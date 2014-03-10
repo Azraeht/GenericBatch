@@ -20,15 +20,11 @@ import org.paris.batch.exception.GenericBatchException;
 
 /** 
  * @author Guillaume Weber
+ * @author Brice Santus
  */
 
 public class GenericBatch {	
 	
-	public GenericBatch() throws NoPropertiesFoundException, IOException{
-		this.logger = new LogBatch();
-		this.logger.configurationLog();
-		checkProperties();
-	}
 	
 	/**
 	 * Objet Properties
@@ -41,6 +37,21 @@ public class GenericBatch {
 	protected LogBatch logger;
 	
 	
+	
+	
+	/**
+	 * Constructeur de GenericBatch, permet d'instancier le Batch, son logger et ses properties
+	 * @throws NoPropertiesFoundException
+	 * @throws IOException
+	 */
+	public GenericBatch() throws NoPropertiesFoundException, IOException{
+		// Initialisation du logger
+		this.logger = new LogBatch();
+		this.logger.configurationLog();
+		// Vérification des properties
+		checkProperties();
+	}
+	
 	/**
 	 * Méthode permettant d'utiliser le fichier de configuration query.properties.
 	 * @throws NoPropertiesFoundException
@@ -48,7 +59,7 @@ public class GenericBatch {
 	public static void chargerProperties() throws Throwable {
 		//ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		props = new Properties();
-		String cheminDAccesProperties = "query.properties";
+		String nomFichierProperties = "query.properties";
 		String workingDir = System.getProperty("user.dir")+ "\\config\\";
 		File temp = new File(workingDir, "query.properties");		
 		
@@ -60,10 +71,10 @@ public class GenericBatch {
 		        props.load(resourceAsStream);
 		    }
 		} catch (NullPointerException npe) {
-			System.out.println("NullPointerException au chargement du fichier de propriétés :\n\t" + cheminDAccesProperties + "\n" + npe.toString());
+			System.out.println("NullPointerException au chargement du fichier de propriétés :\n\t" + nomFichierProperties + "\n" + npe.toString());
 			throw new NoPropertiesFoundException(npe.getMessage());
 		} catch (IOException ioe) {
-			System.out.println("IOException au chargement du fichier de propriétés :\n\t" + cheminDAccesProperties + "\n" + ioe.getMessage());
+			System.out.println("IOException au chargement du fichier de propriétés :\n\t" + nomFichierProperties + "\n" + ioe.getMessage());
 			throw new NoPropertiesFoundException(ioe.getMessage());
 		} 	
 	}
@@ -78,7 +89,6 @@ public class GenericBatch {
 		}
 		catch(Throwable t){
 			System.err.println(t.getMessage());
-			//LogBatch.logBatch.info("Code de retour : "+CodeRetourBatch.EXIT_ERROR);
 			LogBatch.logBatch.info("Code de retour : "+CodeRetourBatch.EXIT_ERROR);
 		}
 	}
@@ -268,9 +278,4 @@ public class GenericBatch {
 		LogBatch.logBatch.info("Exception levée, arrêt du batch.");
 	}
 	
-	
-	
-	public static void main(String[] args) throws Exception {
-
-	}
 }
