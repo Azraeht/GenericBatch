@@ -10,15 +10,14 @@ import java.util.Properties;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
-
 import org.paris.batch.CodeRetourBatch;
 import org.paris.batch.DBBatch;
 import org.paris.batch.LogBatch;
-
 import org.paris.batch.exception.NoPropertiesFoundException;
 import org.paris.batch.exception.GenericBatchException;
 
-/** 
+/**
+ * Classe générique offrant plusieurs services communs à tous les batchs Ville de Paris. 
  * @author Guillaume Weber
  * @author Brice Santus
  */
@@ -27,12 +26,12 @@ public class GenericBatch {
 	
 	
 	/**
-	 * Objet Properties
+	 * Objet Properties - reçoit les informations spécifiées dans le fichier de configuration adjoint au batch
 	 */
 	static Properties props;
 	
 	/**
-	 * Objet Logger
+	 * Objet Logger - prend en charge la traçabilité des opérations effectuées par le batch
 	 */
 	protected LogBatch logger;
 	
@@ -44,7 +43,11 @@ public class GenericBatch {
 	 * @throws NoPropertiesFoundException
 	 * @throws IOException
 	 */
-	public GenericBatch() throws NoPropertiesFoundException, IOException{
+	public GenericBatch() throws NoPropertiesFoundException, IOException
+	{
+		//TODO : supprimer la trace ci-dessous
+		System.out.println("Instanciation de GenericBatch");
+		
 		// Initialisation du logger
 		this.logger = new LogBatch();
 		this.logger.configurationLog();
@@ -53,10 +56,15 @@ public class GenericBatch {
 	}
 	
 	/**
-	 * Méthode permettant d'utiliser le fichier de configuration query.properties.
+	 * Charge le fichier de propriétés décrivant les éléments nécessaires au fonctionnement du batch
 	 * @throws NoPropertiesFoundException
 	 */
-	public static void chargerProperties() throws Throwable {
+	public static void chargerProperties() throws NoPropertiesFoundException
+	{
+		//TODO : rajouter, au chargement des propriétés par défaut, le chargement de propriétés
+		//complément
+		System.out.println("GenericBatch.chargerProperties");
+		
 		//ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		props = new Properties();
 		String nomFichierProperties = "query.properties";
@@ -271,11 +279,27 @@ public class GenericBatch {
 	}
 	
 	/**
-	 * Méthode pour gérer l'arrêt du batch après une exception.
+	 * Méthode pour gérer l'arrêt du batch après une erreur irrécupérable.
 	 */
 	public static void exitFailure(){
-		System.exit(0);
-		LogBatch.logBatch.info("Exception levée, arrêt du batch.");
+		System.exit(CodeRetourBatch.EXIT_ERROR);
+		LogBatch.logBatch.info("Erreur irrécupérable. Fin d'exécution du batch.");
+	}
+
+	/**
+	 * Méthode pour gérer l'arrêt du batch quand tout va bien (hé ouais, c'est possible).
+	 */
+	public static void exitSuccess(){
+		System.exit(CodeRetourBatch.EXIT_OK);
+		LogBatch.logBatch.info("Fin d'exécution du batch (succès).");
+	}
+
+	/**
+	 * Méthode pour gérer l'arrêt du batch après un avertissement.
+	 */
+	public static void exitWarning(){
+		System.exit(CodeRetourBatch.EXIT_WARNING);
+		LogBatch.logBatch.info("Fin d'exécution du batch (succès).");
 	}
 	
 }

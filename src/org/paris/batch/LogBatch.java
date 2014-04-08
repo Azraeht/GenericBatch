@@ -13,9 +13,14 @@ import org.apache.log4j.PatternLayout;
 import org.paris.batch.CodeRetourBatch;
 import org.paris.batch.exception.NoPropertiesFoundException;
 
+/**
+ * Implémentation spécifique au framework d'un logger Log4J v1
+ * @author lannoog
+ *
+ */
 public class LogBatch {
 	/**
-	 * Objet Logger
+	 * Objet Logger - singleton
 	 */
 	public static Logger logBatch;
 	
@@ -24,10 +29,18 @@ public class LogBatch {
 	 */
 	static Properties properties;
 	
+	/**
+	 * Accesseur simple
+	 * @return instance courante du Logger
+	 */
 	public Logger getLogBatch() {
 		return logBatch;
 	}
 
+	/**
+	 * Affectation simple
+	 * @param logBatch
+	 */
 	public static void setLogBatch(Logger logBatch) {
 		LogBatch.logBatch = logBatch;
 	}
@@ -39,9 +52,18 @@ public class LogBatch {
 	 */
 	public void configurationAutoLog() throws IOException {
 		//On configure le log dans le dossier log.
+		//affecter au singleton une nouvelle instance de logger
 		setLogBatch(Logger.getRootLogger());
+		
+		//configurer le mode de sauvegarde de la trace d'exécution
 		PatternLayout layout2 = new PatternLayout("%d %-5p %c - %F:%L - %m%n");
+		
+		//TODO : virer la trace ci-dessous
+		System.out.println("Les fichiers de log sont créés ici :\n" + System.getProperty("user.dir") +"\\log\\GenericBatchLog.txt");
+		
+		//créer le FileAppender et son emplacement de sortie en fonction du mode de sauvegarde
 		FileAppender appender = new FileAppender(layout2, System.getProperty("user.dir") +"\\log\\GenericBatchLog.txt",false);
+		
 		ConsoleAppender stdout = new ConsoleAppender(layout2);		
 		getLogBatch().addAppender(appender);
 		getLogBatch().addAppender(stdout);
