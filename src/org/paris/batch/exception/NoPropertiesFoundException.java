@@ -6,6 +6,7 @@ package org.paris.batch.exception;
 * @author Guillaume Weber
 * 
 */
+@SuppressWarnings("serial")
 public class NoPropertiesFoundException extends GenericBatchException {
 		
 	/**

@@ -5,6 +5,7 @@ package org.paris.batch.exception;
  * @author webergu
  *
  */
+@SuppressWarnings("serial")
 public abstract class GenericBatchException extends Exception{
 	
 	/** 
