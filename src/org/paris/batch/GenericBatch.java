@@ -113,7 +113,6 @@ public abstract class GenericBatch {
                     .println("Instanciation de GenericBatch::Création du logger");
         }
         this.logger = LogBatch.getLogBatch(props);
-        this.logger.debug("Initialisation [debug] terminée.");
         this.logger
                 .info("Initialisation des objets FileWriter, CommandExecutor.");
         this.writer = new FileWriter(this.logger);
@@ -125,14 +124,12 @@ public abstract class GenericBatch {
      * Méthode pour gérer l'arrêt du batch après une erreur irrécupérable.
      */
     public void exitFailure() {
-        logger.info("Erreur irrécupérable. Fin d'exécution du batch.");
-
         try {
             finished();
         } catch (SQLExecutorException e) {
             logger.error(e);
-
         } finally {
+            logger.info("Erreur irrécupérable. Fin d'exécution du batch.");
             System.exit(EXIT_ERROR);
         }
     }
@@ -142,13 +139,12 @@ public abstract class GenericBatch {
      * possible).
      */
     public void exitSuccess() {
-        logger.info("Fin d'exécution du batch (succès).");
-
         try {
             finished();
         } catch (SQLExecutorException e) {
             logger.error(e);
         } finally {
+            logger.info("Fin d'exécution du batch (succès).");
             System.exit(EXIT_OK);
         }
     }
@@ -157,14 +153,13 @@ public abstract class GenericBatch {
      * Méthode pour gérer l'arrêt du batch après un avertissement.
      */
     public void exitWarning() {
-        logger.info("Fin d'exécution du batch (avertissements).");
-
         try {
             finished();
         } catch (SQLExecutorException e) {
             logger.error(e);
 
         } finally {
+            logger.info("Fin d'exécution du batch (avertissements).");
             System.exit(EXIT_WARNING);
         }
     }
