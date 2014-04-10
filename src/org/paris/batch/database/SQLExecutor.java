@@ -1,6 +1,7 @@
 package org.paris.batch.database;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ import org.paris.batch.exception.SQLExecutorException;
  */
 public class SQLExecutor {
 
-     private Connection connection;
+    private Connection connection;
     private Logger logger;
     private QueryRunner runner;
 
@@ -109,13 +110,14 @@ public class SQLExecutor {
      * @param query
      * @return
      */
-    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler, String query) {
+    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
+            String query) {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
             logger.info("Requête SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
-            result = runner.query(connection, query,handler);
+            result = runner.query(connection, query, handler);
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
@@ -157,7 +159,7 @@ public class SQLExecutor {
             logger.info("Requête SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, new MapListHandler(),
-                    params );
+                    params);
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
@@ -166,18 +168,42 @@ public class SQLExecutor {
         }
         return result;
     }
-    
+
     /**
      * @param query
      * @return
      */
-    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler, String query, Object... params) {
+    public ResultSet executeSelectWithRS(String query, Object... params) {
+        ResultSet result = null;
+        try {
+            logger.info("Requête SQL : " + query);
+            PreparedStatement ps = connection.prepareStatement(query);
+            for (int i = 0; i < params.length; i++) {
+                ps.setObject(i + 1, params[i]);
+            }
+            result = ps.executeQuery();
+            logger.info("Requête exécutée.");
+        } catch (Exception e) {
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + e.getMessage();
+            logger.error(msg);
+            
+        }
+        return result;
+    }
+
+    /**
+     * @param query
+     * @return
+     */
+    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
+            String query, Object... params) {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
             logger.info("Requête SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
-            result = runner.query(connection, query, handler,                   params );
+            result = runner.query(connection, query, handler, params);
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
