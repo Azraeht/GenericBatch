@@ -3,8 +3,6 @@ package org.paris.batch.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -47,9 +45,9 @@ public class SQLExecutor {
      */
     public void close() throws SQLExecutorException {
         try {
-            logger.info("Fermeture de la connection en cours...");
+            logger.debug("Fermeture de la connection en cours...");
             this.connection.close();
-            logger.info("Fermeture de la connection effectuée.");
+            logger.debug("Fermeture de la connection effectuée.");
 
         } catch (Throwable t) {
             String msg = "Erreur à la fermeture de la connection : "
@@ -69,15 +67,18 @@ public class SQLExecutor {
      * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
      *         correctement exécutée.
      */
-    public int executeUpdate(String query) {
+    public int executeUpdate(String query) throws SQLExecutorException {
         int result = 0;
         try {
             logger.info("Requête SQL : " + query);
             result = runner.update(connection, query);
             logger.info("Requête exécutée. Résultat retourné : " + result);
         } catch (Exception sqle) {
-            logger.error("Exception à l'exécution de la requête :\n\t" + query
-                    + "\n" + sqle.getMessage());
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            
+            throw new SQLExecutorException(msg);
         }
         return result;
     }
@@ -93,15 +94,19 @@ public class SQLExecutor {
      * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
      *         correctement exécutée.
      */
-    public int executeUpdate(String query, Object... params) {
+    public int executeUpdate(String query, Object... params)
+            throws SQLExecutorException {
         int result = 0;
         try {
             logger.info("Requête SQL : " + query);
             result = runner.update(connection, query, params);
             logger.info("Requête exécutée. Résultat retourné : " + result);
         } catch (Exception sqle) {
-            logger.error("Exception à l'exécution de la requête :\n\t" + query
-                    + "\n" + sqle.getMessage());
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            
+            throw new SQLExecutorException(msg);
         }
         return result;
     }
@@ -111,7 +116,7 @@ public class SQLExecutor {
      * @return
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
-            String query) {
+            String query) throws SQLExecutorException {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
@@ -121,38 +126,21 @@ public class SQLExecutor {
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
-            logger.error("Exception à l'exécution de la requête :\n\t" + query
-                    + "\n" + sqle.getMessage());
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            
+            throw new SQLExecutorException(msg);
         }
         return result;
-    }
-
-    public ResultSetHandler<Object[]> getCSVResultSetHandler() {
-        ResultSetHandler<Object[]> h = new ResultSetHandler<Object[]>() {
-            public Object[] handle(ResultSet rs) throws SQLException {
-                if (!rs.next()) {
-                    return null;
-                }
-
-                ResultSetMetaData meta = rs.getMetaData();
-                int cols = meta.getColumnCount();
-                Object[] result = new Object[cols];
-
-                for (int i = 0; i < cols; i++) {
-                    result[i] = rs.getObject(i + 1);
-                }
-
-                return result;
-            }
-        };
-        return h;
     }
 
     /**
      * @param query
      * @return
      */
-    public List<?> executeSelect(String query, Object... params) {
+    public List<?> executeSelect(String query, Object... params)
+            throws SQLExecutorException {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
@@ -163,31 +151,49 @@ public class SQLExecutor {
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
-            logger.error("Exception à l'exécution de la requête :\n\t" + query
-                    + "\n" + sqle.getMessage());
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            
+            throw new SQLExecutorException(msg);
         }
         return result;
+    }
+
+    /**
+     * Wrapper pour la méthode
+     * <code>executeSelectWithRS(String query, Object... params)</code>
+     * 
+     * @param query
+     * @return
+     */
+    public ResultSet executeSelectWithRS(String query)
+            throws SQLExecutorException {
+        return executeSelectWithRS(query, (Object[]) null);
     }
 
     /**
      * @param query
      * @return
      */
-    public ResultSet executeSelectWithRS(String query, Object... params) {
+    public ResultSet executeSelectWithRS(String query, Object... params)
+            throws SQLExecutorException {
         ResultSet result = null;
         try {
             logger.info("Requête SQL : " + query);
             PreparedStatement ps = connection.prepareStatement(query);
-            for (int i = 0; i < params.length; i++) {
-                ps.setObject(i + 1, params[i]);
-            }
+            if (params != null)
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
             result = ps.executeQuery();
             logger.info("Requête exécutée.");
-        } catch (Exception e) {
+        } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
-                    + e.getMessage();
+                    + sqle.getMessage();
             logger.error(msg);
             
+            throw new SQLExecutorException(msg);
         }
         return result;
     }
@@ -197,7 +203,7 @@ public class SQLExecutor {
      * @return
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
-            String query, Object... params) {
+            String query, Object... params) throws SQLExecutorException {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
@@ -207,8 +213,11 @@ public class SQLExecutor {
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
-            logger.error("Exception à l'exécution de la requête :\n\t" + query
-                    + "\n" + sqle.getMessage());
+            String msg = "Exception à l'exécution de `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            
+            throw new SQLExecutorException(msg);
         }
         return result;
     }
