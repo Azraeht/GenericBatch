@@ -2,12 +2,13 @@ package org.paris.batch.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.output.XMLOutputter;
 import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.paris.batch.exception.FileWriterException;
 
 /**
@@ -15,13 +16,15 @@ import org.paris.batch.exception.FileWriterException;
  * 
  */
 public class FileWriter {
+    // Constants
+    public static final String CSV_DEFAULT_SEPARATOR = ";";
 
-    /**
-     * 
-     */
+    //
     private Logger logger;
 
     /**
+     * Constructeur
+     * 
      * @param logger
      */
     public FileWriter(Logger logger) {
@@ -29,6 +32,9 @@ public class FileWriter {
     }
 
     /**
+     * Méthode pour écrire un fichier au format texte à partir d'une chaine type
+     * C.
+     * 
      * @param filename
      * @param content
      * @throws FileWriterException
@@ -52,7 +58,8 @@ public class FileWriter {
     }
 
     /**
-     * Wrapper
+     * Wrapper de la méthode
+     * <code>writeTextFile(String filename, char[] content)</code>.
      * 
      * @param filename
      * @param content
@@ -64,8 +71,13 @@ public class FileWriter {
     }
 
     /**
+     * Méthode pour écrire un fichier au format XML à partir d'un objet
+     * <code>org.jdom2.Document</code>.
+     * 
      * @param filename
+     *            le nom du fichier à écrire.
      * @param document
+     *            le document XML(
      * @throws FileWriterException
      */
     public void writeXMLFile(String filename, Document document)
@@ -87,7 +99,11 @@ public class FileWriter {
     }
 
     /**
-     * Wrapper
+     * Wrapper de la méthode
+     * <code>writeXMLFile(String filename, Document document)</code> pour écrire
+     * un fichier au format XML à partir d'un objet
+     * <code>org.jdom2.Element</code>. Le document conteneur est automatiquement
+     * créé.
      * 
      * @param filename
      * @param element
@@ -98,6 +114,53 @@ public class FileWriter {
         Document document = new Document();
         document.setRootElement(element);
         writeXMLFile(filename, document);
+    }
+
+    /**
+     * Ecrit le résultat d'une requête dans un fichier au format CSV. Attention,
+     * dans cette méthode il n'y a pas d'entêtes.<br>
+     * 
+     * Evolutions futures:<br>
+     * - passer le séparateur de champ en option.
+     * 
+     * @param filename
+     *            le fichier de destination. Exemple :
+     *            <code>C:\Users\galloiem\workspace\GenericBatchSampleProject\log\out.txt</code>
+     * @param values
+     *            l'ensemble de résultat d'une requête sous la forme d'un
+     *            <code>ArrayListHandler</code>
+     * @throws FileWriterException
+     */
+    public void writeCSVFile(String filename, List<Object[]> values)
+            throws FileWriterException {
+        logger.info("Ecriture du fichier : " + filename);
+        try {
+            File file = new File(filename);
+            BufferedWriter out = new BufferedWriter(
+                    new java.io.FileWriter(file));
+            for (Object[] v : values) {
+                String line = "";
+                for (int i = 0; i < v.length; i++) {
+                    if (v[i] != null) {
+                        line += v[i].toString().trim();
+                    }
+                    if (i != v.length - 1) {
+                        line += CSV_DEFAULT_SEPARATOR;
+                    }
+                }
+                logger.debug("line : " + line);
+                out.write(line + "\n");
+            }
+            out.close();
+            logger.info("Fichier écrit.");
+
+        } catch (Exception e) {
+            String msg = "Erreur lors de l'écriture du fichier '" + filename
+                    + "\n" + e.getMessage();
+            logger.error(msg);
+
+            throw new FileWriterException(msg);
+        }
     }
 
 }
