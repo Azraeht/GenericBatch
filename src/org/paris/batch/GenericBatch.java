@@ -43,9 +43,9 @@ public abstract class GenericBatch {
     /**
      * Code retours
      */
-    public static int EXIT_OK = 0;
-    public static int EXIT_WARNING = 5;
-    public static int EXIT_ERROR = 10;
+    public static final int EXIT_OK = 0;
+    public static final int EXIT_WARNING = 5;
+    public static final int EXIT_ERROR = 10;
 
     /**
      * Objet Properties - reçoit les informations spécifiées dans le fichier de
