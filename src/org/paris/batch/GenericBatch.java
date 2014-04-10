@@ -74,8 +74,10 @@ public abstract class GenericBatch {
 
     /**
      * Traitement principal du Batch.
+     * 
+     * @return le code retour. voir <code>EXIT_*</code>
      */
-    public abstract void run();
+    public abstract int run();
 
     /**
      * Méthode pour nettoyer les ressources utilisées. Cette méthode est appelée
