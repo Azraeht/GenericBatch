@@ -1,12 +1,15 @@
 package org.paris.batch.database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.log4j.Logger;
 import org.paris.batch.exception.ConfigurationBatchException;
@@ -19,7 +22,7 @@ import org.paris.batch.exception.SQLExecutorException;
  */
 public class SQLExecutor {
 
-    private Connection connection;
+     private Connection connection;
     private Logger logger;
     private QueryRunner runner;
 
@@ -71,9 +74,9 @@ public class SQLExecutor {
             logger.info("Requête SQL : " + query);
             result = runner.update(connection, query);
             logger.info("Requête exécutée. Résultat retourné : " + result);
-        } catch (SQLException sqle) {
-            logger.error("SQLException à l'exécution de la requête :\n\t"
-                    + query + "\n" + sqle.getMessage());
+        } catch (Exception sqle) {
+            logger.error("Exception à l'exécution de la requête :\n\t" + query
+                    + "\n" + sqle.getMessage());
         }
         return result;
     }
@@ -95,9 +98,9 @@ public class SQLExecutor {
             logger.info("Requête SQL : " + query);
             result = runner.update(connection, query, params);
             logger.info("Requête exécutée. Résultat retourné : " + result);
-        } catch (SQLException sqle) {
-            logger.error("SQLException à l'exécution de la requête :\n\t"
-                    + query + "\n" + sqle.getMessage());
+        } catch (Exception sqle) {
+            logger.error("Exception à l'exécution de la requête :\n\t" + query
+                    + "\n" + sqle.getMessage());
         }
         return result;
     }
@@ -106,20 +109,41 @@ public class SQLExecutor {
      * @param query
      * @return
      */
-    public List<?> executeSelect(String query) {
+    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler, String query) {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
             logger.info("Requête SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
-            result = runner.query(connection, query, new MapListHandler());
+            result = runner.query(connection, query,handler);
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
-        } catch (SQLException sqle) {
-            logger.error("SQLException à l'exécution de la requête :\n\t"
-                    + query + "\n" + sqle.getMessage());
+        } catch (Exception sqle) {
+            logger.error("Exception à l'exécution de la requête :\n\t" + query
+                    + "\n" + sqle.getMessage());
         }
         return result;
+    }
+
+    public ResultSetHandler<Object[]> getCSVResultSetHandler() {
+        ResultSetHandler<Object[]> h = new ResultSetHandler<Object[]>() {
+            public Object[] handle(ResultSet rs) throws SQLException {
+                if (!rs.next()) {
+                    return null;
+                }
+
+                ResultSetMetaData meta = rs.getMetaData();
+                int cols = meta.getColumnCount();
+                Object[] result = new Object[cols];
+
+                for (int i = 0; i < cols; i++) {
+                    result[i] = rs.getObject(i + 1);
+                }
+
+                return result;
+            }
+        };
+        return h;
     }
 
     /**
@@ -133,12 +157,32 @@ public class SQLExecutor {
             logger.info("Requête SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, new MapListHandler(),
-                    params);
+                    params );
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
-        } catch (SQLException sqle) {
-            logger.error("SQLException à l'exécution de la requête :\n\t"
-                    + query + "\n" + sqle.getMessage());
+        } catch (Exception sqle) {
+            logger.error("Exception à l'exécution de la requête :\n\t" + query
+                    + "\n" + sqle.getMessage());
+        }
+        return result;
+    }
+    
+    /**
+     * @param query
+     * @return
+     */
+    public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler, String query, Object... params) {
+        @SuppressWarnings("rawtypes")
+        List<?> result = new ArrayList();
+        try {
+            logger.info("Requête SQL : " + query);
+            // org.apache.commons.dbutils.ResultSetHandler<T>
+            result = runner.query(connection, query, handler,                   params );
+            logger.info("Requête exécutée. Eléments retournés : "
+                    + result.size());
+        } catch (Exception sqle) {
+            logger.error("Exception à l'exécution de la requête :\n\t" + query
+                    + "\n" + sqle.getMessage());
         }
         return result;
     }
