@@ -77,7 +77,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
@@ -88,7 +88,7 @@ public class SQLExecutor {
      * base de données avec paramètres.
      * 
      * @param query
-     *            requete SQL à executer.
+     *            la requête SQL
      * @param params
      *            The query replacement parameters.
      * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
@@ -105,7 +105,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
@@ -113,6 +113,7 @@ public class SQLExecutor {
 
     /**
      * @param query
+     *            la requête SQL
      * @return
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
@@ -121,7 +122,6 @@ public class SQLExecutor {
         List<?> result = new ArrayList();
         try {
             logger.info("Requête SQL : " + query);
-            // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, handler);
             logger.info("Requête exécutée. Eléments retournés : "
                     + result.size());
@@ -129,7 +129,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
@@ -137,7 +137,8 @@ public class SQLExecutor {
 
     /**
      * @param query
-     * @return
+     *            la requête SQL
+     * @return <code>List<Map<String, String>></code>
      */
     public List<?> executeSelect(String query, Object... params)
             throws SQLExecutorException {
@@ -154,7 +155,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
@@ -165,6 +166,7 @@ public class SQLExecutor {
      * <code>executeSelectWithRS(String query, Object... params)</code>
      * 
      * @param query
+     *            la requête SQL
      * @return
      */
     public ResultSet executeSelectWithRS(String query)
@@ -173,8 +175,13 @@ public class SQLExecutor {
     }
 
     /**
+     * Attention, cette méthode a été écrite pour la transition du job MDPH0001.
+     * Il convient d'utiliser les autres méthodes qui ne retournent pas de
+     * <code>java.sql.ResultSet</code>.
+     * 
      * @param query
-     * @return
+     *            la requête SQL
+     * @return <code>java.sql.ResultSet</code>.
      */
     public ResultSet executeSelectWithRS(String query, Object... params)
             throws SQLExecutorException {
@@ -192,7 +199,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
@@ -200,6 +207,7 @@ public class SQLExecutor {
 
     /**
      * @param query
+     *            la requête SQL
      * @return
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
@@ -216,7 +224,7 @@ public class SQLExecutor {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
-            
+
             throw new SQLExecutorException(msg);
         }
         return result;
