@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
 import org.paris.batch.exception.CommandExecutorException;
 
 /**
+ * Exécution de commandes sur le système hote.
+ * 
  * @author galloiem
  * 
  */
@@ -16,14 +18,22 @@ public class CommandExecutor {
     private Logger logger;
 
     /**
-     * 
+     * Constructeur
      */
     public CommandExecutor(Logger logger) {
         this.logger = logger;
     }
 
+    /**
+     * Exécute la commande spécifiée
+     * 
+     * @param cmd
+     *            la commande à exécuter
+     * @return La sortie standard de l'exécution de la commande
+     * @throws CommandExecutorException
+     */
     public String runCommand(String cmd) throws CommandExecutorException {
-        logger.info("Exécution de la commande : `" + cmd+"`");
+        logger.info("Exécution de la commande : `" + cmd + "`");
         StringBuffer output = new StringBuffer();
         Process p;
         try {
@@ -43,13 +53,14 @@ public class CommandExecutor {
 
             throw new CommandExecutorException(msg);
         }
-        logger.debug("Sortie de la commande: \n"+output);
-        logger.info("Commande `"+ cmd +"` exécutée.");
+        logger.debug("Sortie de la commande: \n" + output);
+        logger.info("Commande `" + cmd + "` exécutée.");
 
         return output.toString();
     }
 
-    public int runCommandInt(String cmd) throws CommandExecutorException {
+    @SuppressWarnings("unused")
+    private int runCommandInt(String cmd) throws CommandExecutorException {
         logger.info("Exécution de la commande : " + cmd);
         final Runtime r = Runtime.getRuntime();
         int returnCode = -1;
@@ -67,7 +78,8 @@ public class CommandExecutor {
         return returnCode;
     }
 
-    public int runCommandWithStreams(String cmd)
+    @SuppressWarnings("unused")
+    private int runCommandWithStreams(String cmd)
             throws CommandExecutorException {
         logger.info("Exécution de la commande : " + cmd);
         int result = -1;

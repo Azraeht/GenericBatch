@@ -12,20 +12,24 @@ import org.jdom2.output.XMLOutputter;
 import org.paris.batch.exception.FileWriterException;
 
 /**
+ * Gestion de fichiers
+ * 
  * @author galloiem
  * 
  */
 public class FileWriter {
-    // Constants
+    /**
+     * CSV : séparateur de champ par défaut
+     */
     public static final String CSV_DEFAULT_SEPARATOR = ";";
 
-    //
     private Logger logger;
 
     /**
      * Constructeur
      * 
      * @param logger
+     *            journal d'événements
      */
     public FileWriter(Logger logger) {
         this.logger = logger;
@@ -36,7 +40,9 @@ public class FileWriter {
      * C.
      * 
      * @param filename
+     *            le nom du fichier à écrire.
      * @param content
+     *            le contenu
      * @throws FileWriterException
      */
     public void writeTextFile(String filename, char[] content)
@@ -62,7 +68,9 @@ public class FileWriter {
      * <code>writeTextFile(String filename, char[] content)</code>.
      * 
      * @param filename
+     *            le nom du fichier à écrire.
      * @param content
+     *            le contenu
      * @throws FileWriterException
      */
     public void writeTextFile(String filename, String content)
@@ -77,7 +85,7 @@ public class FileWriter {
      * @param filename
      *            le nom du fichier à écrire.
      * @param document
-     *            le document XML(
+     *            le document XML
      * @throws FileWriterException
      */
     public void writeXMLFile(String filename, Document document)
@@ -106,7 +114,9 @@ public class FileWriter {
      * créé.
      * 
      * @param filename
+     *            le nom du fichier à écrire.
      * @param element
+     *            le contenu
      * @throws FileWriterException
      */
     public void writeXMLFile(String filename, Element element)

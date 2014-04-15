@@ -13,17 +13,26 @@ import org.paris.batch.utils.FileWriter;
 import org.paris.batch.utils.CommandExecutor;
 
 /**
- * Classe générique offrant plusieurs services communs à tous les batchs Ville
+ * Classe abstraite offrant plusieurs services communs à tous les batchs Ville
  * de Paris.
+ * 
+ * <br>
+ * La contrat de la classe stipule qu'il faut implémenter ces trois méthodes:<br>
+ * <ul>
+ * <li><code>setup()</code></li>
+ * <li><code>run()</code></li>
+ * <li><code>finished()</code></li>
+ * </ul>
+
+ * @see GenericBatch#setup()
+ * @see #run()
+ * @see #finished()
+ * 
+ * 
  * 
  * @author Guillaume Weber
  * @author Brice Santus
  * @author Emmanuel GALLOIS
- */
-
-/**
- * @author galloiem
- * 
  */
 public abstract class GenericBatch {
     /**
@@ -41,10 +50,16 @@ public abstract class GenericBatch {
      */
     public static final String ENV_DEBUG = "MDP_BATCH_DEBUG";
     /**
-     * Code retours
+     * Code retour - OK
      */
     public static final int EXIT_OK = 0;
+    /**
+     * Code retour - Avertissement
+     */
     public static final int EXIT_WARNING = 5;
+    /**
+     * Code retour - Erreur
+     */
     public static final int EXIT_ERROR = 10;
 
     /**
@@ -67,7 +82,7 @@ public abstract class GenericBatch {
     protected CommandExecutor command;
 
     /**
-     * Méthode pour initialiser les variables locales.
+     * Méthode pour initialiser les ressources locales.
      */
     public abstract void setup() throws ConfigurationBatchException,
             DatabaseDriverNotFoundException;

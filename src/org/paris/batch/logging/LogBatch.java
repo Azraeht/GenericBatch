@@ -27,11 +27,8 @@ public class LogBatch {
     /**
      * Création et configuration du logger
      * 
-     * Propriétés utilisées:<br>
-     * - log.pattern : format des logs.<br>
-     * - log.name : nom du fichier de log.<br>
-     * - log.path : chemin vers le fichier de log.<br>
      * 
+     * @see ConfigurationManagerBatch
      * 
      * @return instance courante du Logger
      */

@@ -12,18 +12,29 @@ import org.paris.batch.exception.DatabaseDriverNotFoundException;
 
 public class DBConnection {
     /**
-     * constants
+     * URL JDBC pour Oracle
      */
     private static final String URL_ORACLE = "jdbc:oracle:thin:@%s:%s:%s";
-    private static final String URL_MYSQL = "jdbc:mysql://%s:%s/%s";
     /**
-     * constructor
+     * URL JDBC pour MySQL
+     */
+    private static final String URL_MYSQL = "jdbc:mysql://%s:%s/%s";
+
+    /**
+     * constructeur
+     * 
+     * @param p
+     *            propriétés pour la création de la connection
+     * @return Connection object
+     * @throws DatabaseDriverNotFoundException
+     * @throws ConfigurationBatchException
      */
     public static Connection getConnection(Properties p)
             throws DatabaseDriverNotFoundException, ConfigurationBatchException {
         Connection connect;
-        //System.out.print(p);
-        String driver = p.getProperty(ConfigurationManagerBatch.DB_JDBC_DRIVER_KEY);
+        // System.out.print(p);
+        String driver = p
+                .getProperty(ConfigurationManagerBatch.DB_JDBC_DRIVER_KEY);
         if (!DbUtils.loadDriver(driver)) {
             // Si le driver n'est pas détecté l'application s'arrête
             String msg = "Driver `" + driver + "` absent.";
@@ -52,8 +63,8 @@ public class DBConnection {
                     p.getProperty(ConfigurationManagerBatch.DB_PASS_KEY));
 
             // TODO : ATTENTION au CAST !!!!!!!!
-            connect.setAutoCommit(Boolean.parseBoolean(p
-                    .getProperty(ConfigurationManagerBatch.DB_AUTOCOMMIT_KEY, "false")));
+            connect.setAutoCommit(Boolean.parseBoolean(p.getProperty(
+                    ConfigurationManagerBatch.DB_AUTOCOMMIT_KEY, "false")));
 
         } catch (SQLException sqle) {
             String msg = "Problème de connexion à la base de données :\n\t"

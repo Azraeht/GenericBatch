@@ -16,8 +16,9 @@ import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.SQLExecutorException;
 
 /**
- * @author galloiem
+ * Services de base de données.
  * 
+ * @author galloiem
  */
 public class SQLExecutor {
 
@@ -26,8 +27,12 @@ public class SQLExecutor {
     private QueryRunner runner;
 
     /**
+     * Constructeur
+     * 
      * @param properties
+     *            les informations nécessaires pour la création de la connection
      * @param logger
+     *            journal d'événements
      * @throws DatabaseDriverNotFoundException
      * @throws ConfigurationBatchException
      */
@@ -41,6 +46,8 @@ public class SQLExecutor {
     }
 
     /**
+     * Ferme la connection ouverte par {@link #SQLExecutor(Properties, Logger)}
+     * 
      * @throws SQLExecutorException
      */
     public void close() throws SQLExecutorException {
@@ -114,7 +121,7 @@ public class SQLExecutor {
     /**
      * @param query
      *            la requête SQL
-     * @return
+     * @return une liste contenant les résultats
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
             String query) throws SQLExecutorException {
@@ -162,12 +169,12 @@ public class SQLExecutor {
     }
 
     /**
-     * Wrapper pour la méthode
-     * <code>executeSelectWithRS(String query, Object... params)</code>
+     * @deprecated Wrapper pour la méthode
+     *             <code>executeSelectWithRS(String query, Object... params)</code>
      * 
      * @param query
      *            la requête SQL
-     * @return
+     * @return <code>java.sql.ResultSet</code>.
      */
     public ResultSet executeSelectWithRS(String query)
             throws SQLExecutorException {
@@ -175,9 +182,9 @@ public class SQLExecutor {
     }
 
     /**
-     * Attention, cette méthode a été écrite pour la transition du job MDPH0001.
-     * Il convient d'utiliser les autres méthodes qui ne retournent pas de
-     * <code>java.sql.ResultSet</code>.
+     * @deprecated Attention, cette méthode a été écrite pour la transition du
+     *             job MDPH0001. Il convient d'utiliser les autres méthodes qui
+     *             ne retournent pas de <code>java.sql.ResultSet</code>.
      * 
      * @param query
      *            la requête SQL
@@ -206,9 +213,14 @@ public class SQLExecutor {
     }
 
     /**
+     * @param handler
+     *            comment traiter le ResultSet et alimenter le resultat.
      * @param query
      *            la requête SQL
-     * @return
+     * @param params
+     *            liaison des paramètres pour la requête SQL
+     * @return une liste du type définie par le paramètre handler
+     * @throws SQLExecutorException
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
             String query, Object... params) throws SQLExecutorException {
