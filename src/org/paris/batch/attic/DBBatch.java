@@ -4,16 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.paris.batch.GenericBatch;
-import org.paris.batch.logging.LogBatch;
 import org.paris.batch.exception.DatabaseConnectionFailedException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
-import org.paris.batch.exception.GenericBatchException;
 import org.paris.batch.exception.NoPropertiesFoundException;
+import org.paris.batch.logging.LogBatch;
 
 /**
  * @deprecated
