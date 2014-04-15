@@ -2,16 +2,16 @@
 	<!-- ========== CHANGER version et main-class =========== -->
 	<!-- ========== ATTENTION fichier de build différent !!!= -->
 	<property name="version" value="1.0" />
-    <property name="main-class" value="No Main Class Name Here" />
+	<property name="main-class" value="No Main Class Name Here" />
 	<!-- ==========END CHANGE VERSION ======= -->
-    <property name="lib.dir" value="lib" />
+	<property name="lib.dir" value="lib" />
 	<property name="src.dir" value="src" />
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 	<property name="dist.dir" value="dist" />
 	<!-- ========== classpaths =========== -->
-	<path id="classpath">
+	<path id="classpath" description="Pour le build">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 		<fileset dir="${build.dir}" includes="**/*.class" />
 	</path>
@@ -48,9 +48,9 @@
 		</copy>
 	</target>
 	<!-- ========== jar =========== -->
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile,javadoc">
 		<mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/${ant.project.name}-${version}.jar" >
+		<jar destfile="${jar.dir}/${ant.project.name}-${version}.jar">
 			<fileset dir="${classes.dir}" />
 			<fileset dir="${src.dir}" includes="**/*.java" />
 			<manifest>
