@@ -1,6 +1,5 @@
 package org.paris.batch;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -9,8 +8,8 @@ import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.NoPropertiesFoundException;
 import org.paris.batch.exception.SQLExecutorException;
 import org.paris.batch.logging.LogBatch;
-import org.paris.batch.utils.FileWriter;
 import org.paris.batch.utils.CommandExecutor;
+import org.paris.batch.utils.FileWriter;
 
 /**
  * Classe abstraite offrant plusieurs services communs à tous les batchs Ville
@@ -88,6 +87,9 @@ public abstract class GenericBatch {
 
     /**
      * Méthode pour initialiser les ressources locales.
+     * 
+     * @throws ConfigurationBatchException
+     * @throws DatabaseDriverNotFoundException
      */
     public abstract void setup() throws ConfigurationBatchException,
             DatabaseDriverNotFoundException;
@@ -103,6 +105,8 @@ public abstract class GenericBatch {
      * Méthode pour nettoyer les ressources utilisées. Cette méthode est appelée
      * automatiquement lors de l'appel à l'une des méthodes de sortie (
      * <code>exit*</code>).
+     * 
+     * @throws SQLExecutorException
      */
     public abstract void finished() throws SQLExecutorException;
 
@@ -110,8 +114,8 @@ public abstract class GenericBatch {
      * Constructeur de GenericBatch, permet d'instancier le Batch, son logger et
      * ses properties
      * 
+     * @throws ConfigurationBatchException
      * @throws NoPropertiesFoundException
-     * @throws IOException
      */
     public GenericBatch() throws ConfigurationBatchException,
             NoPropertiesFoundException {

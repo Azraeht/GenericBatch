@@ -116,7 +116,13 @@ public class DBBatch {
      *            URL de connexion
      * @param baseMySQL
      *            nom de la base de donnée
+     * @param userMySQL
+     *            username
+     * @param passMySQL
+     *            password
      * @return Connection On obtient une connexion
+     * @throws DatabaseDriverNotFoundException
+     * @throws DatabaseConnectionFailedException
      * @throws ClassNotFoundException
      *             Le driver est absent
      */

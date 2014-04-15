@@ -27,10 +27,14 @@ public class LogBatch {
     /**
      * Création et configuration du logger
      * 
+     * @param properties
+     *            propriétés de configuration du journal
+     * 
      * 
      * @see ConfigurationManagerBatch
      * 
      * @return instance courante du Logger
+     * @throws ConfigurationBatchException
      */
     public static Logger getLogBatch(Properties properties)
             throws ConfigurationBatchException {

@@ -73,6 +73,7 @@ public class SQLExecutor {
      *            requete SQL à executer.
      * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
      *         correctement exécutée.
+     * @throws SQLExecutorException
      */
     public int executeUpdate(String query) throws SQLExecutorException {
         int result = 0;
@@ -100,6 +101,7 @@ public class SQLExecutor {
      *            The query replacement parameters.
      * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
      *         correctement exécutée.
+     * @throws SQLExecutorException
      */
     public int executeUpdate(String query, Object... params)
             throws SQLExecutorException {
@@ -119,9 +121,11 @@ public class SQLExecutor {
     }
 
     /**
+     * @param handler
      * @param query
      *            la requête SQL
      * @return une liste contenant les résultats
+     * @throws SQLExecutorException
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
             String query) throws SQLExecutorException {
@@ -145,7 +149,9 @@ public class SQLExecutor {
     /**
      * @param query
      *            la requête SQL
+     * @param params
      * @return <code>List<Map<String, String>></code>
+     * @throws SQLExecutorException
      */
     public List<?> executeSelect(String query, Object... params)
             throws SQLExecutorException {
@@ -176,6 +182,7 @@ public class SQLExecutor {
      *            la requête SQL
      * @return <code>java.sql.ResultSet</code>.
      */
+    @SuppressWarnings("javadoc")
     public ResultSet executeSelectWithRS(String query)
             throws SQLExecutorException {
         return executeSelectWithRS(query, (Object[]) null);
@@ -190,6 +197,7 @@ public class SQLExecutor {
      *            la requête SQL
      * @return <code>java.sql.ResultSet</code>.
      */
+    @SuppressWarnings("javadoc")
     public ResultSet executeSelectWithRS(String query, Object... params)
             throws SQLExecutorException {
         ResultSet result = null;

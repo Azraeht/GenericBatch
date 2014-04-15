@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.paris.batch.exception.ConfigurationBatchException;
-import org.paris.batch.exception.NoPropertiesFoundException;
 
 /**
  * Cette classe permet de travailler sur des fichiers de propriétés.
@@ -117,7 +116,7 @@ public class ConfigurationManagerBatch {
      * @param properties_type
      *            le type de propriété à charger.
      * @return Les propriétés contenues dans le fichier
-     * @throws NoPropertiesFoundException
+     * @throws ConfigurationBatchException
      */
     public static Properties loadProperties(String properties_type)
             throws ConfigurationBatchException {

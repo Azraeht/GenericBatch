@@ -19,6 +19,9 @@ public class CommandExecutor {
 
     /**
      * Constructeur
+     * 
+     * @param logger
+     *            journal d'événements
      */
     public CommandExecutor(Logger logger) {
         this.logger = logger;

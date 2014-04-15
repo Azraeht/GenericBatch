@@ -10,6 +10,12 @@ import org.paris.batch.ConfigurationManagerBatch;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 
+/**
+ * Connection utilisée par la class {@link SQLExecutor}
+ * 
+ * @author galloiem
+ *
+ */
 public class DBConnection {
     /**
      * URL JDBC pour Oracle
