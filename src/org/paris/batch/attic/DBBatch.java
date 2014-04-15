@@ -8,9 +8,11 @@ import java.sql.*;
 import java.util.Properties;
 
 import org.apache.commons.dbutils.DbUtils;
+import org.paris.batch.GenericBatch;
 import org.paris.batch.logging.LogBatch;
 import org.paris.batch.exception.DatabaseConnectionFailedException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
+import org.paris.batch.exception.GenericBatchException;
 import org.paris.batch.exception.NoPropertiesFoundException;
 
 /**
@@ -168,7 +170,7 @@ public class DBBatch {
         } else {
             LogBatch.logBatch.info("Impossible de fermer la connexion");
             LogBatch.logBatch.info("Code de retour : "
-                    + CodeRetourBatch.EXIT_ERROR);
+                    + GenericBatch.EXIT_ERROR);
         }
     }
 }
