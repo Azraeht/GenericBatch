@@ -13,6 +13,11 @@ import org.paris.batch.exception.DatabaseConnectionFailedException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.NoPropertiesFoundException;
 
+/**
+ * @deprecated
+ * @author webber
+ * 
+ */
 public class DBBatch {
     /**
      * Nom du driver
@@ -30,15 +35,9 @@ public class DBBatch {
     /**
      * Méthode qui retourne l'instance et la crée si elle n'existe pas.
      * 
-     * @param urlOracle
-     *            URL de connexion
-     * @param portOracle
-     *            Port de connexion
-     * @param SIDOracle
-     *            SID de connexion
-     * @return Connection On obtient une connexion
+     * @return la connection
      * @throws DatabaseDriverNotFoundException
-     *             Le driver est absent
+     * @throws DatabaseConnectionFailedException
      * @throws NoPropertiesFoundException
      */
     public static Connection getInstance()
