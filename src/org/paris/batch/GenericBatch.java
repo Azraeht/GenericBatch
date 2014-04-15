@@ -23,7 +23,7 @@ import org.paris.batch.utils.CommandExecutor;
  * <li><code>run()</code></li>
  * <li><code>finished()</code></li>
  * </ul>
-
+ * 
  * @see GenericBatch#setup()
  * @see #run()
  * @see #finished()
@@ -63,21 +63,26 @@ public abstract class GenericBatch {
     public static final int EXIT_ERROR = 10;
 
     /**
-     * Objet Properties - reçoit les informations spécifiées dans le fichier de
-     * configuration adjoint au batch
+     * reçoit les informations spécifiées dans le fichier de configuration
+     * adjoint au batch
      */
     protected Properties props;
     /**
-     * Objet Logger - prend en charge la traçabilité des opérations effectuées
-     * par le batch
+     * prend en charge la traçabilité des opérations effectuées par le batch
+     * 
+     * @see LogBatch
      */
     protected Logger logger;
     /**
-     * Objet FileWriter - permet d'écrire du contenu dans des fichiers.
+     * permet d'écrire du contenu dans des fichiers.
+     * 
+     * @see FileWriter
      */
     protected FileWriter writer;
     /**
-     * Objet CommandExecutor - permet d'exécuter des commandes système.
+     * permet d'exécuter des commandes système.
+     * 
+     * @see CommandExecutor
      */
     protected CommandExecutor command;
 
