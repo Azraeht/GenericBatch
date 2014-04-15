@@ -1,49 +1,118 @@
 <project name="GenericBatch" basedir="." default="jar">
+	<!-- ========== CHANGER version et main-class =========== -->
+	<!-- ========== ATTENTION fichier de build différent !!!= -->
+	<property name="version" value="1.0" />
+    <property name="main-class" value="No Main Class Name Here" />
+	<!-- ==========END CHANGE VERSION ======= -->
     <property name="lib.dir" value="lib" />
-    <path id="classpath">
-        <fileset dir=".\lib" includes="**/*.jar" />
-    </path>
-    <!-- ==========CHANGE VERSION =========== -->
-    <property name="version"     value="1.0" />
-    <!-- ==========END CHANGE VERSION ======= -->
-    <property name="src.dir"     value="src" />
-    <property name="build.dir"   value="build" />
-    <property name="classes.dir" value="${build.dir}/classes" />
-    <property name="jar.dir"     value="${build.dir}/jar" />
-    <property name="main-class"  value="No Main Class Name Here" />
-    <target name="clean">
-        <delete dir="${build.dir}" />
-    </target>
-    <target name="compile">
-        <mkdir dir="${classes.dir}" />
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" />
-        <copy todir="${classes.dir}">
-          <fileset dir="${src.dir}">
-            <include name="**/*.xml"/>
-            <include name="**/*.xsl"/>
-            <include name="**/*.properties"/>
-          </fileset>
-        </copy>
-    </target>
-    <target name="dist" depends="jar">
-    </target>
-    <target name="jar" depends="compile">
-        <mkdir dir="${jar.dir}" />
-        <jar destfile="${jar.dir}/${ant.project.name}-${version}.jar" >
-            <fileset dir="${classes.dir}" />
-            <fileset dir="${src.dir}" includes="**/*.java"/>
-            <manifest><attribute name="Main-Class" value="${main-class}" /></manifest>
-        </jar>
-    </target>
-    <target name="run" depends="jar">
-        <java fork="true" classname="${main-class}">
-            <classpath>
-                <path refid="classpath" />
-                <path location="${jar.dir}/${ant.project.name}.jar" />
-            </classpath>
-            <arg value="RIMM" />
-        </java>
-    </target>
-    <target name="clean-build" depends="clean,jar" />
-    <target name="main" depends="clean,jar" />
+	<property name="src.dir" value="src" />
+	<property name="build.dir" value="build" />
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="jar.dir" value="${build.dir}/jar" />
+	<property name="dist.dir" value="dist" />
+	<!-- ========== classpaths =========== -->
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+		<fileset dir="${build.dir}" includes="**/*.class" />
+	</path>
+	<path id="rt_classpath">
+		<fileset dir="${dist.dir}" includes="**/*.jar" />
+	</path>
+	<!-- =================================================================== -->
+	<!-- ========== TASKS ================================================== -->
+	<!-- =================================================================== -->
+	<!-- ========== clean =========== -->
+	<target name="clean" description="Nettoyage des dossiers build et dist.">
+		<delete dir="${build.dir}" failonerror="no" />
+		<delete dir="${dist.dir}" failonerror="no" />
+		<delete failonerror="no">
+			<fileset dir="${lib.dir}">
+				<include name="GenericBatch-" />
+			</fileset>
+		</delete>
+	</target>
+	<!-- ========== resources =========== -->
+	<target name="resources" depends="clean">
+		<mkdir dir="${lib.dir}" />
+	</target>
+	<!-- ========== compile =========== -->
+	<target name="compile" depends="resources">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" />
+		<copy todir="${classes.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml" />
+				<include name="**/*.xsl" />
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+	</target>
+	<!-- ========== jar =========== -->
+	<target name="jar" depends="compile">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/${ant.project.name}-${version}.jar" >
+			<fileset dir="${classes.dir}" />
+			<fileset dir="${src.dir}" includes="**/*.java" />
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+			</manifest>
+		</jar>
+	</target>
+	<!-- ========== javadoc =========== -->
+	<target name='javadoc' description='Generate javadoc.' depends="">
+		<javadoc use='true' author='true' version='true' overview='${src.dir}/overview.html' access='package' sourcepath='src' packagenames='*.*' destdir='${build.dir}/javadoc' windowtitle='${ant.project.name} ${version}' noqualifier='java.*:javax.*:com.sun.*' linksource='true'>
+			<classpath refid='classpath' />
+			<link href='http://java.sun.com/javase/6/docs/api/' />
+		</javadoc>
+	</target>
+
+	<!-- ========== build cmd =========== -->
+	<target name="build_cmd">
+		<exec output="${dist.dir}/run.cmd" command="cmd /c dir dist\lib /b" />
+		<replaceregexp file="${dist.dir}/run.cmd" match="(.*\.jar)" replace="lib/\1" byline="true" />
+		<replaceregexp file="${dist.dir}/run.cmd" match="${line.separator}" replace=";" flags="gis" byline="false" />
+		<replaceregexp file="${dist.dir}/run.cmd" match="^" replace="java -cp " flags="" byline="true" />
+		<replaceregexp file="${dist.dir}/run.cmd" match="$" replace=" ${main-class}" flags="" byline="true" />
+	</target>
+
+	<!-- ========== dist =========== -->
+	<target name="dist" depends="jar,javadoc,build_cmd">
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}/lib" />
+		<mkdir dir="${dist.dir}/config" />
+		<mkdir dir="${dist.dir}/doc" />
+		<copy todir="${dist.dir}/config">
+			<fileset dir="config" />
+		</copy>
+		<copy todir="${dist.dir}/doc">
+			<fileset dir="${build.dir}/javadoc" />
+		</copy>
+		<copy todir="${dist.dir}/lib">
+			<fileset dir="../GenericBatch/build/jar/" />
+			<fileset dir="${lib.dir}" />
+			<fileset dir="${jar.dir}" />
+		</copy>
+	</target>
+	<!-- ========== javadoc =========== -->
+	<target name="infos">
+		<echo>
+Application: ${ant.project.name} ${version}
+Main class : ${main-class}
+Build File : ${ant.file} 
+Run Date   : ${build.time}
+Run by     : ${user.name}
+Build Dir  : ${build.dir}
+Base Dir   : ${basedir}
+Java Home  : ${java.home}
+          </echo>
+	</target>
+	<!-- ========== run =========== -->
+	<target name="run" depends="dist">
+		<java fork="true" classname="${main-class}" dir="${dist.dir}" maxmemory="1024m">
+			<classpath>
+				<path refid="rt_classpath" />
+			</classpath>
+			<arg value="RIMM" />
+		</java>
+	</target>
 </project>
