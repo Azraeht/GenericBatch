@@ -48,12 +48,13 @@
 		</tbody>
 	</table>
 
-
 	<br>
 	<br>
 	<hr>
 
 	<h2>Création d'un nouveau batch</h2>
+
+	<h3>manuellement</h3>
 	En attendant d'avoir la tâche ant de création d'un nouveau projet
 	(automatique), il convient de suivre les instructions suivantes pour
 	créer un nouveau projet :
@@ -68,10 +69,12 @@
 			hériter de la classe <code>GenericBatch</code></li>
 		<li>Implémenter les méthodes abstraites</li>
 	</ol>
+	ou (méthode préférée) avec le build.xml
 
+	<h3>tache ant : new</h3>
+	Cette cible permet de créer un nouveau projet basé sur GenericBatch.
 
 	<h2>Cibles importantes du fichier ant des projets hérités</h2>
-
 	<h3>dist</h3>
 	Cette cible permet de construire le batch avec sa documentation.
 	<p>
@@ -80,10 +83,5 @@
 		contiendra tous les éléments nécessaires à son exécution autonome.
 	<h3>run</h3>
 	Cette cible permet d'exécuter le batch.
-	<h3>new (TODO)</h3>
-	Cette cible permet de créer un nouveau projet basé sur GenericBatch.
-
-
-
 </BODY>
 </HTML>
