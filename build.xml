@@ -1,6 +1,4 @@
 <project name="GenericBatch" basedir="." default="jar">
-	<!-- ========== CHANGER version et main-class =========== -->
-	<!-- ========== ATTENTION fichier de build différent !!!= -->
 	<property name="version" value="1.0" />
 	<property name="main-class" value="No Main Class Name Here" />
 	<!-- ==========END CHANGE VERSION ======= -->
@@ -9,14 +7,10 @@
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir" value="${build.dir}/jar" />
-	<property name="dist.dir" value="dist" />
 	<!-- ========== classpaths =========== -->
 	<path id="classpath" description="Pour le build">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 		<fileset dir="${build.dir}" includes="**/*.class" />
-	</path>
-	<path id="rt_classpath">
-		<fileset dir="${dist.dir}" includes="**/*.jar" />
 	</path>
 	<!-- =================================================================== -->
 	<!-- ========== TASKS ================================================== -->
@@ -31,12 +25,9 @@
 			</fileset>
 		</delete>
 	</target>
-	<!-- ========== resources =========== -->
-	<target name="resources" depends="clean">
-		<mkdir dir="${lib.dir}" />
-	</target>
 	<!-- ========== compile =========== -->
-	<target name="compile" depends="resources">
+	<target name="compile" depends="">
+		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" />
 		<copy todir="${classes.dir}">
@@ -46,6 +37,13 @@
 				<include name="**/*.properties" />
 			</fileset>
 		</copy>
+	</target>
+	<!-- ========== javadoc =========== -->
+	<target name='javadoc' description='Generate javadoc.' depends="compile">
+		<javadoc use='true' author='true' version='true' overview='${src.dir}/overview.html' access='package' sourcepath='src' packagenames='*.*' destdir='${build.dir}/javadoc' windowtitle='${ant.project.name} ${version}' noqualifier='java.*:javax.*:com.sun.*' linksource='true'>
+			<classpath refid='classpath' />
+			<link href='http://java.sun.com/javase/6/docs/api/' />
+		</javadoc>
 	</target>
 	<!-- ========== jar =========== -->
 	<target name="jar" depends="compile,javadoc">
@@ -58,61 +56,61 @@
 			</manifest>
 		</jar>
 	</target>
-	<!-- ========== javadoc =========== -->
-	<target name='javadoc' description='Generate javadoc.' depends="">
-		<javadoc use='true' author='true' version='true' overview='${src.dir}/overview.html' access='package' sourcepath='src' packagenames='*.*' destdir='${build.dir}/javadoc' windowtitle='${ant.project.name} ${version}' noqualifier='java.*:javax.*:com.sun.*' linksource='true'>
-			<classpath refid='classpath' />
-			<link href='http://java.sun.com/javase/6/docs/api/' />
-		</javadoc>
-	</target>
-
-	<!-- ========== build cmd =========== -->
-	<target name="build_cmd">
-		<exec output="${dist.dir}/run.cmd" command="cmd /c dir dist\lib /b" />
-		<replaceregexp file="${dist.dir}/run.cmd" match="(.*\.jar)" replace="lib/\1" byline="true" />
-		<replaceregexp file="${dist.dir}/run.cmd" match="${line.separator}" replace=";" flags="gis" byline="false" />
-		<replaceregexp file="${dist.dir}/run.cmd" match="^" replace="java -cp " flags="" byline="true" />
-		<replaceregexp file="${dist.dir}/run.cmd" match="$" replace=" ${main-class}" flags="" byline="true" />
-	</target>
-
-	<!-- ========== dist =========== -->
-	<target name="dist" depends="jar,javadoc,build_cmd">
-		<mkdir dir="${dist.dir}" />
-		<mkdir dir="${dist.dir}/lib" />
-		<mkdir dir="${dist.dir}/config" />
-		<mkdir dir="${dist.dir}/doc" />
-		<copy todir="${dist.dir}/config">
-			<fileset dir="config" />
+	<!-- ========== new batch project =========== -->
+	<target name="new" depends="jar">
+		<input message="Nom du nouveau projet : " addproperty="project" defaultvalue="NouveauProjet" />
+		<echo>projet à créer : "${project}"</echo>
+		<property name="class" value="org.paris.batch.${project}" />
+		<property name="root" value="../${project}" />
+		<property name="classp" value="${root}/src/org/paris/batch" />
+		<!-- -->
+		<copy todir="${root}/lib">
+			<fileset dir="${lib.dir}/" />
+			<fileset dir="${build.dir}/jar/" />
 		</copy>
-		<copy todir="${dist.dir}/doc">
-			<fileset dir="${build.dir}/javadoc" />
+		<copy todir="${root}/config">
+			<fileset dir="templates/config/" />
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
 		</copy>
-		<copy todir="${dist.dir}/lib">
-			<fileset dir="../GenericBatch/build/jar/" />
-			<fileset dir="${lib.dir}" />
-			<fileset dir="${jar.dir}" />
+		<copy todir="${root}">
+			<fileset file="templates/build.xml" />
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
 		</copy>
-	</target>
-	<!-- ========== javadoc =========== -->
-	<target name="infos">
-		<echo>
-Application: ${ant.project.name} ${version}
-Main class : ${main-class}
-Build File : ${ant.file} 
-Run Date   : ${build.time}
-Run by     : ${user.name}
-Build Dir  : ${build.dir}
-Base Dir   : ${basedir}
-Java Home  : ${java.home}
-          </echo>
-	</target>
-	<!-- ========== run =========== -->
-	<target name="run" depends="dist">
-		<java fork="true" classname="${main-class}" dir="${dist.dir}" maxmemory="1024m">
-			<classpath>
-				<path refid="rt_classpath" />
-			</classpath>
-			<arg value="RIMM" />
-		</java>
+		<copy file="templates/skeletons/CHANGE_ME.java" tofile="${classp}/${project}.java">
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<copy file="templates/skeletons/overview.html" todir="${root}/src">
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<copy todir="${root}">
+			<fileset file="templates/build.xml" />
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<copy file="templates/classpath" tofile="${root}/.classpath">
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<copy file="templates/gitignore" tofile="${root}/.gitignore">
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<copy file="templates/project" tofile="${root}/.project">
+			<filterset>
+				<filter token="CHANGE_ME" value="${project}" />
+			</filterset>
+		</copy>
+		<echo>projet "${project}" créé. Vous pouvez importer ce projet dans le workspace.</echo>
 	</target>
 </project>

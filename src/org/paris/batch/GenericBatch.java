@@ -35,7 +35,7 @@ import org.paris.batch.utils.FileWriter;
  */
 public abstract class GenericBatch {
     /**
-     * debogguer to stderr & stdout: Util lors des initialisations de démarrage
+     * debogguer to stderr & stdout: Utile lors des initialisations de démarrage
      * (config, logger,...)
      * 
      */
@@ -111,8 +111,9 @@ public abstract class GenericBatch {
     public abstract void finished() throws SQLExecutorException;
 
     /**
-     * Constructeur de GenericBatch, permet d'instancier le Batch, son logger et
-     * ses properties
+     * Constructeur de GenericBatch, permet d'instancier le Batch, le journal
+     * d'événements, le gestionnaire de commande, la gestion des fichiers et les
+     * propriétés de configuration.
      * 
      * @throws ConfigurationBatchException
      * @throws NoPropertiesFoundException
@@ -161,8 +162,7 @@ public abstract class GenericBatch {
     }
 
     /**
-     * Méthode pour gérer l'arrêt du batch quand tout va bien (hé ouais, c'est
-     * possible).
+     * Méthode pour gérer l'arrêt du batch quand l'exécution s'est bien déroulée
      */
     public void exitSuccess() {
         try {

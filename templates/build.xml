@@ -1,11 +1,14 @@
-<project basedir="." default="dist">
-    <property file="build.properties" />
+<project name="@CHANGE_ME@" basedir="." default="dist">
     <property name="src.dir" value="src" />
     <property name="build.dir" value="build" />
     <property name="classes.dir" value="${build.dir}/classes" />
     <property name="jar.dir" value="${build.dir}/jar" />
     <property name="lib.dir" value="lib" />
     <property name="dist.dir" value="dist" />
+	<!-- -->
+    <property name="main-class" value="org.paris.batch.@CHANGE_ME@" />
+	<property name="version" value="1.0" />
+	<!-- -->
     <!-- ========== classpaths =========== -->
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -115,13 +118,5 @@ Java Home  : ${java.home}
             </classpath>
             <arg value="RIMM" />
         </java>
-    </target>
-    <!-- ========== run =========== -->
-    <target name="sandbox">
-        <exec output="${dist.dir}/run.cmd" command="cmd /c dir dist\lib /b" />
-        <replaceregexp file="${dist.dir}/run.cmd" match="(.*\.jar)" replace="lib/\1" byline="true" />
-        <replaceregexp file="${dist.dir}/run.cmd" match="${line.separator}" replace=";" flags="gis" byline="false" />
-        <replaceregexp file="${dist.dir}/run.cmd" match="^" replace="java -cp " flags="" byline="true" />
-        <replaceregexp file="${dist.dir}/run.cmd" match="$" replace=" ${main-class}" flags="" byline="true" />
     </target>
 </project>
