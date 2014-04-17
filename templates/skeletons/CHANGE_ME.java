@@ -51,7 +51,6 @@ public class @CHANGE_ME@ extends GenericBatch {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-
     }
 
     /**
@@ -70,7 +69,7 @@ public class @CHANGE_ME@ extends GenericBatch {
      */
     @Override
     public void finished() throws SQLExecutorException {
-
+      //TODO Implement me !!!
     }
 
     /*
@@ -80,7 +79,8 @@ public class @CHANGE_ME@ extends GenericBatch {
      */
     @Override
     public int run() {
-
+      //TODO Implement and change me !!!
+      return @CHANGE_ME@.EXIT_OK;
     }
 
     /*
@@ -91,6 +91,6 @@ public class @CHANGE_ME@ extends GenericBatch {
     @Override
     public void setup() throws ConfigurationBatchException,
             DatabaseDriverNotFoundException {
-
+      //TODO Implement me !!!
     }
 }
