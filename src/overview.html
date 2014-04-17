@@ -10,6 +10,7 @@
 	Décrire ici les objectifs du batch.
 	<p></p>
 
+
 	<h2>Synopsis</h2>
 	Décrire les étapes du batch.
 	<br> Example:
@@ -28,24 +29,60 @@
 	<table width="100%" border="1" cellspacing="0" cellpadding="3">
 		<tbody>
 			<tr bgcolor="#CCCCFF" class="TableHeadingColor">
-                <th align="left"><b>Version</b></th>
-                <th align="left"><b>Date</b></th>
-                <th align="left"><b>Commentaires</b></th>
+				<th align="left"><b>Version</b></th>
+				<th align="left"><b>Date</b></th>
+				<th align="left"><b>Commentaires</b></th>
 			</tr>
 			<tr bgcolor="white" class="TableRowColor">
 				<td><code>1.1 </code></td>
 				<td><code>15/04/2014 </code></td>
-				<td>Reprise de la version 1.0 en utilisant le framework. Les
-					méthodes initiales n'ont pas été modifiées.</td>
+				<td>Reprise des idées du framework. Remaniement complet du
+					framework, factorisation et développement de nouvelles
+					fonctionnalités.</td>
 			</tr>
 			<tr bgcolor="white" class="TableRowColor">
 				<td><code>1.0 </code></td>
 				<td><code>??/04/2014 </code></td>
-				<td>Version initiale</td>
+				<td>Version initiale.</td>
 			</tr>
-
 		</tbody>
 	</table>
+
+
+	<br>
+	<br>
+	<hr>
+
+	<h2>Création d'un nouveau batch</h2>
+	En attendant d'avoir la tâche ant de création d'un nouveau projet
+	(automatique), il convient de suivre les instructions suivantes pour
+	créer un nouveau projet :
+	<ol>
+		<li>Créer un nouveau projet Java</li>
+		<li>Copier le contenu du dossier <code>templates</code> à la
+			racine du nouveau projet
+		</li>
+		<li>Modifier le fichier <code>build.properties</code></li>
+		<li>Le build.xml (ant) doit alors être opérationnel</li>
+		<li>La classe principale (exécutant le <code>main</code>) doit
+			hériter de la classe <code>GenericBatch</code></li>
+		<li>Implémenter les méthodes abstraites</li>
+	</ol>
+
+
+	<h2>Cibles importantes du fichier ant</h2>
+
+	<h3>dist</h3>
+	Cette cible permet de construire le batch avec sa documentation.
+	<p>
+		Le dossier
+		<code>dist</code>
+		contiendra tous les éléments nécessaires à son exécution autonome.
+	<h3>run</h3>
+	Cette cible permet d'exécuter le batch.
+	<h3>new (TODO)</h3>
+	Cette cible permet de créer un nouveau projet basé sur GenericBatch.
+
 
 
 </BODY>

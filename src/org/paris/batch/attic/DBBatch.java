@@ -18,6 +18,7 @@ import org.paris.batch.logging.LogBatch;
 
 /**
  * @deprecated
+ * 
  * @author webber
  * 
  */
