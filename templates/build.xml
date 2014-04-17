@@ -33,6 +33,7 @@
     <!-- ========== resources =========== -->
     <target name="resources" depends="clean">
         <mkdir dir="${lib.dir}" />
+    	<mkdir dir="${dist.dir}" />
         <copy todir="${lib.dir}">
             <fileset dir="../GenericBatch/build/jar/" />
             <fileset dir="../GenericBatch/lib/" />
