@@ -22,6 +22,18 @@ public class FileWriter {
      * CSV : séparateur de champ par défaut
      */
     public static final String CSV_DEFAULT_SEPARATOR = ";";
+    /**
+     * Encodage Unicode
+     */
+    public static final String ENCODING_UTF8 = "UTF-8";
+    /**
+     * Encodage Latin1
+     */
+    public static final String ENCODING_ISO8859 = "ISO8859-1";
+    /**
+     * DEFAULT_ENCODING
+     */
+    public static final String DEFAULT_ENCODING = ENCODING_ISO8859;
 
     private Logger logger;
 
@@ -90,11 +102,28 @@ public class FileWriter {
      */
     public void writeXMLFile(String filename, Document document)
             throws FileWriterException {
+        writeXMLFile(filename, document, DEFAULT_ENCODING);
+    }
+
+    /**
+     * Méthode pour écrire un fichier au format XML à partir d'un objet
+     * <code>org.jdom2.Document</code>.
+     * 
+     * @param filename
+     *            le nom du fichier à écrire.
+     * @param document
+     *            le document XML
+     * @param encoding
+     *            le format d'encodage
+     * @throws FileWriterException
+     */
+    public void writeXMLFile(String filename, Document document, String encoding)
+            throws FileWriterException {
         logger.info("Ecriture du fichier : " + filename);
         try {
 
             XMLOutputter xmlOutput = new XMLOutputter();
-            xmlOutput.setFormat(Format.getPrettyFormat());
+            xmlOutput.setFormat(Format.getPrettyFormat().setEncoding(encoding));
             xmlOutput.output(document, new java.io.FileWriter(filename));
 
         } catch (Exception e) {
