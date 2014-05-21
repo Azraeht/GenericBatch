@@ -12,11 +12,11 @@ import org.paris.batch.utils.CommandExecutor;
 import org.paris.batch.utils.FileWriter;
 
 /**
- * Classe abstraite offrant plusieurs services communs à tous les batchs Ville
+ * Classe abstraite offrant plusieurs services communs ï¿½ tous les batchs Ville
  * de Paris.
  * 
  * <br>
- * La contrat de la classe stipule qu'il faut implémenter ces trois méthodes:<br>
+ * La contrat de la classe stipule qu'il faut implï¿½menter ces trois mï¿½thodes:<br>
  * <ul>
  * <li><code>setup()</code></li>
  * <li><code>run()</code></li>
@@ -25,23 +25,40 @@ import org.paris.batch.utils.FileWriter;
  * 
  * @see GenericBatch#setup()
  * @see #run()
- * @see #finished()
+ * @see #finished()   
  * 
  * 
  * 
  * @author Guillaume Weber
  * @author Brice Santus
  * @author Emmanuel GALLOIS
+ * 
+ * Exemple : 
+
+      //getting username using System.getProperty in Java
+       String user = System.getProperty("user.name") ;
+       System.out.println("Username using system property: "  + user);
+    
+     //getting username as environment variable in java, only works in windows
+       String userWindows = System.getenv("USERNAME");
+       System.out.println("Username using environment variable in windows : "  + userWindows);
+          
+     //name and value of all environment variable in Java  program
+      Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            System.out.format("%s=%s%n", envName, env.get(envName));
+        }
+
  */
 public abstract class GenericBatch {
     /**
-     * debogguer to stderr & stdout: Utile lors des initialisations de démarrage
+     * debogguer to stderr & stdout: Utile lors des initialisations de dï¿½marrage
      * (config, logger,...)
      * 
      */
     public static boolean DEBUG = false;
     /**
-     * Variable d'environnement pour définir la variable <code>DEBUG</code><br>
+     * Variable d'environnement pour dï¿½finir la variable <code>DEBUG</code><br>
      * Exemples:<br>
      * <code>set MDP_BATCH_DEBUG=DEBUG</code><br>
      * <code>set MDP_BATCH_DEBUG=1</code><br>
@@ -62,31 +79,31 @@ public abstract class GenericBatch {
     public static final int EXIT_ERROR = 10;
 
     /**
-     * reçoit les informations spécifiées dans le fichier de configuration
+     * reï¿½oit les informations spï¿½cifiï¿½es dans le fichier de configuration
      * adjoint au batch
      */
     protected Properties props;
     /**
-     * prend en charge la traçabilité des opérations effectuées par le batch
+     * prend en charge la traï¿½abilitï¿½ des opï¿½rations effectuï¿½es par le batch
      * 
      * @see LogBatch
      */
     protected Logger logger;
     /**
-     * permet d'écrire du contenu dans des fichiers.
+     * permet d'ï¿½crire du contenu dans des fichiers.
      * 
      * @see FileWriter
      */
     protected FileWriter writer;
     /**
-     * permet d'exécuter des commandes système.
+     * permet d'exï¿½cuter des commandes systï¿½me.
      * 
      * @see CommandExecutor
      */
     protected CommandExecutor command;
 
     /**
-     * Méthode pour initialiser les ressources locales.
+     * Mï¿½thode pour initialiser les ressources locales.
      * 
      * @throws ConfigurationBatchException
      * @throws DatabaseDriverNotFoundException
@@ -102,8 +119,8 @@ public abstract class GenericBatch {
     public abstract int run();
 
     /**
-     * Méthode pour nettoyer les ressources utilisées. Cette méthode est appelée
-     * automatiquement lors de l'appel à l'une des méthodes de sortie (
+     * Mï¿½thode pour nettoyer les ressources utilisï¿½es. Cette mï¿½thode est appelï¿½e
+     * automatiquement lors de l'appel ï¿½ l'une des mï¿½thodes de sortie (
      * <code>exit*</code>).
      * 
      * @throws SQLExecutorException
@@ -112,81 +129,162 @@ public abstract class GenericBatch {
 
     /**
      * Constructeur de GenericBatch, permet d'instancier le Batch, le journal
-     * d'événements, le gestionnaire de commande, la gestion des fichiers et les
-     * propriétés de configuration.
+     * d'ï¿½vï¿½nements, le gestionnaire de commande, la gestion des fichiers et les
+     * propriï¿½tï¿½s de configuration.
      * 
      * @throws ConfigurationBatchException
      * @throws NoPropertiesFoundException
      */
     public GenericBatch() throws ConfigurationBatchException,
-            NoPropertiesFoundException {
+            NoPropertiesFoundException 
+            {
         // debug defini dans l'environnement ?
-        if (System.getenv(ENV_DEBUG) != null) {
+        if (System.getenv(ENV_DEBUG) != null)
+        {
             DEBUG = true;
         }
         //
-        if (DEBUG) {
-            System.out
-                    .println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
+        if (DEBUG) 
+        {
+            System.out.println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
         }
-        props = ConfigurationManagerBatch
-                .mergeProperties(
-                        ConfigurationManagerBatch
-                                .loadProperties(ConfigurationManagerBatch.PROPERTIES_CONFIG_FILENAME),
-                        ConfigurationManagerBatch
-                                .loadProperties(ConfigurationManagerBatch.PROPERTIES_QUERY_FILENAME));
-        if (DEBUG) {
-            System.out
-                    .println("Instanciation de GenericBatch::Création du logger");
+        props = ConfigurationManagerBatch.mergeProperties(
+                        ConfigurationManagerBatch.loadProperties(ConfigurationManagerBatch.PROPERTIES_CONFIG_FILENAME),
+                        ConfigurationManagerBatch.loadProperties(ConfigurationManagerBatch.PROPERTIES_QUERY_FILENAME));
+        if (DEBUG) 
+        {
+            System.out.println("Instanciation de GenericBatch::CrÃ©ation du logger");
         }
         this.logger = LogBatch.getLogBatch(props);
-        this.logger
-                .info("Initialisation des objets FileWriter, CommandExecutor.");
+        this.logger.info("Initialisation des objets FileWriter, CommandExecutor.");
         this.writer = new FileWriter(this.logger);
         this.command = new CommandExecutor(this.logger);
-        this.logger.info("Initialisation terminée.");
+        this.logger.info("Initialisation terminÃ©e.");
     }
 
     /**
-     * Méthode pour gérer l'arrêt du batch après une erreur irrécupérable.
+     * MÃ©thode pour gÃ©rer l'arrÃªt du batch aprÃ¨s une erreur irrÃ©cupÃ©rable.
      */
-    public void exitFailure() {
-        try {
+    public void exitFailure() 
+    {
+        try 
+        {
             finished();
-        } catch (SQLExecutorException e) {
+        } 
+        catch (SQLExecutorException e) {
             logger.error(e);
-        } finally {
-            logger.info("Erreur irrécupérable. Fin d'exécution du batch.");
+        } finally 
+        {
+            logger.info("Erreur irrÃ©cupÃ©rable. Fin d'exÃ©cution du batch.");
             System.exit(EXIT_ERROR);
         }
     }
 
     /**
-     * Méthode pour gérer l'arrêt du batch quand l'exécution s'est bien déroulée
+     * MÃ©thode pour gÃ©rer l'arrÃªt du batch quand l'exÃ©cution s'est bien dÃ©roulÃ©e
      */
-    public void exitSuccess() {
-        try {
+    public void exitSuccess() 
+    {
+        try 
+        {
             finished();
-        } catch (SQLExecutorException e) {
+        } 
+        catch (SQLExecutorException e) 
+        {
             logger.error(e);
-        } finally {
-            logger.info("Fin d'exécution du batch (succès).");
+        } finally 
+        {
+            logger.info("Fin d'exÃ©cution du batch (succÃ¨s).");
             System.exit(EXIT_OK);
         }
     }
 
     /**
-     * Méthode pour gérer l'arrêt du batch après un avertissement.
+     * MÃ©thode pour gÃ©rer l'arrÃªt du batch aprÃ¨s un avertissement.
      */
-    public void exitWarning() {
-        try {
+    public void exitWarning() 
+    {
+        try 
+        {
             finished();
-        } catch (SQLExecutorException e) {
+        } 
+        catch (SQLExecutorException e) 
+        {
             logger.error(e);
-
-        } finally {
-            logger.info("Fin d'exécution du batch (avertissements).");
+        } 
+        finally 
+        {
+            logger.info("Fin d'exÃ©cution du batch (avertissements).");
             System.exit(EXIT_WARNING);
         }
     }
+    
+    /**
+     *  MÃ©thode de rÃ©cupÃ©ration des variables d'environnement.
+     * @param Valeur
+     */
+    public String getEnvVar(String Valeur) 
+    {
+        String MaValeur = "";
+        try 
+        {
+            MaValeur = System.getenv(Valeur) ;
+            System.out.println("Valeur en cours : "  + MaValeur);
+        } 
+        catch (Exception e) 
+        {
+            logger.info("Erreur lors de la rÃ©cupÃ©ration des variables OS.");
+            logger.error(e);
+        } 
+        return MaValeur;
+    }
+    
+    /**
+     *  MÃ©thode de rÃ©cupÃ©ration des nom et lieu de fichier Ã  gÃ©nÃ©rer aprÃ¨s avoir testÃ© si la 
+     *  variable d'environnement du fichier SalsaConfig.bat est saisie, sinon il faut prendre  
+     *  la valeur de la propriÃ©tÃ© du mÃªme nom saisie dans le fichier Config.Properties. Pffff......
+     *  @param nomProp nom de la propriÃ©tÃ© Ã  trouver
+     */
+    public String recupValeurProp(String nomProp) 
+    {
+        String valeur = "";
+        try
+        {
+            //on tente la rÃ©cupÃ©ration de la valeur de la propriÃ©tÃ© dans les variables d'environnement
+            valeur = getEnvVar(nomProp); 
+            if (valeur == null)  
+            {
+                //propriÃ©tÃ© introuvable dans l'environnement ! On prend la valeur par dÃ©faut prÃ©sente
+                //dans les fichiers de propriÃ©tÃ©s
+                valeur = System.getProperty(nomProp);
+            }
+        }
+        catch (Exception e) 
+        {
+            logger.info("Erreur lors de la rÃ©cupÃ©ration de la propriÃ©tÃ© : "+ nomProp);
+            logger.error(e);
+        }
+        return valeur;    
+    }
+    
+    /**
+     *  MÃ©thode d'initialisation des variables d'environnement.
+     * 
+     * @param Nom
+     * @param Contenu
+     */
+    /*public void SetEnvVar(String Nom, String Contenu) 
+    {
+        try 
+        {
+            System.setProperty(Nom, Contenu) ;
+            System.out.println("Valeur de substitution : "+Nom+' '+Contenu);
+        } 
+        catch (Exception e) 
+        {
+            logger.info("Initialisation erronnÃ©e des variables OS.");
+            logger.error(e);
+        } 
+    }
+    */
 }

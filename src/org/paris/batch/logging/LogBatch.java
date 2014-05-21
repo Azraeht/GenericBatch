@@ -12,7 +12,7 @@ import org.paris.batch.ConfigurationManagerBatch;
 import org.paris.batch.exception.ConfigurationBatchException;
 
 /**
- * Implémentation spécifique au framework d'un logger Log4J v1
+ * Implï¿½mentation spï¿½cifique au framework d'un logger Log4J v1
  * 
  * @author lannoog
  * @author galloiem
@@ -25,10 +25,10 @@ public class LogBatch {
     public static Logger logBatch = null;
 
     /**
-     * Création et configuration du logger
+     * Crï¿½ation et configuration du logger
      * 
      * @param properties
-     *            propriétés de configuration du journal
+     *            propriï¿½tï¿½s de configuration du journal
      * 
      * 
      * @see ConfigurationManagerBatch
@@ -45,7 +45,7 @@ public class LogBatch {
         String log_path = properties.getProperty(
                 ConfigurationManagerBatch.LOG_PATH_KEY,
                 ConfigurationManagerBatch.LOG_PATH_DFT);
-        // vérification du dossier, sinon création de celui-ci.
+        // vÃ©rification du dossier, sinon crÃ©ation de celui-ci.
         File directory = new File(log_path);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -89,7 +89,7 @@ public class LogBatch {
      */
     public static Logger getLogBatch() throws ConfigurationBatchException {
         if (logBatch == null) {
-            String msg = "Tentative d'accès à un singleton non initialisé.";
+            String msg = "Tentative d'accÃ¨s Ã  un singleton non initialisÃ©.";
             System.err.println(msg);
             throw new ConfigurationBatchException(msg);
         }

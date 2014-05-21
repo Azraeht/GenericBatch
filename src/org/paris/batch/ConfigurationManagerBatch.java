@@ -5,9 +5,10 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.paris.batch.exception.ConfigurationBatchException;
+import org.paris.batch.utils.CommandExecutor;
 
 /**
- * Cette classe permet de travailler sur des fichiers de propriétés.
+ * Cette classe permet de travailler sur des fichiers de propriï¿½tï¿½s.
  * 
  * @author galloiem
  * 
@@ -35,7 +36,7 @@ public class ConfigurationManagerBatch {
      */
     public final static String ENV_QUERY_FILENAME = "MDP_BATCH_QUERY_FILENAME";
     /**
-     * Variable d'environnement : pour tracer le démarage initial de la classe.
+     * Variable d'environnement : pour tracer le dï¿½marage initial de la classe.
      */
     public final static String ENV_DEBUG = "MDP_BATCH_DEBUG";
     /**
@@ -43,7 +44,7 @@ public class ConfigurationManagerBatch {
      */
     public static final String LOG_PATTERN_KEY = "log.pattern";
     /**
-     * log : patron du format par défaut
+     * log : patron du format par dï¿½faut
      */
     public static final String LOG_PATTERN_DFT = "%d %-5p %c - %F:%L - %m%n";
     /**
@@ -51,7 +52,7 @@ public class ConfigurationManagerBatch {
      */
     public static final String LOG_PATH_KEY = "log.path";
     /**
-     * log : chemin par défaut
+     * log : chemin par dï¿½faut
      */
     public static final String LOG_PATH_DFT = System.getProperty("user.dir")
             + "\\log\\";
@@ -60,7 +61,7 @@ public class ConfigurationManagerBatch {
      */
     public static final String LOG_FILE_KEY = "log.filename";
     /**
-     * log : nom par défaut
+     * log : nom par dï¿½faut
      */
     public static final String LOG_FILE_DFT = "generic_batch.log";
     /**
@@ -68,11 +69,11 @@ public class ConfigurationManagerBatch {
      */
     public static final String LOG_LEVEL_KEY = "log.level";
     /**
-     * log : niveau par défaut du log.
+     * log : niveau par dï¿½faut du log.
      */
     public static final String LOG_LEVEL_DFT = "INFO";
     /**
-     * log : écrire sur la sortie standard
+     * log : ï¿½crire sur la sortie standard
      */
     public static final String LOG_STDOUT_KEY = "log.stdout";
     /**
@@ -101,21 +102,23 @@ public class ConfigurationManagerBatch {
      */
     public static final String DB_PASS_KEY = "db.pass";
     /**
-     * Database : Autocommit
+     * Database : Autocommit vrai/faux.
      */
     public static final String DB_AUTOCOMMIT_KEY = "db.autocommit";
 
     /**
-     * 
-     * Charge le fichier de propriétés spécifié
+     *     * Database : choix de l'encodage.
+     */
+    public static final String DB_ENCODAGE_KEY = "db.encodage";
+
+    /**
      * 
      * @see #PROPERTIES_CONFIG_FILENAME
      * @see #PROPERTIES_QUERY_FILENAME
      * 
-     * 
      * @param properties_type
-     *            le type de propriété à charger.
-     * @return Les propriétés contenues dans le fichier
+     *            le type de propriï¿½tï¿½ ï¿½ charger.
+     * @return Les propriï¿½tï¿½s contenues dans le fichier
      * @throws ConfigurationBatchException
      */
     public static Properties loadProperties(String properties_type)
@@ -126,25 +129,34 @@ public class ConfigurationManagerBatch {
         String properties_filename;
 
         // Quel est le type de fichier de configuration ?
-        if (properties_type.equals(PROPERTIES_CONFIG_FILENAME)) {
+        if (properties_type.equals(PROPERTIES_CONFIG_FILENAME)) 
+        {
             env_var = ENV_CONFIG_FILENAME;
-        } else if (properties_type.equals(PROPERTIES_QUERY_FILENAME)) {
+        } 
+        else if (properties_type.equals(PROPERTIES_QUERY_FILENAME)) 
+        {
             env_var = ENV_QUERY_FILENAME;
         }
 
-        // L'environnement surcharge les valeurs par défaut (dossier `config`).
+        // L'environnement surcharge les valeurs par dï¿½faut (dossier `config`).
         env = System.getenv(env_var);
-        if (env != null && (new File(env)).exists()) {
+        if (env != null && (new File(env)).exists()) 
+        {
             properties_filename = env;
-        } else {
+        } 
+        else 
+        {
             properties_filename = System.getProperty("user.dir")
                     + CONFIG_DIRNAME + properties_type;
         }
-        try {
+        try 
+        {
             properties.load(new FileInputStream(new File(properties_filename)));
             return properties;
-        } catch (Exception e) {
-            String msg = "Erreur lors du traitement de chargement de configuration - Fichier concerné: "
+        } 
+        catch (Exception e) 
+        {
+            String msg = "Erreur lors du traitement de chargement de configuration - Fichier concernï¿½: "
                     + properties_filename + "\nException : " + e.getMessage();
             System.err.println(msg);
             throw new ConfigurationBatchException(msg);
@@ -153,15 +165,15 @@ public class ConfigurationManagerBatch {
 
     /**
      * 
-     * Retourne une instance de type Properties basée sur la fusion des
-     * instances p1 et p2. Si une clé existe dans les deux, la valeur de p2
+     * Retourne une instance de type Properties basï¿½e sur la fusion des
+     * instances p1 et p2. Si une clï¿½ existe dans les deux, la valeur de p2
      * remplacera celle de p1.
      * 
      * @param p1
-     *            propriétés - jeu #1
+     *            propriï¿½tï¿½s - jeu #1
      * @param p2
-     *            propriétés - jeu #2
-     * @return merged : propriétés fusionnées.
+     *            propriï¿½tï¿½s - jeu #2
+     * @return merged : propriï¿½tï¿½s fusionnï¿½es.
      */
     public static Properties mergeProperties(Properties p1, Properties p2) {
         Properties merged = new Properties();
@@ -174,8 +186,8 @@ public class ConfigurationManagerBatch {
     }
 
     /**
-     * Permet de retourner un sous-ensemble des propriétés filtées par le
-     * paramètre <code>filter</code>.<br>
+     * Permet de retourner un sous-ensemble des propriï¿½tï¿½s filtï¿½es par le
+     * paramï¿½tre <code>filter</code>.<br>
      * exemple de filtre:
      * 
      * <pre>
@@ -183,17 +195,18 @@ public class ConfigurationManagerBatch {
      * </pre>
      * 
      * @param p
-     *            Les propriétés à filtrer
+     *            Les propriï¿½tï¿½s ï¿½ filtrer
      * @param filter
-     *            le filtre à rechercher
+     *            le filtre ï¿½ rechercher
      * @param removeFilter
-     *            si défini à <code>true</code> alors le filtre sera supprimé de
-     *            la clé, sinon la clé reste tel quel.
-     * @return Les propriétés filtrées
+     *            si dï¿½fini ï¿½ <code>true</code> alors le filtre sera supprimï¿½ de
+     *            la clï¿½, sinon la clï¿½ reste tel quel.
+     * @return Les propriï¿½tï¿½s filtrï¿½es
      * 
      */
     public static Properties filterProperties(Properties p, String filter,
-            boolean removeFilter) {
+            boolean removeFilter) 
+    {
         Properties props = new Properties();
         for (Object key : p.keySet()) {
             String newkey = (String) key;
@@ -210,5 +223,5 @@ public class ConfigurationManagerBatch {
 
         return props;
     }
-
+        
 }

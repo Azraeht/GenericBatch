@@ -26,10 +26,10 @@
 		</delete>
 	</target>
 	<!-- ========== compile =========== -->
-	<target name="compile" depends="">
+	<target name="compile" depends="clean">
 		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" />
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" encoding="UTF-8"/>
 		<copy todir="${classes.dir}">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml" />

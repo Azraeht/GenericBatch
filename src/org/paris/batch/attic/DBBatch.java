@@ -37,7 +37,7 @@ public class DBBatch {
     static Properties properties;
 
     /**
-     * Méthode qui retourne l'instance et la crée si elle n'existe pas.
+     * MÃ©thode qui retourne l'instance et la crÃ©e si elle n'existe pas.
      * 
      * @return la connection
      * @throws DatabaseDriverNotFoundException
@@ -56,7 +56,7 @@ public class DBBatch {
         String workingDir = System.getProperty("user.dir") + "\\config\\";
         File temp = new File(workingDir, "config.properties");
 
-        // On teste l'existence du fichier de propriétés
+        // On teste l'existence du fichier de propriï¿½tï¿½s
         try {
             // props.load(classLoader.getResourceAsStream("\\query.properties"));
             InputStream resourceAsStream = new FileInputStream(temp);
@@ -65,23 +65,23 @@ public class DBBatch {
             }
         } catch (NullPointerException npe) {
             System.out
-                    .println("NullPointerException au chargement du fichier de propriétés :\n\t"
+                    .println("NullPointerException au chargement du fichier de propriï¿½tï¿½s :\n\t"
                             + cheminDAccesProperties + "\n" + npe.toString());
             throw new NoPropertiesFoundException(npe.getMessage());
         } catch (IOException ioe) {
             System.out
-                    .println("IOException au chargement du fichier de propriétés :\n\t"
+                    .println("IOException au chargement du fichier de propriï¿½tï¿½s :\n\t"
                             + cheminDAccesProperties + "\n" + ioe.getMessage());
             throw new NoPropertiesFoundException(ioe.getMessage());
         }
 
         try {
             if (!conn) {
-                // Si le driver n'est pas détecté l'application s'arrête
+                // Si le driver n'est pas dï¿½tectï¿½ l'application s'arrï¿½te
                 System.out.println("Driver absent.");
 
                 throw (new DatabaseDriverNotFoundException(
-                        "Ouhlà, le driver paraît absent. On est grave dans la mouise cap'taine"));
+                        "Ouhlï¿½, le driver paraï¿½t absent. On est grave dans la mouise cap'taine"));
             }
         } catch (DatabaseDriverNotFoundException ddne) {
             System.out
@@ -92,7 +92,7 @@ public class DBBatch {
 
         if (connect == null) {
             try {
-                // Établissement de la connexion au SGBD
+                // ï¿½tablissement de la connexion au SGBD
                 connect = DriverManager.getConnection("jdbc:oracle:thin:@"
                         + properties.getProperty("urlOracle") + ":"
                         + properties.getProperty("portOracle") + ":"
@@ -102,7 +102,7 @@ public class DBBatch {
                 connect.setAutoCommit(false);
             } catch (SQLException sqle) {
                 System.out
-                        .println("Problème de connexion à la base de données :\n\t"
+                        .println("Problï¿½me de connexion ï¿½ la base de donnï¿½es :\n\t"
                                 + "\n" + sqle.getMessage());
                 throw new DatabaseDriverNotFoundException(sqle.getMessage());
             }
@@ -111,12 +111,12 @@ public class DBBatch {
     }
 
     /**
-     * Méthode qui retourne l'instance MySQL et la crée si elle n'existe pas.
+     * Mï¿½thode qui retourne l'instance MySQL et la crï¿½e si elle n'existe pas.
      * 
      * @param urlMySQL
      *            URL de connexion
      * @param baseMySQL
-     *            nom de la base de donnée
+     *            nom de la base de donnï¿½e
      * @param userMySQL
      *            username
      * @param passMySQL
@@ -135,11 +135,11 @@ public class DBBatch {
 
         try {
             if (Class.forName("com.mysql.jdbc.Driver") == null) {
-                // Si le driver n'est pas détecté l'application s'arrête
+                // Si le driver n'est pas dï¿½tectï¿½ l'application s'arrï¿½te
                 System.out.println("Driver absent.");
 
                 throw (new DatabaseDriverNotFoundException(
-                        "Ouhlà, le driver paraît absent. On est grave dans la mouise cap'taine"));
+                        "Ouhlï¿½, le driver paraï¿½t absent. On est grave dans la mouise cap'taine"));
 
             }
         } catch (DatabaseDriverNotFoundException ddne) {
@@ -152,7 +152,7 @@ public class DBBatch {
 
         if (connect == null) {
             try {
-                // Établissement de la connexion au SGBD
+                // ï¿½tablissement de la connexion au SGBD
                 connect = DriverManager.getConnection(
                         "jdbc:mysql://" + properties.getProperty("urlMySQL")
                                 + "/" + properties.getProperty("baseMySQL"),
@@ -161,7 +161,7 @@ public class DBBatch {
                 connect.setAutoCommit(false);
             } catch (SQLException sqle) {
                 System.out
-                        .println("Problème de connexion à la base de données :\n\t"
+                        .println("Problï¿½me de connexion ï¿½ la base de donnï¿½es :\n\t"
                                 + "\n" + sqle.getMessage());
                 throw new DatabaseConnectionFailedException(sqle.getMessage());
             }
@@ -170,7 +170,7 @@ public class DBBatch {
     }
 
     /**
-     * Méthode qui termine l'instance
+     * Mï¿½thode qui termine l'instance
      */
     public static void closeInstance() {
         if (connect != null) {

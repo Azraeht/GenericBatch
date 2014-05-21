@@ -3,6 +3,7 @@ package org.paris.batch.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,7 +17,7 @@ import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.SQLExecutorException;
 
 /**
- * Services de base de données.
+ * Services de base de donnï¿½es.
  * 
  * @author galloiem
  */
@@ -25,14 +26,15 @@ public class SQLExecutor {
     private Connection connection;
     private Logger logger;
     private QueryRunner runner;
+    private ProcRunner procRunner;
 
     /**
      * Constructeur
      * 
      * @param properties
-     *            les informations nécessaires pour la création de la connection
+     *            les informations nï¿½cessaires pour la crï¿½ation de la connection
      * @param logger
-     *            journal d'événements
+     *            journal d'ï¿½vï¿½nements
      * @throws DatabaseDriverNotFoundException
      * @throws ConfigurationBatchException
      */
@@ -42,6 +44,7 @@ public class SQLExecutor {
         this.connection = DBConnection.getConnection(properties);
         this.logger = logger;
         runner = new QueryRunner();
+        procRunner = new ProcRunner();
         logger.debug("SQLExecutor configured.");
     }
 
@@ -54,10 +57,10 @@ public class SQLExecutor {
         try {
             logger.debug("Fermeture de la connection en cours...");
             this.connection.close();
-            logger.debug("Fermeture de la connection effectuée.");
+            logger.debug("Fermeture de la connection effectuï¿½e.");
 
         } catch (Throwable t) {
-            String msg = "Erreur à la fermeture de la connection : "
+            String msg = "Erreur ï¿½ la fermeture de la connection : "
                     + t.getMessage();
             logger.error(msg);
 
@@ -66,23 +69,55 @@ public class SQLExecutor {
     }
 
     /**
-     * Méthode pour effectuer une requête "DELETE","UPDATE" ou "INSERT" dans une
-     * base de données sans paramètres.
+     * La mï¿½thode execute une procï¿½dure ou un package Oracle.
+     * Elle s'appuie sur la classe ProcRunner qui vient complï¿½ter la librairie DBUtils
+     * @throws SQLExecutorException
+     */
+    public List<?> executeCallableStatement(String statementCall) throws SQLExecutorException {
+        @SuppressWarnings("rawtypes")
+        List<?> result = new ArrayList();
+        try {
+            logger.info("Appel ï¿½ exï¿½cuter : " + statementCall);
+            
+            //result = runner.update(connection, query);
+            result = procRunner.queryProc(connection, statementCall, new MapListHandler());
+            logger.info("Traitement exï¿½cutï¿½. Elï¿½ments retournï¿½s : " + result.size());
+        } catch (SQLException sqle) {
+            String msg = "Exception ï¿½ l'exï¿½cution de '" + statementCall + "'\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+
+            throw new SQLExecutorException(msg);
+        }
+        catch (Exception e)
+        {
+            String msg = "Exception ï¿½ l'exï¿½cution de '" + statementCall + "'\n" + e.getMessage();
+            logger.error(msg);
+            throw new SQLExecutorException(msg);
+        }
+        return result;
+
+        
+    }
+
+    /**
+     * Mï¿½thode pour effectuer une requï¿½te "DELETE","UPDATE" ou "INSERT" dans une
+     * base de donnï¿½es sans paramï¿½tres.
      * 
      * @param query
-     *            requete SQL à executer.
-     * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
-     *         correctement exécutée.
+     *            requete SQL ï¿½ executer.
+     * @return 1 si la requï¿½te s'est executï¿½e ou 0 si elle ne s'est pas
+     *         correctement exï¿½cutï¿½e.
      * @throws SQLExecutorException
      */
     public int executeUpdate(String query) throws SQLExecutorException {
         int result = 0;
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("Requï¿½te SQL : " + query);
             result = runner.update(connection, query);
-            logger.info("Requête exécutée. Résultat retourné : " + result);
+            logger.info("Requï¿½te exï¿½cutï¿½e. Rï¿½sultat retournï¿½ : " + result);
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception ï¿½ l'exï¿½cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
@@ -92,26 +127,26 @@ public class SQLExecutor {
     }
 
     /**
-     * Méthode pour effectuer une requête "DELETE","UPDATE" ou "INSERT" dans une
-     * base de données avec paramètres.
+     * Mï¿½thode pour effectuer une requï¿½te "DELETE","UPDATE" ou "INSERT" dans une
+     * base de donnï¿½es avec paramï¿½tres.
      * 
      * @param query
-     *            la requête SQL
+     *            la requï¿½te SQL
      * @param params
      *            The query replacement parameters.
-     * @return 1 si la requête s'est executée ou 0 si elle ne s'est pas
-     *         correctement exécutée.
+     * @return 1 si la requï¿½te s'est executï¿½e ou 0 si elle ne s'est pas
+     *         correctement exï¿½cutï¿½e.
      * @throws SQLExecutorException
      */
     public int executeUpdate(String query, Object... params)
             throws SQLExecutorException {
         int result = 0;
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("Requï¿½te SQL : " + query);
             result = runner.update(connection, query, params);
-            logger.info("Requête exécutée. Résultat retourné : " + result);
+            logger.info("Requï¿½te exï¿½cutï¿½e. Rï¿½sultat retournï¿½ : " + result);
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception ï¿½ l'exï¿½cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
@@ -123,8 +158,8 @@ public class SQLExecutor {
     /**
      * @param handler
      * @param query
-     *            la requête SQL
-     * @return une liste contenant les résultats
+     *            la requÃªte SQL
+     * @return une liste contenant les rÃ©sultats
      * @throws SQLExecutorException
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
@@ -132,12 +167,12 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("RequÃªte SQL : " + query);
             result = runner.query(connection, query, handler);
-            logger.info("Requête exécutée. Eléments retournés : "
+            logger.info("RequÃªte exÃ©cutÃ©e. ElÃ©ments retournÃ©s : "
                     + result.size());
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception Ã  l'exÃ©cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
@@ -148,7 +183,7 @@ public class SQLExecutor {
 
     /**
      * @param query
-     *            la requête SQL
+     *            la requÃªte SQL
      * @param params
      * @return <code>List<Map<String, String>></code>
      * @throws SQLExecutorException
@@ -158,14 +193,14 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("RequÃªte SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, new MapListHandler(),
                     params);
-            logger.info("Requête exécutée. Eléments retournés : "
+            logger.info("RequÃªte exÃ©cutÃ©e. ElÃ©ments retournÃ©s : "
                     + result.size());
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception Ã  l'exÃ©cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
@@ -175,11 +210,11 @@ public class SQLExecutor {
     }
 
     /**
-     * @deprecated Wrapper pour la méthode
+     * @deprecated Wrapper pour la mï¿½thode
      *             <code>executeSelectWithRS(String query, Object... params)</code>
      * 
      * @param query
-     *            la requête SQL
+     *            la requï¿½te SQL
      * @return <code>java.sql.ResultSet</code>.
      */
     @SuppressWarnings("javadoc")
@@ -189,12 +224,12 @@ public class SQLExecutor {
     }
 
     /**
-     * @deprecated Attention, cette méthode a été écrite pour la transition du
-     *             job MDPH0001. Il convient d'utiliser les autres méthodes qui
+     * @deprecated Attention, cette mï¿½thode a ï¿½tï¿½ ï¿½crite pour la transition du
+     *             job MDPH0001. Il convient d'utiliser les autres mï¿½thodes qui
      *             ne retournent pas de <code>java.sql.ResultSet</code>.
      * 
      * @param query
-     *            la requête SQL
+     *            la requï¿½te SQL
      * @return <code>java.sql.ResultSet</code>.
      */
     @SuppressWarnings("javadoc")
@@ -202,16 +237,16 @@ public class SQLExecutor {
             throws SQLExecutorException {
         ResultSet result = null;
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("Requï¿½te SQL : " + query);
             PreparedStatement ps = connection.prepareStatement(query);
             if (params != null)
                 for (int i = 0; i < params.length; i++) {
                     ps.setObject(i + 1, params[i]);
                 }
             result = ps.executeQuery();
-            logger.info("Requête exécutée.");
+            logger.info("Requï¿½te exï¿½cutï¿½e.");
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception ï¿½ l'exï¿½cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
@@ -224,10 +259,10 @@ public class SQLExecutor {
      * @param handler
      *            comment traiter le ResultSet et alimenter le resultat.
      * @param query
-     *            la requête SQL
+     *            la requï¿½te SQL
      * @param params
-     *            liaison des paramètres pour la requête SQL
-     * @return une liste du type définie par le paramètre handler
+     *            liaison des paramï¿½tres pour la requï¿½te SQL
+     * @return une liste du type dï¿½finie par le paramï¿½tre handler
      * @throws SQLExecutorException
      */
     public List<?> executeSelect(ResultSetHandler<List<Object[]>> handler,
@@ -235,13 +270,13 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requête SQL : " + query);
+            logger.info("Requï¿½te SQL : " + query);
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, handler, params);
-            logger.info("Requête exécutée. Eléments retournés : "
+            logger.info("Requï¿½te exï¿½cutï¿½e. Elï¿½ments retournï¿½s : "
                     + result.size());
         } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
+            String msg = "Exception ï¿½ l'exï¿½cution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
 
