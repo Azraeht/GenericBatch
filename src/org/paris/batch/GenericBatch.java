@@ -3,6 +3,7 @@ package org.paris.batch;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.paris.batch.config.ConfigurationManagerBatch;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.NoPropertiesFoundException;
@@ -129,12 +130,17 @@ public abstract class GenericBatch {
             System.out
                     .println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
         }
+        /*
         props = ConfigurationManagerBatch
                 .mergeProperties(
                         ConfigurationManagerBatch
                                 .loadProperties(ConfigurationManagerBatch.PROPERTIES_CONFIG_FILENAME),
                         ConfigurationManagerBatch
                                 .loadProperties(ConfigurationManagerBatch.PROPERTIES_QUERY_FILENAME));
+        */
+        
+     	props = ConfigurationManagerBatch.initProperties();
+        
         if (DEBUG) {
             System.out
                     .println("Instanciation de GenericBatch::Création du logger");

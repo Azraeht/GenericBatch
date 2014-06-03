@@ -8,7 +8,8 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.paris.batch.ConfigurationManagerBatch;
+import org.paris.batch.config.ConfigurationManagerBatch;
+import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 
 /**
@@ -40,11 +41,11 @@ public class LogBatch {
             throws ConfigurationBatchException {
         logBatch = Logger.getRootLogger();
         String log_pattern = properties.getProperty(
-                ConfigurationManagerBatch.LOG_PATTERN_KEY,
-                ConfigurationManagerBatch.LOG_PATTERN_DFT);
+        		ConfigurationParameters.LOG_PATTERN_KEY,
+        		ConfigurationParameters.LOG_PATTERN_DFT);
         String log_path = properties.getProperty(
-                ConfigurationManagerBatch.LOG_PATH_KEY,
-                ConfigurationManagerBatch.LOG_PATH_DFT);
+        		ConfigurationParameters.LOG_PATH_KEY,
+        		ConfigurationParameters.LOG_PATH_DFT);
         // vérification du dossier, sinon création de celui-ci.
         File directory = new File(log_path);
         if (!directory.exists()) {
@@ -52,15 +53,15 @@ public class LogBatch {
         }
         // fichier de log.
         String log_filename = properties.getProperty(
-                ConfigurationManagerBatch.LOG_FILE_KEY,
-                ConfigurationManagerBatch.LOG_FILE_DFT);
+        		ConfigurationParameters.LOG_FILE_KEY,
+        		ConfigurationParameters.LOG_FILE_DFT);
 
         Level level = Level.toLevel(properties.getProperty(
-                ConfigurationManagerBatch.LOG_LEVEL_KEY,
-                ConfigurationManagerBatch.LOG_LEVEL_DFT));
+        		ConfigurationParameters.LOG_LEVEL_KEY,
+        		ConfigurationParameters.LOG_LEVEL_DFT));
 
         boolean logstdout = Boolean.parseBoolean(properties.getProperty(
-                ConfigurationManagerBatch.LOG_STDOUT_KEY, "false"));
+        		ConfigurationParameters.LOG_STDOUT_KEY, "false"));
 
         try {
             PatternLayout layout2 = new PatternLayout(log_pattern);
