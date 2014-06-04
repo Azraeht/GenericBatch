@@ -1,9 +1,12 @@
 package org.paris.batch;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.paris.batch.config.ConfigurationManagerBatch;
+import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.NoPropertiesFoundException;
@@ -11,6 +14,7 @@ import org.paris.batch.exception.SQLExecutorException;
 import org.paris.batch.logging.LogBatch;
 import org.paris.batch.utils.CommandExecutor;
 import org.paris.batch.utils.FileWriter;
+import org.paris.batch.datafile.DataFile;
 
 /**
  * Classe abstraite offrant plusieurs services communs à tous les batchs Ville
@@ -68,6 +72,10 @@ public abstract class GenericBatch {
      */
     protected Properties props;
     /**
+     * properties dédiés aux formats des datafiles issus du fichier format.properties
+     */
+    protected Properties formats;
+    /**
      * prend en charge la traçabilité des opérations effectuées par le batch
      * 
      * @see LogBatch
@@ -85,6 +93,11 @@ public abstract class GenericBatch {
      * @see CommandExecutor
      */
     protected CommandExecutor command;
+    
+    /**
+     * ArrayList permettant de stocker les datafiles
+     */
+    protected ArrayList<DataFile> dataFileList;
 
     /**
      * Méthode pour initialiser les ressources locales.
@@ -138,18 +151,39 @@ public abstract class GenericBatch {
                         ConfigurationManagerBatch
                                 .loadProperties(ConfigurationManagerBatch.PROPERTIES_QUERY_FILENAME));
         */
-        
+        // Initialisation des properties
      	props = ConfigurationManagerBatch.initProperties();
+     	
+     	// Initialisation des properties de format
+     	Enumeration enuKeys = props.keys();
+     	this.formats = new Properties();
+		while (enuKeys.hasMoreElements()) {
+			String key = enuKeys.nextElement().toString();
+			String value = props.getProperty(key);
+			// Si la propertie est un format elle est ajouté aux properties de format 
+			if(key.contains(ConfigurationParameters.FORMAT_PREFIX)){
+				this.formats.put(key, value);
+			}
+		}
         
         if (DEBUG) {
             System.out
                     .println("Instanciation de GenericBatch::Création du logger");
         }
+        // --------------------Initialisation des modules---------------------------------------
+        
+        // Initialisation du logger
         this.logger = LogBatch.getLogBatch(props);
         this.logger
                 .info("Initialisation des objets FileWriter, CommandExecutor.");
+        
+        // Initialisation du writer et de la Datafilelist
         this.writer = new FileWriter(this.logger);
+        this.dataFileList = new ArrayList<DataFile>();
+        
+        // Initialisation de l'executeur de commande
         this.command = new CommandExecutor(this.logger);
+        
         this.logger.info("Initialisation terminée.");
     }
 

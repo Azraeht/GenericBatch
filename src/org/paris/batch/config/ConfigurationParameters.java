@@ -102,4 +102,8 @@ public class ConfigurationParameters {
      * Database : Autocommit
      */
     public static final String DB_AUTOCOMMIT_KEY = "config.db.autocommit";
+    
+    public static final String FORMAT_PREFIX = "format";
+    public static final String CONFIG_PREFIX = "config";
+    public static final String QUERY_PREFIX = "query";
 }
