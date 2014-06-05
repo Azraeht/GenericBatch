@@ -6,11 +6,11 @@ import java.util.HashMap;
 /**
  * 
  * @author santusbr
- * Classe représentant une structure de donnée issue d'un fichier ou d'une base de donnée
+ * Classe reprÃ©sentant une structure de donnÃ©e issue d'un fichier ou d'une base de donnÃ©e
  */
-public class Datas {
+public class DataStructure {
 
-	private ArrayList<HashMap<String, Object>> datas = new ArrayList();
+	private ArrayList<HashMap<String, Object>> datas = new ArrayList<HashMap<String, Object>>();
 	
 	public void add(HashMap<String, Object> data){
 		this.datas.add(data);
@@ -20,12 +20,12 @@ public class Datas {
 	}
 	public HashMap<String, Object> get(String key,String value){
 		
-		// TODO méthode permettant de recherche une donnée dans Datas
+		// TODO mÃ©thode permettant de recherche une donnÃ©e dans Datas
 		return null;
 	}
 	public String toString(){
 		
-		// TODO méthode permettant de convertir en string le Arraylist datas
+		// TODO mÃ©thode permettant de convertir en string le Arraylist datas
 		return null;
 	}
 	

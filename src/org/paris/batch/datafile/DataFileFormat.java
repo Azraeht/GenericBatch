@@ -16,7 +16,7 @@ import org.paris.batch.exception.DataFileFormatException;
 
 /**
  * @author santusbr
- *
+ * Classe repr√©sentant un format de donn√©es
  */
 public class DataFileFormat {
 
@@ -31,6 +31,10 @@ public class DataFileFormat {
 
 	/**
 	 * Constructeur
+	 * @param DataFileName : Nom du datafile
+	 * @param type : Type de format (CSV ou Colonne)
+	 * @param formats : Properties contenant les formats de donn√©es
+	 * @throws DataFileException
 	 */
 	public DataFileFormat(String DataFileName,String type, Properties formats) throws DataFileFormatException{
 		// On stock le type de format et on va lire les properties correspondantes
@@ -49,7 +53,7 @@ public class DataFileFormat {
 
 				// Si le type correspond on stock la properties dans le Hashtable temporaire
 				if(key.contains(type+"."+DataFileName)){
-					// On rÈcupËre le charactËre de complÈment, de fin d'enregistrement et le sÈparateur
+					// On r√©cup√©re le charact√©re de compl√©ment, de fin d'enregistrement et le s√©parateur
 					if(key.contains("separator")){
 						this.separator = value;
 					}
@@ -65,9 +69,9 @@ public class DataFileFormat {
 					else if(key.contains("recordlength")){
 						this.recordlength = Integer.parseInt(value);
 					} else {
-						// on supprime le prÈfixe in / out
+						// on supprime le pr√©fixe in / out
 						String[] keys = key.split("\\.");
-						key = keys[1]+"."+keys[2];
+						key = keys[keys.length-2]+"."+keys[keys.length-1];
 
 						// on stock la properties
 						Boolean tmp = temptable.containsKey(key);
@@ -89,8 +93,8 @@ public class DataFileFormat {
 				itr = set.iterator();
 			}
 		}catch (Exception e){
-			String msg = "Erreur lors de la crÈation du Format de donnÈes - Format concernÈ: "
-					+ this.type + "\nException : " + "Il n'y a pas de fichier source dÈfini ou de format d'entrÈe";
+			String msg = "Erreur lors de la cr√©ation du Format de donn√©es - Format concern√©: "
+					+ this.type + "\nException : " + "Il n'y a pas de fichier source d√©fini ou de format d'entr√©e";
 			System.err.println(msg);
 			throw new DataFileFormatException(msg);
 		}
@@ -100,7 +104,7 @@ public class DataFileFormat {
 
 
 	/**
-	 * MÈthode findFirst : Renvoi la clÈ ayant le plus petit offset du Hastable
+	 * M√©thode findFirst : Renvoi la cl√© ayant le plus petit offset du Hastable
 	 * @param ht : Hastable
 	 * @return key
 	 * 
@@ -131,8 +135,8 @@ public class DataFileFormat {
 	}
 
 	/**
-	 * MÈthode findNext : Renvoi la clÈ ayant le plus petit offset suivant la clÈ donnÈe
-	 * @param previewkey : clÈ pour laquelle on veut trouver la suivante
+	 * M√©thode findNext : Renvoi la cl√© ayant le plus petit offset suivant la cl√© donn√©e
+	 * @param previewkey : cl√© pour laquelle on veut trouver la suivante
 	 * @return key
 	 */
 	public String findNext(String previewkey){
@@ -157,6 +161,10 @@ public class DataFileFormat {
 		return key;
 	}
 
+	/**
+	 * M√©thode toString()
+	 * @return String : Format des donn√©es sous forme de chaine de caract√®re
+	 */
 	public String toString(){
 		return "Format : "+this.format.toString();
 

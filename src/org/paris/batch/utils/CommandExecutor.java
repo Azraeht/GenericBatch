@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.paris.batch.exception.CommandExecutorException;
 
 /**
- * Exécution de commandes sur le système hote.
+ * ExÃ©cution de commandes sur le systÃ©me hote.
  * 
  * @author galloiem
  * 
@@ -21,22 +21,22 @@ public class CommandExecutor {
      * Constructeur
      * 
      * @param logger
-     *            journal d'événements
+     *            journal d'Ã©vÃ©nements
      */
     public CommandExecutor(Logger logger) {
         this.logger = logger;
     }
 
     /**
-     * Exécute la commande spécifiée
+     * ExÃ©cute la commande spÃ©cifiÃ©e
      * 
      * @param cmd
-     *            la commande à exécuter
-     * @return La sortie standard de l'exécution de la commande
+     *            la commande Ã  exÃ©cuter
+     * @return La sortie standard de l'exÃ©cution de la commande
      * @throws CommandExecutorException
      */
     public String runCommand(String cmd) throws CommandExecutorException {
-        logger.info("Exécution de la commande : `" + cmd + "`");
+        logger.info("ExÃ©cution de la commande : `" + cmd + "`");
         StringBuffer output = new StringBuffer();
         Process p;
         try {
@@ -50,28 +50,28 @@ public class CommandExecutor {
             }
 
         } catch (Exception e) {
-            String msg = "Erreur d'exécution de la commande : " + cmd + "\n"
+            String msg = "Erreur d'exÃ©cution de la commande : " + cmd + "\n"
                     + e.getMessage();
             logger.error(msg);
 
             throw new CommandExecutorException(msg);
         }
         logger.debug("Sortie de la commande: \n" + output);
-        logger.info("Commande `" + cmd + "` exécutée.");
+        logger.info("Commande `" + cmd + "` exÃ©cutÃ©e.");
 
         return output.toString();
     }
 
     @SuppressWarnings("unused")
     private int runCommandInt(String cmd) throws CommandExecutorException {
-        logger.info("Exécution de la commande : " + cmd);
+        logger.info("ExÃ©cution de la commande : " + cmd);
         final Runtime r = Runtime.getRuntime();
         int returnCode = -1;
         try {
             Process p = r.exec(cmd);
             returnCode = p.waitFor();
         } catch (Exception e) {
-            String msg = "Erreur d'exécution de la commande : " + cmd + "\n"
+            String msg = "Erreur d'exÃ©cution de la commande : " + cmd + "\n"
                     + e.getMessage();
             logger.error(msg);
 
@@ -84,7 +84,7 @@ public class CommandExecutor {
     @SuppressWarnings("unused")
     private int runCommandWithStreams(String cmd)
             throws CommandExecutorException {
-        logger.info("Exécution de la commande : " + cmd);
+        logger.info("ExÃ©cution de la commande : " + cmd);
         int result = -1;
         Runtime runtime = Runtime.getRuntime();
         final Process process;
@@ -134,7 +134,7 @@ public class CommandExecutor {
             }.start();
 
         } catch (Exception e) {
-            String msg = "Erreur d'exécution de la commande : " + cmd + "\n"
+            String msg = "Erreur d'exÃ©cution de la commande : " + cmd + "\n"
                     + e.getMessage();
             logger.error(msg);
 

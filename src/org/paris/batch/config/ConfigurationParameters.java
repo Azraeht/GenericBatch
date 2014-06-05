@@ -30,7 +30,7 @@ public class ConfigurationParameters {
      */
     public final static String ENV_QUERY_FILENAME = "MDP_BATCH_QUERY_FILENAME";
     /**
-     * Variable d'environnement : pour tracer le d�marage initial de la classe.
+     * Variable d'environnement : pour tracer le démarage initial de la classe.
      */
     public final static String ENV_DEBUG = "MDP_BATCH_DEBUG";
     
@@ -41,7 +41,7 @@ public class ConfigurationParameters {
      */
     public static final String LOG_PATTERN_KEY = "config.log.pattern";
     /**
-     * log : patron du format par d�faut
+     * log : patron du format par défaut
      */
     public static final String LOG_PATTERN_DFT = "%d %-5p %c - %F:%L - %m%n";
     /**
@@ -49,7 +49,7 @@ public class ConfigurationParameters {
      */
     public static final String LOG_PATH_KEY = "config.log.path";
     /**
-     * log : chemin par d�faut
+     * log : chemin par défaut
      */
     public static final String LOG_PATH_DFT = System.getProperty("user.dir")
             + "\\log\\";
@@ -58,7 +58,7 @@ public class ConfigurationParameters {
      */
     public static final String LOG_FILE_KEY = "config.log.filename";
     /**
-     * log : nom par d�faut
+     * log : nom par défaut
      */
     public static final String LOG_FILE_DFT = "generic_batch.log";
     /**
@@ -66,11 +66,11 @@ public class ConfigurationParameters {
      */
     public static final String LOG_LEVEL_KEY = "config.log.level";
     /**
-     * log : niveau par d�faut du log.
+     * log : niveau par défaut du log.
      */
     public static final String LOG_LEVEL_DFT = "INFO";
     /**
-     * log : �crire sur la sortie standard
+     * log : écrire sur la sortie standard
      */
     public static final String LOG_STDOUT_KEY = "config.log.stdout";
     /**
@@ -103,7 +103,25 @@ public class ConfigurationParameters {
      */
     public static final String DB_AUTOCOMMIT_KEY = "config.db.autocommit";
     
+    /**
+     * Préfix des formats types de properties de conf
+     * format : préfix des properties de format pour les DataFiles
+     * */
     public static final String FORMAT_PREFIX = "format";
+    /**
+     * Préfix des formats types de properties de conf
+     * config : préfix des properties principales du fichier config.properties
+     * */
     public static final String CONFIG_PREFIX = "config";
+    /**
+     * Préfix des formats types de properties de conf
+     * query : préfix des properties du fichier destiné au module SQL
+     * */
     public static final String QUERY_PREFIX = "query";
+    
+    /**
+     * Paramètres contenant les modules à utiliser
+     */
+    public static final String CONFIG_MODULES= "gen.configfiles";
+    
 }

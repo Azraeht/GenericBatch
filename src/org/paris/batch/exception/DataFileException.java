@@ -6,14 +6,14 @@ package org.paris.batch.exception;
 public class DataFileException extends GenericBatchException {
 
 	/** 
-	* Crée une nouvelle instance de DataFileException
+	* CrÃ©e une nouvelle instance de DataFileException
 	*/
     public DataFileException() {
         super();
     }
 
     /**
-     * Crée une nouvelle instance de DataFileException
+     * CrÃ©e une nouvelle instance de DataFileException
      * @param message
      */
     public DataFileException(String message) {

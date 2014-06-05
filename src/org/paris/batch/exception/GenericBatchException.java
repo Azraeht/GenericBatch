@@ -1,7 +1,7 @@
 package org.paris.batch.exception;
 
 /**
- * Classe d'exception générique pour le framework GenericBatch.
+ * Classe d'exception gÃ©nÃ©rique pour le framework GenericBatch.
  * @author webergu
  *
  */
@@ -9,15 +9,15 @@ package org.paris.batch.exception;
 public abstract class GenericBatchException extends Exception{
 	
 	/** 
-	* Crée une nouvelle instance de GenericBatchException
-	* @param message Le message détaillant l'exception 
+	* CrÃ©e une nouvelle instance de GenericBatchException
+	* @param message Le message dÃ©taillant l'exception 
 	*/
 	public GenericBatchException(String message){
 		super(message);
 	}
 	
 	/**
-	 * Constructeur par défaut
+	 * Constructeur par dÃ©faut
 	 */
 	public GenericBatchException(){
 		super();

@@ -6,147 +6,154 @@ import java.util.Properties;
 
 import org.paris.batch.exception.ConfigurationBatchException;
 
+
 /**
- * Cette classe permet de travailler sur des fichiers de propriétés.
+ * Cette classe permet de travailler sur des fichiers de propriÃ©tÃ©s.
  * 
  * @author galloiem
  * 
  */
 public class ConfigurationManagerBatch {
-    /**
-    
+	/**
+
 
     /**
-     * 
-     * Charge le fichier de propriétés spécifié
-     * 
-     * @see #PROPERTIES_CONFIG_FILENAME
-     * @see #PROPERTIES_QUERY_FILENAME
-     * 
-     * 
-     * @param properties_type
-     *            le type de propriété à charger.
-     * @return Les propriétés contenues dans le fichier
-     * @throws ConfigurationBatchException
-     */
-    public static Properties loadProperties(String properties_type)
-            throws ConfigurationBatchException {
-        Properties properties = new Properties();
-        String env = null;
-        String env_var = null;
-        String properties_filename;
+	 * 
+	 * Charge le fichier de propriÃ©tÃ©s spÃ©cifiÃ©
+	 *  
+	 * 
+	 * @param properties_type
+	 *            le type de propriÃ©tÃ© Ã  charger.
+	 * @return Les propriÃ©tÃ©s contenues dans le fichier
+	 * @throws ConfigurationBatchException
+	 */
+	public static Properties loadProperties(String properties_type)
+			throws ConfigurationBatchException {
+		Properties properties = new Properties();
+		String env = null;
+		String env_var = null;
+		String properties_filename;
 
-        // Quel est le type de fichier de configuration ?
-        if (properties_type.equals(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME)) {
-            env_var = ConfigurationParameters.ENV_CONFIG_FILENAME;
-            env = System.getenv(env_var);
-        } 
-        else if (properties_type.equals(ConfigurationParameters.PROPERTIES_QUERY_FILENAME)) {
-            env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
-            env = System.getenv(env_var);
-        }
-        
-
-        // L'environnement surcharge les valeurs par défaut (dossier `config`).
-        if (env != null && (new File(env)).exists()) {
-            properties_filename = env;
-        } else {
-            properties_filename = System.getProperty("user.dir")
-                    + ConfigurationParameters.CONFIG_DIRNAME + properties_type;
-        }
-        try {
-            properties.load(new FileInputStream(new File(properties_filename)));
-            return properties;
-        } catch (Exception e) {
-            String msg = "Erreur lors du traitement de chargement de configuration - Fichier concerné: "
-                    + properties_filename + "\nException : " + e.getMessage();
-            System.err.println(msg);
-            throw new ConfigurationBatchException(msg);
-        }
-    }
-
-    /**
-     * Méthode retournant l'ensemble des properties à partir de la liste de fichiers de properties contenu dans la propertie
-     * config.configfiles de config.properties(fichier de conf par défaut et obligatoire)
-     * */
-    public static Properties initProperties() throws ConfigurationBatchException{
-    	
-    	Properties basicsProperties = new Properties();
-    	Properties finalProperties = new Properties();
-    	
-    	// Initialisation à partir des fichiers par défaut config.properties
-    	basicsProperties = ConfigurationManagerBatch.loadProperties(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME);
-    	
-    	// Récupération de la liste des fichiers de config de modules présents dans le répertoire 'config'
-    	String ConfigFiles = basicsProperties.getProperty("config.configfiles");
-    	String[] listConfigFiles = ConfigFiles.split(",");
-    	
-    	finalProperties.putAll(basicsProperties);
-    	// Chargement de chaque fichier de properties
-    	for (String configfile : listConfigFiles) {
-			finalProperties.putAll(ConfigurationManagerBatch.loadProperties(configfile+".properties"));
+		// Quel est le type de fichier de configuration ?
+		if (properties_type.equals(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME)) {
+			env_var = ConfigurationParameters.ENV_CONFIG_FILENAME;
+			env = System.getenv(env_var);
+		} 
+		else if (properties_type.equals(ConfigurationParameters.PROPERTIES_QUERY_FILENAME)) {
+			env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
+			env = System.getenv(env_var);
 		}
-    	
-    	return finalProperties;
-    }
-    /**
-     * 
-     * Retourne une instance de type Properties basée sur la fusion des
-     * instances p1 et p2. Si une clé existe dans les deux, la valeur de p2
-     * remplacera celle de p1.
-     * 
-     * @param p1
-     *            propriétés - jeu #1
-     * @param p2
-     *            propriétés - jeu #2
-     * @return merged : propriétés fusionnées.
-     */
-    public static Properties mergeProperties(Properties p1, Properties p2) {
-        Properties merged = new Properties();
-        merged = p1;
-        for (Object k : p2.keySet()) {
-            merged.setProperty((String) k, (String) p2.get(k));
-        }
 
-        return merged;
-    }
 
-    /**
-     * Permet de retourner un sous-ensemble des propriétés filtées par le
-     * paramètre <code>filter</code>.<br>
-     * exemple de filtre:
-     * 
-     * <pre>
-     * &quot;.oracleDB&quot;
-     * </pre>
-     * 
-     * @param p
-     *            Les propriétés à filtrer
-     * @param filter
-     *            le filtre à rechercher
-     * @param removeFilter
-     *            si défini à <code>true</code> alors le filtre sera supprimé de
-     *            la clé, sinon la clé reste tel quel.
-     * @return Les propriétés filtrées
-     * 
-     */
-    public static Properties filterProperties(Properties p, String filter,
-            boolean removeFilter) {
-        Properties props = new Properties();
-        for (Object key : p.keySet()) {
-            String newkey = (String) key;
-            if (removeFilter) {
-                // System.out.println("b:"+newkey);
-                newkey = newkey.replaceAll(filter, "");
-                // System.out.println("a:"+newkey);
-            }
-            if (((String) key).contains(filter)) {
-                // System.out.println("->"+newkey);
-                props.setProperty(newkey, (String) p.get(key));
-            }
-        }
+		// L'environnement surcharge les valeurs par dÃ©faut (dossier `config`).
+		if (env != null && (new File(env)).exists()) {
+			properties_filename = env;
+		} else {
+			properties_filename = System.getProperty("user.dir")
+					+ ConfigurationParameters.CONFIG_DIRNAME + properties_type;
+		}
+		try {
+			properties.load(new FileInputStream(new File(properties_filename)));
+			return properties;
+		} catch (Exception e) {
+			String msg = "Erreur lors du traitement de chargement de configuration - Fichier concernÃ©: "
+					+ properties_filename + "\nException : " + e.getMessage();
+			System.err.println(msg);
+			throw new ConfigurationBatchException(msg);
+		}
+	}
 
-        return props;
-    }
+	/**
+	 * MÃ©thode retournant l'ensemble des properties Ã  partir de la liste de fichiers de properties contenu dans la propertie
+	 * config.configfiles de config.properties(fichier de conf par dÃ©faut et obligatoire)
+	 * */
+	public static Properties initProperties() throws ConfigurationBatchException{
+
+		Properties basicsProperties = new Properties();
+		Properties finalProperties = new Properties();
+		try{
+			// Initialisation Ã  partir des fichiers par dÃ©faut config.properties
+			basicsProperties = ConfigurationManagerBatch.loadProperties(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME);
+
+			// RÃ©cupÃ©ration de la liste des fichiers de config de modules prÃ©sents dans le rÃ©pertoire 'config'
+
+			String ConfigFiles = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
+
+			if(ConfigFiles != null){
+				String[] listConfigFiles = ConfigFiles.split(",");
+				finalProperties.putAll(basicsProperties);
+
+				// Chargement de chaque fichier de properties
+				for (String configfile : listConfigFiles) {
+					finalProperties.putAll(ConfigurationManagerBatch.loadProperties(configfile+".properties"));
+				}
+			}
+		}catch(Exception e){
+			String msg = "Erreur lors de l'initialisation de la configuration\nException : " + e.getMessage();
+			System.err.println(msg);
+			throw new ConfigurationBatchException(msg);
+		}
+
+		return finalProperties;
+	}
+	/**
+	 * 
+	 * Retourne une instance de type Properties basÃ©e sur la fusion des
+	 * instances p1 et p2. Si une clÃ© existe dans les deux, la valeur de p2
+	 * remplacera celle de p1.
+	 * 
+	 * @param p1
+	 *            propriÃ©tÃ©s - jeu #1
+	 * @param p2
+	 *            propriÃ©tÃ©s - jeu #2
+	 * @return merged : propriÃ©tÃ©s fusionnÃ©es.
+	 */
+	public static Properties mergeProperties(Properties p1, Properties p2) {
+		Properties merged = new Properties();
+		merged = p1;
+		for (Object k : p2.keySet()) {
+			merged.setProperty((String) k, (String) p2.get(k));
+		}
+
+		return merged;
+	}
+
+	/**
+	 * Permet de retourner un sous-ensemble des propriÃ©tÃ©s filtÃ©es par le
+	 * paramÃ©tre <code>filter</code>.<br>
+	 * exemple de filtre:
+	 * 
+	 * <pre>
+	 * &quot;.oracleDB&quot;
+	 * </pre>
+	 * 
+	 * @param p
+	 *            Les propriÃ©tÃ©s Ã  filtrer
+	 * @param filter
+	 *            le filtre Ã  rechercher
+	 * @param removeFilter
+	 *            si dÃ©fini Ã  <code>true</code> alors le filtre sera supprimÃ© de
+	 *            la clÃ©, sinon la clÃ© reste tel quel.
+	 * @return Les propriÃ©tÃ©s filtrÃ©es
+	 * 
+	 */
+	public static Properties filterProperties(Properties p, String filter,
+			boolean removeFilter) {
+		Properties props = new Properties();
+		for (Object key : p.keySet()) {
+			String newkey = (String) key;
+			if (removeFilter) {
+				// System.out.println("b:"+newkey);
+				newkey = newkey.replaceAll(filter, "");
+				// System.out.println("a:"+newkey);
+			}
+			if (((String) key).contains(filter)) {
+				// System.out.println("->"+newkey);
+				props.setProperty(newkey, (String) p.get(key));
+			}
+		}
+
+		return props;
+	}
 
 }

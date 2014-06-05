@@ -1,8 +1,8 @@
 package org.paris.batch.exception;
 
 /**
- * Classe d'exception spécifique pour traiter les anomalies de driver pour se
- * connecter à la base de données.
+ * Classe d'exception spÃ©cifique pour traiter les anomalies de driver pour se
+ * connecter Ã  la base de donnÃ©es.
  * 
  * @author webergu
  * 
@@ -10,17 +10,17 @@ package org.paris.batch.exception;
 @SuppressWarnings("serial")
 public class DatabaseConnectionFailedException extends GenericBatchException {
     /**
-     * Crée une nouvelle instance de DatabaseConnectionFailedException
+     * CrÃ©e une nouvelle instance de DatabaseConnectionFailedException
      * 
      * @param message
-     *            Le message détaillant l'exception
+     *            Le message dÃ©taillant l'exception
      */
     public DatabaseConnectionFailedException(String message) {
         super(message);
     }
 
     /**
-     * Constructeur par défaut
+     * Constructeur par dÃ©faut
      */
     public DatabaseConnectionFailedException() {
         super();

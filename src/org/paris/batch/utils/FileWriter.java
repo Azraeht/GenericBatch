@@ -19,7 +19,7 @@ import org.paris.batch.exception.FileWriterException;
  */
 public class FileWriter {
     /**
-     * CSV : séparateur de champ par défaut
+     * CSV : sÃ©parateur de champ par dÃ©faut
      */
     public static final String CSV_DEFAULT_SEPARATOR = ";";
     /**
@@ -41,18 +41,18 @@ public class FileWriter {
      * Constructeur
      * 
      * @param logger
-     *            journal d'événements
+     *            journal d'Ã©vÃ©nements
      */
     public FileWriter(Logger logger) {
         this.logger = logger;
     }
 
     /**
-     * Méthode pour écrire un fichier au format texte à partir d'une chaine type
+     * MÃ©thode pour Ã©crire un fichier au format texte Ã  partir d'une chaine type
      * C.
      * 
      * @param filename
-     *            le nom du fichier à écrire.
+     *            le nom du fichier Ã  Ã©crire.
      * @param content
      *            le contenu
      * @throws FileWriterException
@@ -67,7 +67,7 @@ public class FileWriter {
             out.write(content);
             out.close();
         } catch (Exception e) {
-            String msg = "Erreur lors de l'écriture du fichier '" + filename
+            String msg = "Erreur lors de l'Ã©criture du fichier '" + filename
                     + "\n" + e.getMessage();
             logger.error(msg);
 
@@ -76,11 +76,11 @@ public class FileWriter {
     }
 
     /**
-     * Wrapper de la méthode
+     * Wrapper de la mÃ©thode
      * <code>writeTextFile(String filename, char[] content)</code>.
      * 
      * @param filename
-     *            le nom du fichier à écrire.
+     *            le nom du fichier Ã  Ã©crire.
      * @param content
      *            le contenu
      * @throws FileWriterException
@@ -91,11 +91,11 @@ public class FileWriter {
     }
 
     /**
-     * Méthode pour écrire un fichier au format XML à partir d'un objet
+     * MÃ©thode pour Ã©crire un fichier au format XML Ã  partir d'un objet
      * <code>org.jdom2.Document</code>.
      * 
      * @param filename
-     *            le nom du fichier à écrire.
+     *            le nom du fichier Ã  Ã©crire.
      * @param document
      *            le document XML
      * @throws FileWriterException
@@ -106,11 +106,11 @@ public class FileWriter {
     }
 
     /**
-     * Méthode pour écrire un fichier au format XML à partir d'un objet
+     * MÃ©thode pour Ã©crire un fichier au format XML Ã  partir d'un objet
      * <code>org.jdom2.Document</code>.
      * 
      * @param filename
-     *            le nom du fichier à écrire.
+     *            le nom du fichier Ã  Ã©crire.
      * @param document
      *            le document XML
      * @param encoding
@@ -127,7 +127,7 @@ public class FileWriter {
             xmlOutput.output(document, new java.io.FileWriter(filename));
 
         } catch (Exception e) {
-            String msg = "Erreur lors de l'écriture du fichier '" + filename
+            String msg = "Erreur lors de l'Ã©criture du fichier '" + filename
                     + "\n" + e.getMessage();
             logger.error(msg);
 
@@ -136,14 +136,14 @@ public class FileWriter {
     }
 
     /**
-     * Wrapper de la méthode
-     * <code>writeXMLFile(String filename, Document document)</code> pour écrire
-     * un fichier au format XML à partir d'un objet
+     * Wrapper de la mÃ©thode
+     * <code>writeXMLFile(String filename, Document document)</code> pour Ã©crire
+     * un fichier au format XML Ã  partir d'un objet
      * <code>org.jdom2.Element</code>. Le document conteneur est automatiquement
-     * créé.
+     * crÃ©Ã©.
      * 
      * @param filename
-     *            le nom du fichier à écrire.
+     *            le nom du fichier Ã  Ã©crire.
      * @param element
      *            le contenu
      * @throws FileWriterException
@@ -156,17 +156,17 @@ public class FileWriter {
     }
 
     /**
-     * Ecrit le résultat d'une requête dans un fichier au format CSV. Attention,
-     * dans cette méthode il n'y a pas d'entêtes.<br>
+     * Ecrit le rÃ©sultat d'une requÃ©te dans un fichier au format CSV. Attention,
+     * dans cette mÃ©thode il n'y a pas d'entÃ©tes.<br>
      * 
      * Evolutions futures:<br>
-     * - passer le séparateur de champ en option.
+     * - passer le sÃ©parateur de champ en option.
      * 
      * @param filename
      *            le fichier de destination. Exemple :
      *            <code>C:\Users\galloiem\workspace\GenericBatchSampleProject\log\out.txt</code>
      * @param values
-     *            l'ensemble de résultat d'une requête sous la forme d'un
+     *            l'ensemble de rÃ©sultat d'une requÃ©te sous la forme d'un
      *            <code>ArrayListHandler</code>
      * @throws FileWriterException
      */
@@ -191,10 +191,10 @@ public class FileWriter {
                 out.write(line + "\n");
             }
             out.close();
-            logger.info("Fichier écrit.");
+            logger.info("Fichier Ã©crit.");
 
         } catch (Exception e) {
-            String msg = "Erreur lors de l'écriture du fichier '" + filename
+            String msg = "Erreur lors de l'Ã©criture du fichier '" + filename
                     + "\n" + e.getMessage();
             logger.error(msg);
 

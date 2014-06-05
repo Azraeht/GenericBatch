@@ -17,11 +17,11 @@ import org.paris.batch.utils.FileWriter;
 import org.paris.batch.datafile.DataFile;
 
 /**
- * Classe abstraite offrant plusieurs services communs ‡ tous les batchs Ville
+ * Classe abstraite offrant plusieurs services communs √† tous les batchs Ville
  * de Paris.
  * 
  * <br>
- * La contrat de la classe stipule qu'il faut implÈmenter ces trois mÈthodes:<br>
+ * La contrat de la classe stipule qu'il faut impl√©menter ces trois m√©thodes:<br>
  * <ul>
  * <li><code>setup()</code></li>
  * <li><code>run()</code></li>
@@ -40,13 +40,13 @@ import org.paris.batch.datafile.DataFile;
  */
 public abstract class GenericBatch {
     /**
-     * debogguer to stderr & stdout: Utile lors des initialisations de dÈmarrage
+     * debogguer to stderr & stdout: Utile lors des initialisations de d√©marrage
      * (config, logger,...)
      * 
      */
     public static boolean DEBUG = false;
     /**
-     * Variable d'environnement pour dÈfinir la variable <code>DEBUG</code><br>
+     * Variable d'environnement pour d√©finir la variable <code>DEBUG</code><br>
      * Exemples:<br>
      * <code>set MDP_BATCH_DEBUG=DEBUG</code><br>
      * <code>set MDP_BATCH_DEBUG=1</code><br>
@@ -67,28 +67,28 @@ public abstract class GenericBatch {
     public static final int EXIT_ERROR = 10;
 
     /**
-     * reÁoit les informations spÈcifiÈes dans le fichier de configuration
+     * re√©oit les informations sp√©cifi√©es dans le fichier de configuration
      * adjoint au batch
      */
     protected Properties props;
     /**
-     * properties dÈdiÈs aux formats des datafiles issus du fichier format.properties
+     * properties d√©di√©s aux formats des datafiles issus du fichier format.properties
      */
     protected Properties formats;
     /**
-     * prend en charge la traÁabilitÈ des opÈrations effectuÈes par le batch
+     * prend en charge la tra√ßabilit√© des op√©rations effect√©es par le batch
      * 
      * @see LogBatch
      */
     protected Logger logger;
     /**
-     * permet d'Ècrire du contenu dans des fichiers.
+     * permet d'√©crire du contenu dans des fichiers.
      * 
      * @see FileWriter
      */
     protected FileWriter writer;
     /**
-     * permet d'exÈcuter des commandes systËme.
+     * permet d'ex√©cuter des commandes syst√®me.
      * 
      * @see CommandExecutor
      */
@@ -100,7 +100,7 @@ public abstract class GenericBatch {
     protected ArrayList<DataFile> dataFileList;
 
     /**
-     * MÈthode pour initialiser les ressources locales.
+     * M√©thode pour initialiser les ressources locales.
      * 
      * @throws ConfigurationBatchException
      * @throws DatabaseDriverNotFoundException
@@ -116,8 +116,8 @@ public abstract class GenericBatch {
     public abstract int run();
 
     /**
-     * MÈthode pour nettoyer les ressources utilisÈes. Cette mÈthode est appelÈe
-     * automatiquement lors de l'appel ‡ l'une des mÈthodes de sortie (
+     * M√©thode pour nettoyer les ressources utilis√©es. Cette m√©thode est appel√©e
+     * automatiquement lors de l'appel √† l'une des m√©thodes de sortie (
      * <code>exit*</code>).
      * 
      * @throws SQLExecutorException
@@ -126,8 +126,8 @@ public abstract class GenericBatch {
 
     /**
      * Constructeur de GenericBatch, permet d'instancier le Batch, le journal
-     * d'ÈvÈnements, le gestionnaire de commande, la gestion des fichiers et les
-     * propriÈtÈs de configuration.
+     * d'√©v√©nements, le gestionnaire de commande, la gestion des fichiers et les
+     * propri√©t√©s de configuration.
      * 
      * @throws ConfigurationBatchException
      * @throws NoPropertiesFoundException
@@ -160,7 +160,7 @@ public abstract class GenericBatch {
 		while (enuKeys.hasMoreElements()) {
 			String key = enuKeys.nextElement().toString();
 			String value = props.getProperty(key);
-			// Si la propertie est un format elle est ajoutÈ aux properties de format 
+			// Si la propertie est un format elle est ajout√© aux properties de format 
 			if(key.contains(ConfigurationParameters.FORMAT_PREFIX)){
 				this.formats.put(key, value);
 			}
@@ -168,27 +168,37 @@ public abstract class GenericBatch {
         
         if (DEBUG) {
             System.out
-                    .println("Instanciation de GenericBatch::CrÈation du logger");
+                    .println("Instanciation de GenericBatch::Cr√©ation du logger");
         }
         // --------------------Initialisation des modules---------------------------------------
         
         // Initialisation du logger
         this.logger = LogBatch.getLogBatch(props);
-        this.logger
-                .info("Initialisation des objets FileWriter, CommandExecutor.");
+        this.logger.info("Initialisation du batch.");
+        
         
         // Initialisation du writer et de la Datafilelist
         this.writer = new FileWriter(this.logger);
+        this.logger.info("Module charg√© : FileWriter");
         this.dataFileList = new ArrayList<DataFile>();
         
         // Initialisation de l'executeur de commande
         this.command = new CommandExecutor(this.logger);
+        this.logger.info("Module charg√© : CommandExecutor");
         
-        this.logger.info("Initialisation terminÈe.");
+        String ConfigFiles = props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
+		
+		if(ConfigFiles != null){
+			String[] listConfigFiles = ConfigFiles.split(",");
+			for (String configfile : listConfigFiles) {
+				this.logger.info("Module compl√©mentaire charg√© : "+configfile);
+			}
+		}
+        this.logger.info("Initialisation termin√©e.");
     }
 
     /**
-     * MÈthode pour gÈrer l'arrÍt du batch aprËs une erreur irrÈcupÈrable.
+     * M√©thode pour g√©rer l'arr√™t du batch apr√®s une erreur irr√©cup√©rable.
      */
     public void exitFailure() {
         try {
@@ -196,13 +206,13 @@ public abstract class GenericBatch {
         } catch (SQLExecutorException e) {
             logger.error(e);
         } finally {
-            logger.info("Erreur irrÈcupÈrable. Fin d'exÈcution du batch.");
+            logger.info("Erreur irr√©cup√©rable. Fin d'ex√©cution du batch.");
             System.exit(EXIT_ERROR);
         }
     }
 
     /**
-     * MÈthode pour gÈrer l'arrÍt du batch quand l'exÈcution s'est bien dÈroulÈe
+     * M√©thode pour g√©rer l'arr√©t du batch quand l'ex√©cution s'est bien d√©roul√©e
      */
     public void exitSuccess() {
         try {
@@ -210,13 +220,13 @@ public abstract class GenericBatch {
         } catch (SQLExecutorException e) {
             logger.error(e);
         } finally {
-            logger.info("Fin d'exÈcution du batch (succËs).");
+            logger.info("Fin d'ex√©cution du batch (succ√©s).");
             System.exit(EXIT_OK);
         }
     }
 
     /**
-     * MÈthode pour gÈrer l'arrÍt du batch aprËs un avertissement.
+     * M√©thode pour g√©rer l'arr√©t du batch apr√©s un avertissement.
      */
     public void exitWarning() {
         try {
@@ -225,7 +235,7 @@ public abstract class GenericBatch {
             logger.error(e);
 
         } finally {
-            logger.info("Fin d'exÈcution du batch (avertissements).");
+            logger.info("Fin d'ex√©cution du batch (avertissements).");
             System.exit(EXIT_WARNING);
         }
     }

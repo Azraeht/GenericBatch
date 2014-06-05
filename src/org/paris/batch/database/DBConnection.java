@@ -11,7 +11,7 @@ import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 
 /**
- * Connection utilisée par la class {@link SQLExecutor}
+ * Connection utilisÃ©e par la class {@link SQLExecutor}
  * 
  * @author galloiem
  *
@@ -30,7 +30,7 @@ public class DBConnection {
      * constructeur
      * 
      * @param p
-     *            propriétés pour la création de la connection
+     *            propriÃ©tÃ©s pour la crÃ©ation de la connection
      * @return Connection object
      * @throws DatabaseDriverNotFoundException
      * @throws ConfigurationBatchException
@@ -42,7 +42,7 @@ public class DBConnection {
         String driver = p
                 .getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY);
         if (!DbUtils.loadDriver(driver)) {
-            // Si le driver n'est pas détecté l'application s'arrête
+            // Si le driver n'est pas dÃ©tectÃ© l'application s'arrÃ©te
             String msg = "Driver `" + driver + "` absent.";
             System.err.println(msg);
 
@@ -62,7 +62,7 @@ public class DBConnection {
                     p.getProperty(ConfigurationParameters.DB_ID_KEY));
         }
         // else if (){} and so on...
-        // Établissement de la connexion au SGBD
+        // Ã©tablissement de la connexion au SGBD
         try {
             connect = DriverManager.getConnection(url,
                     p.getProperty(ConfigurationParameters.DB_USER_KEY),
@@ -73,7 +73,7 @@ public class DBConnection {
             		ConfigurationParameters.DB_AUTOCOMMIT_KEY, "false")));
 
         } catch (SQLException sqle) {
-            String msg = "Problème de connexion à la base de données :\n\t"
+            String msg = "ProblÃ©me de connexion Ã  la base de donnÃ©es :\n\t"
                     + "\n" + sqle.getMessage();
             System.err.println(msg);
             throw new ConfigurationBatchException(msg);

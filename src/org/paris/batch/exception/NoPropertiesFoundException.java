@@ -1,8 +1,7 @@
 package org.paris.batch.exception;
 
 /**
-* Classe d'exception spécifique pour traiter les anomalies de driver pour se connecter
-* à la base de données.
+* Classe d'exception spÃ©cifique pour traiter les absences de properties
 * @author Guillaume Weber
 * 
 */
@@ -10,8 +9,8 @@ package org.paris.batch.exception;
 public class NoPropertiesFoundException extends GenericBatchException {
 		
 	/**
-	* Crée une nouvelle instance de DatabaseDriverNotFoundException
-	* @param message Le message détaillant l'exception 
+	* CrÃ©e une nouvelle instance de NoPropertiesFoundException
+	* @param message Le message dÃ©taillant l'exception 
 	*/
 	public NoPropertiesFoundException(String message)
 	{
@@ -19,7 +18,7 @@ public class NoPropertiesFoundException extends GenericBatchException {
 	}
 		
 	/**
-	* Constructeur par défaut
+	* Constructeur par dÃ©faut
 	*/
 	public NoPropertiesFoundException()
 	{

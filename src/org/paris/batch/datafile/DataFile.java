@@ -21,14 +21,16 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
-import org.paris.batch.datas.Datas;
+import org.apache.log4j.Logger;
+import org.paris.batch.datas.DataStructure;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DataFileException;
 import org.paris.batch.exception.DataFileFormatException;
+import org.paris.batch.logging.LogBatch;
 
 /**
  * @author santusbr
- * Classe DataFile : ReprÈsente un fichier de donnÈes et possËde les mÈthodes nÈcessaires ‡ sa manipulation
+ * Classe DataFile : Repr√©sente un fichier de donn√©es et poss√©de les m√©thodes n√©cessaires √† sa manipulation
  */
 
 public class DataFile {
@@ -39,41 +41,52 @@ public class DataFile {
 
 	private String typeFormat = null;
 
-	// Formats de donnÈes in et out
+	// Formats de donn√©es in et out
 	protected DataFileFormat in = null;
 	protected DataFileFormat out = null;
 
-	protected Datas datas = null;
+	protected DataStructure datas = null;
+	
+	protected Logger logger=null;
 
 
 	/**
 	 * Constructeur
-	 * @param filename : nom du fichier de donnÈes
+	 * @param filename : nom du fichier de donn√©es
 	 * @param sourcePath : chemin de la source
 	 * @param destinationPath : chemin de la destination
+	 * @param formatIn [optionnel] : DataFileFormat d'entr√©e
+	 * @param typeFormat : Type de format CSV ou Colonn√© (DataFileType)
+	 * @param formats : Properties contenant les formats de DataFile
+	 * @param logger : Logger 
+	 * @throws DataFileException
 	 */
-	public DataFile(String filename, String sourcePath, String destinationPath, String formatIn, String typeFormat, Properties formats) throws DataFileException{
+	public DataFile(String filename, String sourcePath, String destinationPath, String formatIn, String typeFormat, Properties formats,Logger logger) throws DataFileException{
 
 		try{
 			// Initialisation du DataFile
 			this.setName(filename);
-			// DÈfinition des fichiers de source et de destination
+			// D√©finition des fichiers de source et de destination
 			this.setFichierSource(new File(sourcePath+"/"+filename));
 
+			this.logger = logger;
+			
 			if(destinationPath != null){
 				this.setFichierDestination(new File(destinationPath+"/"+filename));
 			}
-			// DÈfinition du type de fichier CSV / ColonnÈ
+			// D√©finition du type de fichier CSV / Colonn√©
 			this.setTypeFormat(typeFormat);
 		}catch(Exception e){
-			String msg = "Erreur lors de l'accËs au fichier - Fichier concernÈ: "
+			String msg = "Erreur lors de l'acc√©s au fichier - Fichier concern√©: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
 		}
 	}
 	/**
-	 * MÈthode de chargement des donnÈes du fichier en mÈmoire
+	 * M√©thode de chargement des donn√©es du fichier en m√©moire
+	 * @param FileOrigine : Nom du fichier √† charger
+	 * @throws DataFileException
 	 */
 	public void loadData(String FileOrigine) throws DataFileException{
 		FileInputStream fstream;
@@ -97,10 +110,10 @@ public class DataFile {
 				while((strLine = br.readLine()) != null){
 					String strLineOut = "";
 
-					// On stock les donnÈes en fonction du format
+					// On stock les donn√©es en fonction du format
 					HashMap<String, Object> Data = new HashMap<String, Object>();
 
-					// On crÈe un iterateur pour from
+					// On cr√©e un iterateur pour from
 					Set<String> set = this.getIn().getFormat().keySet();
 					Iterator<String> itr = set.iterator();
 					String formKey = null;
@@ -108,12 +121,12 @@ public class DataFile {
 					int fromoffset = 0;
 					int fromlength = 0;
 
-					// Pour chaque donnÈe dans from
+					// Pour chaque donn√©e dans from
 					while(itr.hasNext()){
-						// On rÈcupËre la clÈ
+						// On r√©cup√©re la cl√©
 						formKey = itr.next();
 
-						// On rÈcupËre offset et length
+						// On r√©cup√©re offset et length
 						formValue = this.getIn().getFormat().get(formKey);
 						fromoffset = Integer.parseInt(formValue.split(",")[0])-1;
 						fromlength = Integer.parseInt(formValue.split(",")[1]);
@@ -125,26 +138,26 @@ public class DataFile {
 				}
 				fstream.close();
 			} catch (Exception e) {
-				String msg = "Erreur lors du chargement en mÈmoire du fichier - Fichier concernÈ: "
+				String msg = "Erreur lors du chargement en m√©moire du fichier - Fichier concern√©: "
 						+ this.getName() + "\nException : " + e.getMessage();
 				System.err.println(msg);
 				throw new DataFileException(msg);
 			}
 		}else{
-			String msg = "Erreur lors du chargement en mÈmoire du fichier - Fichier concernÈ: "
-					+ this.getName() + "\nException : " + "Il n'y a pas de fichier source dÈfini ou de format d'entrÈe";
+			String msg = "Erreur lors du chargement en m√©moire du fichier - Fichier concern√©: "
+					+ this.getName() + "\nException : " + "Il n'y a pas de fichier source d√©fini ou de format d'entr√©e";
 			System.err.println(msg);
 			throw new DataFileException(msg);
 		}
 	}
 
 	/**
-	 * Methode : copie le fichier source dans le rÈpertoire destination
+	 * Methode : copie le fichier source dans le r√©pertoire destination
 	 * @throws DataFileException 
 	 */
 	public void sourceToDestination() throws DataFileException{
 
-		System.out.println("Copie du fichier : "+ this.fichierSource.getName());
+		//System.out.println("Copie du fichier : "+ this.fichierSource.getName());
 
 		FileInputStream fstream;
 		try {
@@ -169,7 +182,7 @@ public class DataFile {
 			bufferedWriter.close();
 
 		} catch (IOException e) {
-			String msg = "Erreur lors de la copie du fichier source vers sa destination - Fichier concernÈ: "
+			String msg = "Erreur lors de la copie du fichier source vers sa destination - Fichier concern√©: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
@@ -177,35 +190,36 @@ public class DataFile {
 
 	}
 	/**
-	 * Methode : formatFile, permet de formater le fichier de donnÈes en fonction du format fournit
+	 * Methode : formatFile, permet de formater le fichier de donn√©es en fonction du format fournit
 	 * @throws DataFileException 
 	 */
 	public void formatFile(DataFileFormat from, DataFileFormat to) throws DataFileException {
 		FileInputStream fstream;
-		// Si le fichier destination n'existe pas encore on le copie ‡ partir de la source
+		// Si le fichier destination n'existe pas encore on le copie √† partir de la source
 		if(!this.fichierDestination.exists()){
 			this.sourceToDestination();
 
 		}
-		// On crÈÈ un fichier temporaire dans lequel on va Ècrire les donnÈes formatÈe
+		// On cr√©√© un fichier temporaire dans lequel on va √©crire les donn√©es format√©e
 
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(fichierDestination.getPath()+"_temp"));
-			// On lit et format les donnÈes
+			// On lit et format les donn√©es
 			fstream = new FileInputStream(this.fichierDestination);
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
 			String strLine;
 
+			int compteurligne = 0;
 			// On parcours le fichier
 			while((strLine = br.readLine()) != null){
 				String strLineOut = "";
 
-				// On stock les donnÈes en fonction du format
+				// On stock les donn√©es en fonction du format
 				Hashtable<String, String> Data = new Hashtable<String, String>();
 
-				// On crÈe un iterateur pour from
+				// On cr√©e un iterateur pour from
 				Set<String> set = from.getFormat().keySet();
 				Iterator<String> itr = set.iterator();
 				String formKey = null;
@@ -213,12 +227,12 @@ public class DataFile {
 				int fromoffset = 0;
 				int fromlength = 0;
 
-				// Pour chaque donnÈe dans from
+				// Pour chaque donn√©e dans from
 				while(itr.hasNext()){
-					// On rÈcupËre la clÈ
+					// On r√©cup√©re la cl√©
 					formKey = itr.next();
 
-					// On rÈcupËre offset et length
+					// On r√©cup√©re offset et length
 					formValue = from.getFormat().get(formKey);
 					fromoffset = Integer.parseInt(formValue.split(",")[0])-1;
 					fromlength = Integer.parseInt(formValue.split(",")[1]);
@@ -226,9 +240,9 @@ public class DataFile {
 					// On charge les infos dans Datas (key,value)
 					Data.put(formKey, strLine.substring(fromoffset, fromoffset+fromlength));
 				}
-				System.out.println(Data.toString());
+				//System.out.println(Data.toString());
 
-				// On crÈe un iterateur pour to
+				// On cr√©e un iterateur pour to
 				set = to.getFormat().keySet();
 				itr = set.iterator();
 				String toKey = null;
@@ -237,7 +251,7 @@ public class DataFile {
 				int tolength = 0;
 				int finaloffset = 0;
 
-				// On rÈcupËre le sÈparateur, le charactËre de remplacement, la taille de l'enregistrement et le charactËre de fin de ligne
+				// On r√©cup√©re le s√©parateur, le charact√©re de remplacement, la taille de l'enregistrement et le charact√©re de fin de ligne
 				String replacechar = "";
 				if(!to.getReplacechar().trim().isEmpty())
 					replacechar = to.getReplacechar();
@@ -253,20 +267,20 @@ public class DataFile {
 
 
 				while(itr.hasNext()){
-					// On rÈcupËre la premiËre donnÈe du format
+					// On r√©cup√©re la premi√©re donn√©e du format
 					toKey = itr.next();
 
-					// On rÈcupËre la taille total de la chaine
+					// On r√©cup√©re la taille total de la chaine
 					finaloffset = strLineOut.length();
-					// On rÈcupËre la donnÈe, son offset et sa length
+					// On r√©cup√©re la donn√©e, son offset et sa length
 					toValue = to.getFormat().get(toKey);
 					tooffset = Integer.parseInt(toValue.split(",")[0])-1;
 					tolength = Integer.parseInt(toValue.split(",")[1]);
 
 
-					// SÈparateur de champ
+					// S√©parateur de champ
 
-					// ComplÈment de ligne
+					// Compl√©ment de ligne
 					if(!replacechar.isEmpty()){
 						while(finaloffset < tooffset){
 							strLineOut = strLineOut+replacechar;
@@ -274,11 +288,11 @@ public class DataFile {
 						}
 					}
 
-					// On Èdite la donnÈe pour qu'elle entre dans la length de to
+					// On √©dite la donn√©e pour qu'elle entre dans la length de to
 					String data = Data.get(toKey);
 					if(data.length() > tolength)
 						data = data.substring(0, tolength);
-					// On ajoute la donnÈe ‡ chaine finale 
+					// On ajoute la donn√©e √† chaine finale 
 					strLineOut = strLineOut+data;
 				}
 
@@ -298,9 +312,12 @@ public class DataFile {
 					strLineOut = strLineOut+to.getEndrecordchar();
 				if(to.getBacktoline())
 					strLineOut = strLineOut+"\n";
-				bw.write(strLineOut);		
+				bw.write(strLineOut);
+				compteurligne ++;
 			}
 
+			this.logger.info("DataFile - Formatage du fichier "+this.name+" | "+compteurligne+" lignes du fichier trait√©es dans "+this.fichierDestination.getPath()+"/"+this.fichierDestination.getName());
+			
 			// On ferme le fichier source
 			br.close();
 			// On ferme le fichier de destination
@@ -315,7 +332,7 @@ public class DataFile {
 
 			// On renome le fichier temporaire
 		} catch (IOException e) {
-			String msg = "Erreur lors du formatage du fichier - Fichier concernÈ: "
+			String msg = "Erreur lors du formatage du fichier - Fichier concern√©: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
@@ -323,11 +340,11 @@ public class DataFile {
 	}
 
 	/**
-	 * MÈthode permettant d'Ècrire un fichier de donnÈes dans le rÈpertoire destination en fonction d'un format (in ou out)
+	 * M√©thode permettant d'√©crire un fichier de donn√©es dans le r√©pertoire destination en fonction d'un format (in ou out)
 	 * @param format
 	 */
 	public void writeDataFile(DataFileType format){
-		// TODO rÈdiger mÈthode
+		// TODO r√©diger m√©thode
 	}
 	/********************** GETTERS AND SETTERS***************************/
 	public File getFichierSource() {
@@ -354,7 +371,7 @@ public class DataFile {
 		try{
 			this.in = new DataFileFormat(this.name, DataFileType.FORMAT_IN, formats);
 		} catch (DataFileFormatException e) {
-			String msg = "Erreur lors de la dÈfinition du format d'entrÈe - Fichier concernÈ: "
+			String msg = "Erreur lors de la d√©finition du format d'entr√©e - Fichier concern√©: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
@@ -369,7 +386,7 @@ public class DataFile {
 		try {
 			this.out = new DataFileFormat(this.name, DataFileType.FORMAT_OUT, formats);
 		} catch (DataFileFormatException e) {
-			String msg = "Erreur lors de la dÈfinition du format de sortie - Fichier concernÈ: "
+			String msg = "Erreur lors de la d√©finition du format de sortie - Fichier concern√©: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
