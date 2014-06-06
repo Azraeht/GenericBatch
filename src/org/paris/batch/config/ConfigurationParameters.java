@@ -123,5 +123,14 @@ public class ConfigurationParameters {
      * Paramètres contenant les modules à utiliser
      */
     public static final String CONFIG_MODULES= "gen.configfiles";
+
+    /**
+     * Paramètre contenant le nom du batch
+     */
+	public static final String NOM_BATCH = "gen.nombatch";
+	/**
+     * Paramètre contenant la version du batch
+     */
+	public static final String VERSION = "gen.version";
     
 }

@@ -1,5 +1,5 @@
 <project name="GenericBatch" basedir="." default="jar">
-	<property name="version" value="1.0" />
+	<property name="version" value="1.4" />
 	<property name="main-class" value="No Main Class Name Here" />
 	<!-- ==========END CHANGE VERSION ======= -->
 	<property name="lib.dir" value="lib" />
@@ -53,6 +53,7 @@
 			<fileset dir="${src.dir}" includes="**/*.java" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Implementation-Version" value="${version}"/>
 			</manifest>
 		</jar>
 	</target>
