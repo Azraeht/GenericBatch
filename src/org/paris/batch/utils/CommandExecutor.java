@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.paris.batch.exception.CommandExecutorException;
 
 /**
+
  * Exécution de commandes sur le systéme hote.
  * 
  * @author galloiem
@@ -36,7 +37,9 @@ public class CommandExecutor {
      * @throws CommandExecutorException
      */
     public String runCommand(String cmd) throws CommandExecutorException {
+
         logger.info("Exécution de la commande : `" + cmd + "`");
+
         StringBuffer output = new StringBuffer();
         Process p;
         try {
@@ -51,6 +54,7 @@ public class CommandExecutor {
 
         } catch (Exception e) {
             String msg = "Erreur d'exécution de la commande : " + cmd + "\n"
+
                     + e.getMessage();
             logger.error(msg);
 

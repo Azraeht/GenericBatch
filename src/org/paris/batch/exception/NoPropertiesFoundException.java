@@ -1,6 +1,7 @@
 package org.paris.batch.exception;
 
 /**
+
 * Classe d'exception spécifique pour traiter les absences de properties
 * @author Guillaume Weber
 * 

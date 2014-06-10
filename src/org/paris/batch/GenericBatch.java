@@ -24,10 +24,12 @@ import org.paris.batch.database.SQLExecutor;
 import org.paris.batch.datafile.DataFile;
 
 /**
+
  * Classe abstraite offrant plusieurs services communs à tous les batchs Ville
  * de Paris.
  * 
  * <br>
+
  * La contrat de la classe stipule qu'il faut implémenter ces trois méthodes:<br>
  * <ul>
  * <li><code>setup()</code></li>
@@ -37,13 +39,30 @@ import org.paris.batch.datafile.DataFile;
  * 
  * @see GenericBatch#setup()
  * @see #run()
- * @see #finished()
+ * @see #finished()   
  * 
  * 
  * 
  * @author Guillaume Weber
  * @author Brice Santus
  * @author Emmanuel GALLOIS
+ * 
+ * Exemple : 
+
+      //getting username using System.getProperty in Java
+       String user = System.getProperty("user.name") ;
+       System.out.println("Username using system property: "  + user);
+    
+     //getting username as environment variable in java, only works in windows
+       String userWindows = System.getenv("USERNAME");
+       System.out.println("Username using environment variable in windows : "  + userWindows);
+          
+     //name and value of all environment variable in Java  program
+      Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            System.out.format("%s=%s%n", envName, env.get(envName));
+        }
+
  */
 public abstract class GenericBatch {
 	/**
@@ -73,6 +92,7 @@ public abstract class GenericBatch {
 	 */
 	public static final int EXIT_ERROR = 10;
 
+
 	/**
 	 * reéoit les informations spécifiées dans le fichier de configuration
 	 * adjoint au batch
@@ -101,12 +121,14 @@ public abstract class GenericBatch {
 	 */
 	protected CommandExecutor command;
 
+
 	protected SQLExecutor sqlexecutor;
 
 	/**
 	 * ArrayList permettant de stocker les datafiles
 	 */
 	protected ArrayList<DataFile> dataFileList;
+
 
 	/**
 	 * Méthode pour initialiser les ressources locales.
@@ -116,6 +138,7 @@ public abstract class GenericBatch {
 	 */
 	public abstract void setup() throws ConfigurationBatchException,
 	DatabaseDriverNotFoundException;
+
 
 	/**
 	 * Traitement principal du Batch.
@@ -175,11 +198,13 @@ public abstract class GenericBatch {
 			}
 		}
 
+
 		if (DEBUG) {
 			System.out
 			.println("Instanciation de GenericBatch::Création du logger");
 		}
 		// --------------------Initialisation des modules---------------------------------------
+
 
 		// Récupération de la version du GénéricBatch
 		String classSimpleName = GenericBatch.class.getSimpleName() + ".class";
@@ -282,4 +307,5 @@ public abstract class GenericBatch {
 			System.exit(EXIT_WARNING);
 		}
 	}
+
 }

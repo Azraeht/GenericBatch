@@ -1,3 +1,4 @@
+
 package org.paris.batch.database;
 
 import java.sql.Connection;

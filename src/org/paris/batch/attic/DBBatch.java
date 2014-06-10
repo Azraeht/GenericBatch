@@ -56,7 +56,9 @@ public class DBBatch {
         String workingDir = System.getProperty("user.dir") + "\\config\\";
         File temp = new File(workingDir, "config.properties");
 
+
         // On teste l'existence du fichier de propriétés
+
         try {
             // props.load(classLoader.getResourceAsStream("\\query.properties"));
             InputStream resourceAsStream = new FileInputStream(temp);
@@ -64,13 +66,12 @@ public class DBBatch {
                 properties.load(resourceAsStream);
             }
         } catch (NullPointerException npe) {
-            System.out
-                    .println("NullPointerException au chargement du fichier de propriétés :\n\t"
+            System.out.println("NullPointerException au chargement du fichier de propriétés :\n\t"
                             + cheminDAccesProperties + "\n" + npe.toString());
             throw new NoPropertiesFoundException(npe.getMessage());
         } catch (IOException ioe) {
-            System.out
-                    .println("IOException au chargement du fichier de propriétés :\n\t"
+            System.out.println("IOException au chargement du fichier de propriétés :\n\t"
+
                             + cheminDAccesProperties + "\n" + ioe.getMessage());
             throw new NoPropertiesFoundException(ioe.getMessage());
         }
@@ -78,10 +79,12 @@ public class DBBatch {
         try {
             if (!conn) {
                 // Si le driver n'est pas détecté l'application s'arréte
+
                 System.out.println("Driver absent.");
 
                 throw (new DatabaseDriverNotFoundException(
                         "Ouhlé, le driver paraét absent. On est grave dans la mouise cap'taine"));
+
             }
         } catch (DatabaseDriverNotFoundException ddne) {
             System.out
@@ -93,6 +96,7 @@ public class DBBatch {
         if (connect == null) {
             try {
                 // établissement de la connexion au SGBD
+
                 connect = DriverManager.getConnection("jdbc:oracle:thin:@"
                         + properties.getProperty("urlOracle") + ":"
                         + properties.getProperty("portOracle") + ":"
@@ -101,8 +105,7 @@ public class DBBatch {
                         properties.getProperty("pass"));
                 connect.setAutoCommit(false);
             } catch (SQLException sqle) {
-                System.out
-                        .println("Probléme de connexion à la base de données :\n\t"
+                System.out.println("Probléme de connexion à la base de données :\n\t"
                                 + "\n" + sqle.getMessage());
                 throw new DatabaseDriverNotFoundException(sqle.getMessage());
             }
@@ -111,7 +114,9 @@ public class DBBatch {
     }
 
     /**
+
      * Méthode qui retourne l'instance MySQL et la crée si elle n'existe pas.
+
      * 
      * @param urlMySQL
      *            URL de connexion
@@ -136,10 +141,12 @@ public class DBBatch {
         try {
             if (Class.forName("com.mysql.jdbc.Driver") == null) {
                 // Si le driver n'est pas détecté l'application s'arréte
+
                 System.out.println("Driver absent.");
 
                 throw (new DatabaseDriverNotFoundException(
                         "Ouhlé, le driver paraét absent. On est grave dans la mouise cap'taine"));
+
 
             }
         } catch (DatabaseDriverNotFoundException ddne) {
@@ -153,6 +160,7 @@ public class DBBatch {
         if (connect == null) {
             try {
                 // établissement de la connexion au SGBD
+
                 connect = DriverManager.getConnection(
                         "jdbc:mysql://" + properties.getProperty("urlMySQL")
                                 + "/" + properties.getProperty("baseMySQL"),
@@ -160,8 +168,7 @@ public class DBBatch {
                         properties.getProperty("passMySQL"));
                 connect.setAutoCommit(false);
             } catch (SQLException sqle) {
-                System.out
-                        .println("Probléme de connexion à la base de données :\n\t"
+                System.out.println("Probléme de connexion à la base de données :\n\t"
                                 + "\n" + sqle.getMessage());
                 throw new DatabaseConnectionFailedException(sqle.getMessage());
             }

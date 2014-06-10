@@ -13,6 +13,7 @@ import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 
 /**
+
  * Implémentation spécifique au framework d'un logger Log4J v1
  * 
  * @author lannoog
@@ -26,6 +27,7 @@ public class LogBatch {
     public static Logger logBatch = null;
 
     /**
+
      * Création et configuration du logger
      * 
      * @param properties
