@@ -208,24 +208,17 @@ public abstract class GenericBatch {
 
 		// Récupération de la version du GénéricBatch
 		String classSimpleName = GenericBatch.class.getSimpleName() + ".class";
-		System.out.println(classSimpleName);
 		// 2 - Récupérer le chemin physique de la classe
 		String pathToClass = GenericBatch.class.getResource(classSimpleName).toString();
 
-		System.out.println(pathToClass);
 		// 3 - Récupérer le chemin de la classe à partir de la racine du classpath
 		String classFullName = GenericBatch.class.getName().replace('.', '/') + ".class";
-		System.out.println(classFullName);
 		// 4 - Récupérer le chemin complet vers MANIFEST.MF
 		String pathToJar = pathToClass.substring( 0, pathToClass.length() - (classFullName.length()+2)).replace("jar:file:", "");
 		String versionGenericBatch = "non définie";
 		try {
 			JarFile jar = new JarFile(pathToJar);
-			System.out.println("in");
-			
-			System.out.println("Manifest");
 			Manifest manifest = jar.getManifest();
-			System.out.println(manifest.toString());
 			// Lire la propriété "Implementation-Version" du Manifest
 			versionGenericBatch = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
 			jar.close();
