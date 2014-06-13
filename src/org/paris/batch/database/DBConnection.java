@@ -54,14 +54,14 @@ public class DBConnection {
         }
         // Set jdbc database url according driver.
         String url = "";
-        if (p.getProperty("db.jdbc.driver").contains("oracle")) {
+        if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("oracle")) {
             url = String.format(URL_ORACLE,
 
                     p.getProperty(ConfigurationParameters.DB_HOST_KEY),
                     p.getProperty(ConfigurationParameters.DB_PORT_KEY),
                     p.getProperty(ConfigurationParameters.DB_ID_KEY));
 
-        } else if (p.getProperty("db.jdbc.driver").contains("mysql")) {
+        } else if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("mysql")) {
             url = String.format(URL_MYSQL,
                     p.getProperty(ConfigurationParameters.DB_HOST_KEY),
                     p.getProperty(ConfigurationParameters.DB_PORT_KEY),

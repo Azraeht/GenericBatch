@@ -30,7 +30,7 @@ import org.paris.batch.datafile.DataFile;
  * 
  * <br>
 
- * La contrat de la classe stipule qu'il faut implémenter ces trois méthodes:<br>
+ * Le contrat de la classe stipule qu'il faut implémenter ces trois méthodes:<br>
  * <ul>
  * <li><code>setup()</code></li>
  * <li><code>run()</code></li>
@@ -94,7 +94,7 @@ public abstract class GenericBatch {
 
 
 	/**
-	 * reéoit les informations spécifiées dans le fichier de configuration
+	 * réçoit les informations spécifiées dans le fichier de configuration
 	 * adjoint au batch
 	 */
 	protected Properties props;
