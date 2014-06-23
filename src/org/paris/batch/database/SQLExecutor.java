@@ -109,8 +109,8 @@ public class SQLExecutor {
         int result = 0;
         try {
             logger.info("Requéte SQL : " + query);
-            for(String arg:(String[])params){
-            	logger.info("Param : "+arg);
+            for(Object arg:params){
+            	logger.info("Param : "+arg.toString());
              }            
             result = runner.update(connection, query, params);
             logger.info("Requéte exécutée. Résultat retourné : " + result);
@@ -163,9 +163,9 @@ public class SQLExecutor {
         List<?> result = new ArrayList();
         try {
             logger.info("Requéte SQL : " + query);
-            for(String arg:(String[])params){
-            	logger.info("Param : "+arg);
-             }  
+            for(Object arg:params){
+            	logger.info("Param : "+arg.toString());
+             }        
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, new MapListHandler(),
                     params);
@@ -210,9 +210,9 @@ public class SQLExecutor {
         ResultSet result = null;
         try {
             logger.info("Requéte SQL : " + query);
-            for(String arg:(String[])params){
-            	logger.info("Param : "+arg);
-             }  
+            for(Object arg:params){
+            	logger.info("Param : "+arg.toString());
+             }         
             PreparedStatement ps = connection.prepareStatement(query);
             if (params != null)
                 for (int i = 0; i < params.length; i++) {
@@ -246,9 +246,9 @@ public class SQLExecutor {
         List<?> result = new ArrayList();
         try {
             logger.info("Requéte SQL : " + query);
-            for(String arg:(String[])params){
-            	logger.info("Param : "+arg);
-             }  
+            for(Object arg:params){
+            	logger.info("Param : "+arg.toString());
+             }        
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, handler, params);
             logger.info("Requéte exécutée. Eléments retournés : "
