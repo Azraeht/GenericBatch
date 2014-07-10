@@ -8,5 +8,13 @@
 	<classpathentry kind="lib" path="lib/jdom-2.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/mail/dsn.jar"/>
+	<classpathentry kind="lib" path="lib/mail/gimap.jar"/>
+	<classpathentry kind="lib" path="lib/mail/imap.jar"/>
+	<classpathentry kind="lib" path="lib/mail/mailapi.jar"/>
+	<classpathentry kind="lib" path="lib/mail/pop3.jar"/>
+	<classpathentry kind="lib" path="lib/mail/smtp.jar"/>
+	<classpathentry kind="lib" path="lib/mail.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc14.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
