@@ -1,7 +1,6 @@
 package org.paris.batch;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -14,10 +13,10 @@ import org.paris.batch.config.ConfigurationManagerBatch;
 import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
-import org.paris.batch.exception.GenericBatchException;
 import org.paris.batch.exception.NoPropertiesFoundException;
 import org.paris.batch.exception.SQLExecutorException;
 import org.paris.batch.logging.LogBatch;
+import org.paris.batch.mailer.Mailer;
 import org.paris.batch.utils.CommandExecutor;
 import org.paris.batch.utils.FileWriter;
 import org.paris.batch.database.SQLExecutor;
@@ -128,6 +127,8 @@ public abstract class GenericBatch {
 	 * ArrayList permettant de stocker les datafiles
 	 */
 	protected ArrayList<DataFile> dataFileList;
+	
+	protected Mailer mailer = null;
 
 
 	/**
@@ -175,14 +176,7 @@ public abstract class GenericBatch {
 			System.out
 			.println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
 		}
-		/*
-        props = ConfigurationManagerBatch
-                .mergeProperties(
-                        ConfigurationManagerBatch
-                                .loadProperties(ConfigurationManagerBatch.PROPERTIES_CONFIG_FILENAME),
-                        ConfigurationManagerBatch
-                                .loadProperties(ConfigurationManagerBatch.PROPERTIES_QUERY_FILENAME));
-		 */
+		
 		// Initialisation des properties
 		props = ConfigurationManagerBatch.initProperties();
 
@@ -203,7 +197,7 @@ public abstract class GenericBatch {
 			System.out
 			.println("Instanciation de GenericBatch::Création du logger");
 		}
-		// --------------------Initialisation des modules---------------------------------------
+		// -------------------- Versionning Batcht ---------------------------------------
 
 
 		// Récupération de la version du GénéricBatch
@@ -229,6 +223,7 @@ public abstract class GenericBatch {
 			throw new ConfigurationBatchException(msg);
 		}
 
+		// --------------------Initialisation des modules---------------------------------------
 
 
 		// Initialisation du logger
@@ -238,6 +233,7 @@ public abstract class GenericBatch {
 		this.logger.info("Version : "+props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION));
 		this.logger.info("Version GenericBatch: "+versionGenericBatch);
 		this.logger.info("----------- Chargement des modules -----------");
+		
 		// Initialisation du writer et de la Datafilelist
 		this.writer = new FileWriter(this.logger);
 		this.logger.info("Module chargé : FileWriter");
@@ -247,14 +243,24 @@ public abstract class GenericBatch {
 		this.command = new CommandExecutor(this.logger);
 		this.logger.info("Module chargé : CommandExecutor");
 
+		// Initialisation des fichiers de config
 		String ConfigFiles = props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
 
+		// On liste dans le log la liste des modules chargés : Mail, Datafile etc...
 		if(ConfigFiles != null){
 			String[] listConfigFiles = ConfigFiles.split(",");
 			for (String configfile : listConfigFiles) {
+				
+				//Module Mailer
+				if(configfile.equals("mail")){
+					this.mailer = new Mailer(ConfigurationManagerBatch.filterProperties(
+			                props, "mail.", true), this.logger);
+				}
 				this.logger.info("Module complémentaire chargé : "+configfile);
 			}
 		}
+		
+		// --------------------------- Fin de l'initialisation ---------------------------------
 		this.logger.info("Initialisation terminée.");
 	}
 

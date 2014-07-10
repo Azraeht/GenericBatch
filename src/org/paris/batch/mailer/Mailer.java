@@ -8,104 +8,98 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 import org.apache.log4j.Logger;
-import org.paris.batch.config.ConfigurationManagerBatch;
-import org.paris.batch.exception.ConfigurationBatchException;
-import org.paris.batch.logging.LogBatch;
 import org.paris.batch.exception.CannotSendMailException;
 import org.paris.batch.exception.CannotWriteTextToMessageException;
 import org.paris.batch.exception.GeneralMailingException;
-import org.paris.batch.exception.MailSendFailureException;
 
 /**
  * Classe permettant l'envoi de mails
  * 
  * @author tatons
+ * @author Brice SANTUS
  *
  */
 public class Mailer {
-	
+
 	/**
-	 * PropriÈtÈ contenant l'adresse utilisÈe
+	 * Propri√©r√© contenant l'adresse utilis√©e
 	 */
 	protected String from;
-	
+
 	/**
-	 *PropriÈtÈ contenant l'adresse de destination
+	 *Propri√©t√© contenant l'adresse de destination
 	 */
-    protected String to;
-	
+	protected String to;
+
 	/**
-	 * PropriÈtÈ contenant l'adresse hote
+	 *Propri√©t√© contenant le sujet du mail
+	 */
+	protected String subject;
+
+	/**
+	 * Propri√©t√© contenant l'adresse hote
 	 */
 	protected String host;
-		
+
 	/**
-	 * journal d'evenements
+	 * Journal d'evenements
 	 */
 	protected Logger logger;
-	
+
 	/**
-     * reÁoit les informations spÈcifiÈes dans le fichier de configuration
-     */
-    protected Properties props;
-    
-    /**
-     * contient le mail
-     */
-	protected MimeMessage message;
-	
+	 * Re√ßoit les informations sp√©cifi√©es dans le fichier de configuration
+	 */
+	protected Properties props;
+
 	/**
-	 * permet de verifer si le mail contient des piËces jointes
+	 * Contient le mail
+	 */
+	protected MimeMessage message = null;
+
+	/**
+	 * Permet de verifer si le mail contient des pi√®ces jointes
 	 */
 	protected boolean haveAttachment;
-	
+
 	/**
-	 * proprietÈ rÈcupÈrant toutes les piËces jointes du mail
+	 * Propri√©t√© r√©cup√©rant toutes les pi√®ces jointes du mail
 	 */
-	protected Multipart multipart;
-	
+	protected Multipart multipart = null;
+
+	/**
+	 * Propri√©t√© contenant la session d'envoi de mail
+	 */
 	protected Session session ;
+
+	/**
+	 * Propri√©t√© contenant le texte principale du mail
+	 */
+	protected String mainText = "";
+
+	/**
+	 * Propri√©t√© contenant la liste des pi√®ces jointes
+	 */
+	protected ArrayList<String> attachements = new ArrayList<String>(); 
+
 	
-	protected String mainText ;
+	protected ArrayList<MimeMessage> messages = new ArrayList<MimeMessage>();
 	
 	
 	public Mailer(Properties properties, Logger logger)
 	{	
-		 
-	    // Initialisation des propriÈtÈs
-		this.logger = logger;
-		this.props = properties;
-	    String smtp=this.props.getProperty("mail.smtp.host");
-	    props.setProperty(smtp, host);
-	    
-	    // Get the default Session object.
-	    session = Session.getDefaultInstance(props);
-	    
-	    // Create a default MimeMessage object.
-		//multipart = new MimeMultipart();
-		
-		 
+
+		// Initialisation des propri√©t√©s
+		this.setLogger(logger);
+		this.setProps(properties);
+
+		// Get the default Session object.
+		this.setSession(Session.getDefaultInstance(this.props));	
+
 	}
-	
-	public MimeMessage getMessage(){
-		return message;
-	}
-	
+
 	/**
-	 * 
-	 * @return du texte
-	 */
-	public String getMainText(){
-		return mainText;
-	}
-	
-	public void addMainText(String text){
-		mainText+=text;
-	}
-	
-	/**
-	 * Initialise un nouveau message (‡ ce stade, le message ne contient rien du tout).
-	 * On suppose par dÈfaut qu'il n'y aura pas de PJ (mais Áa peut se changer aprËs)
+	 * Initialise un nouveau message (√† ce stade, le message ne contient rien du tout).
+	 * On suppose par d√©faut qu'il n'y aura pas de PJ (mais √ßa peut se changer apr√®s)
 	 */
 	public void newMessage()
 	{
@@ -113,50 +107,42 @@ public class Mailer {
 		haveAttachment=false;
 		try
 		{
-			logger.debug("Nouveau message crÈÈ (ID = " + message.getMessageID() + ")");
+			logger.debug("Nouveau message cr√©√© (ID = " + message.getMessageID() + ")");
 		}
 		catch(MessagingException me)
 		{
-			logger.error("Ouhl‡, j'ai crÈÈ un nouveau message et ce gros chacal veut pas me donner son ID... ah l'b‚tard !\n" + me.getLocalizedMessage());			
+			logger.error("Ouhla, j'ai cr√©√© un nouveau message et ce gros chacal veut pas me donner son ID... ah l'b√†tard !\n" + me.getLocalizedMessage());			
 		}
 	}
-	
+
 	/**
-	 * MÈthode permettant d'ajouter du texte dans le mail ‡ envoyer
+	 * M√©thode permettant d'ajouter du texte dans le mail √† envoyer
 	 * @param text
 	 * @throws MessagingException 
 	 */
-	public void setText(String text) throws CannotWriteTextToMessageException
+	public void setMainText(String text) throws CannotWriteTextToMessageException
 	{
-		try
-		{
-			((MimeMessage) message).setText(text);
-		}
-		catch(MessagingException me)
-		{
-			logger.error("Erreur ‡ l'Ècriture du texte du message :\n" + me.getLocalizedMessage());
-			throw new CannotWriteTextToMessageException(me.getLocalizedMessage());
-		}
+			this.mainText = text;
 	}
-	
+
 	/**
-	 * Ajoute au contenu du corps de texte la chaÓne passÈe en paramËtre.
-	 * NB : tant que le corps de texte n'a pas ÈtÈ explicitement inclus dans le message
-	 * cette mÈthode n'a pas d'effet sur le message
-	 * @param textToAppend la chaÓne ‡ ajouter en fin de corps de texte
-	 * @param newLine boolÈen indiquant s'il faut ou non insÈrer un retour chariot au moment de l'ajout
+	 * Ajoute au contenu du corps de texte la cha√Æne pass√©e en param√®tre.
+	 * NB : tant que le corps de texte n'a pas √©t√© explicitement inclus dans le message
+	 * cette m√©thode n'a pas d'effet sur le message
+	 * @param textToAppend la cha√Æne √† ajouter en fin de corps de texte
+	 * @param newLine bool√©en indiquant s'il faut ou non ins√©rer un retour chariot au moment de l'ajout
 	 */
 	private void appendToMainText(String textToAppend, boolean newLine)
 	{
-		mainText += textToAppend;
+		this.mainText += textToAppend;
 		if(newLine==true){
 			mainText+="\n";
 		}
 	}
-	
+
 	/**
-	 * Ajoute au contenu du corps de texte la chaÓne passÈe en paramËtre, sans insÈrer de retour chariot
-	 * @param textToAppend la chaÓne ‡ ajouter en fin de corps de texte
+	 * Ajoute au contenu du corps de texte la cha√Æne pass√©e en param√®tre, sans ins√©rer de retour chariot
+	 * @param textToAppend la cha√Æne √† ajouter en fin de corps de texte
 	 */
 	public void appendToMainText(String textToAppend)
 	{
@@ -164,90 +150,343 @@ public class Mailer {
 	}
 
 	/**
-	 * Ajoute au contenu du corps de texte la chaÓne passÈe en paramËtre, avec insertion de retour chariot
-	 * @param textToAppend la chaÓne ‡ ajouter en fin de corps de texte
+	 * Ajoute au contenu du corps de texte la cha√Æne pass√©e en param√®tre, avec insertion de retour chariot
+	 * @param textToAppend la cha√Æne √† ajouter en fin de corps de texte
 	 */
 	public void appendToMainTextWithNewLine(String textToAppend)
 	{
 		appendToMainText(textToAppend, true);
 	}
-	
+
 	/**
-	 * mÈthode permettant de dÈfinir le destinataire du mail
-	 * @param mail
+	 * M√©thode permettant de d√©finir le destinataire du mail
 	 * @throws MessagingException 
 	 * @throws AddressException 
 	 */
-	public void setDestinataire(String mail){
-		to=mail;
-		try {
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-		} catch (AddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private boolean setDestinataire() throws MessagingException{
+		if(this.getTo() != null){
+			try {
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			} catch (AddressException e) {
+				logger.error("MAIL : Erreur de cr√©ation de l'adresse :\n" + e.getLocalizedMessage());
+				throw new MessagingException(e.getLocalizedMessage());
+			} catch (MessagingException e) {
+				logger.error("MAIL : Erreur d'ajout du destinataire :\n" + e.getLocalizedMessage());
+				throw new MessagingException(e.getLocalizedMessage());
+			}
+			return true;
+		}
+		else{
+			return false;
 		}
 	}
-	
+
 	/**
-	 * MÈthode permettant de dÈfinir le sujet du mail
-	 * @param subject
+	 * M√©thode permettant de d√©finir l'emetteur du mail
+	 * @throws MessagingException 
+	 * @throws AddressException 
+	 */
+	private boolean setExpediteur() throws MessagingException{
+		if(this.getFrom() != null){
+			try {
+				message.setFrom(new InternetAddress(from));
+			} catch (AddressException e) {
+				logger.error("MAIL : Erreur de cr√©ation de l'adresse :\n" + e.getLocalizedMessage());
+				throw new MessagingException(e.getLocalizedMessage());
+			} catch (MessagingException e) {
+				logger.error("MAIL : Erreur d'ajout de l'√©metteur :\n" + e.getLocalizedMessage());
+				throw new MessagingException(e.getLocalizedMessage());
+			}
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	/**
+	 * M√©thode permettant de d√©finir le sujet du mail
 	 * @throws MessagingException
 	 */
-	public void setSujet(String subject) throws CannotWriteTextToMessageException{
-		try
-		{
-			((MimeMessage) this.message).setSubject(subject);
+	public boolean setSujet() throws MessagingException{
+		if(this.getSubject() != null){
+			try
+			{
+				this.message.setSubject(this.subject);
+				return true;
+			}
+			catch(MessagingException me)
+			{
+				logger.error("Erreur √† l'√©criture du texte du message :\n" + me.getLocalizedMessage());
+				throw new MessagingException(me.getLocalizedMessage());
+			}
 		}
-		catch(MessagingException me)
-		{
-			logger.error("Erreur ‡ l'Ècriture du texte du message :\n" + me.getLocalizedMessage());
-			throw new CannotWriteTextToMessageException(me.getLocalizedMessage());
+		else{
+			return false;
 		}
 	}
-	
+
 	/**
-	 * MÈthode permettant d'ajouter un mail en tant que piËce jointe
+	 * M√©thode permettant d'ajouter un mail en tant que pi√®ce jointe
 	 * @param attachment
 	 * @throws IOException 
 	 * @throws MessagingException 
 	 */
 	public void addMailAsAttachment(MimeMessage attachment,int numMail) throws MessagingException, IOException{
-			//on crÈe une nouvelle partie du message
-			BodyPart messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setContent(new MimeMessage(attachment),"mail n∞"+numMail);
-			multipart.addBodyPart(messageBodyPart);
-			//le boolean est maintenant true car le mail contient une piËce jointe
-			if(haveAttachment==false){
-				haveAttachment=true;
-			}	
+		//on cr√©e une nouvelle partie du message
+		BodyPart messageBodyPart = new MimeBodyPart();
+		messageBodyPart.setContent(new MimeMessage(attachment),"mail n¬∞"+numMail);
+		multipart.addBodyPart(messageBodyPart);
+		//le boolean est maintenant true car le mail contient une pi√®ce jointe
+		if(haveAttachment==false){
+			haveAttachment=true;
+		}	
 	}
-	
+
 	/**
-	 * MÈthode permettant d'ajouter le contenu du multipart dans le mail
+	 * M√©thode permettant d'ajouter le contenu du multipart dans le mail
 	 * @throws MessagingException
 	 */
 	public void addMultipartInMail() throws MessagingException{
+		if(message == null){
+			this.newMessage();
+		}
+
 		message.setContent(multipart);
 	}
-	
-	/**
-	 * MÈthode permettant l'envoi d'un mail
-	 * @throws CannotSendMailException signale que l'envoi du mail a ÈchouÈ
-	 */
-	public void send() throws CannotSendMailException
-	{
-		try
-		{
-			Transport.send(message);
-		}
-		catch(MessagingException me)
-		{
-			logger.error("Weuhl‡, mon mail y part pÙ ! MÈga glandasses !\n" + me.getLocalizedMessage());
-			throw new CannotSendMailException(me.getLocalizedMessage());
-		}
+
+	public void addMailAttachement(String fileName) throws MessagingException{
+		//on cr√©e une nouvelle partie du message
+		this.attachements.add(fileName);
+		//le boolean est maintenant true car le mail contient une pi√®ce jointe
+		if(haveAttachment==false){
+			haveAttachment=true;
+		}	
 	}
+	/**
+	 * M√©thode permettant l'envoi d'un mail
+	 * @param keep : D√©fini le message doit √™tre sauvegard√© par le mailer apr√®s envoi
+	 * @return id : id du mail envoy√© (0 si echec de l'envoi de mail)
+	 * @throws CannotSendMailException signale que l'envoi du mail a √©chou√©
+	 */
+	public int send(boolean keep) throws CannotSendMailException
+	{
+		int id = 0;
+		if(this.message != null){
+			try
+			{
+				if(this.setDestinataire()){
+					if(this.setExpediteur()){
+						if(this.setSujet()){
+							// Initialisation du multipart
+							this.multipart = new MimeMultipart();
+							
+							// Ajout du corps
+							 BodyPart messageBodyPart = new MimeBodyPart();
+							 messageBodyPart.setText(this.mainText);
+							 multipart.addBodyPart(messageBodyPart);
+							 
+							// Ajout des pi√®ces jointes
+							for (String attachement : this.attachements) {
+								 messageBodyPart = new MimeBodyPart();
+						         DataSource source = new FileDataSource(attachement);
+						         messageBodyPart.setDataHandler(new DataHandler(source));
+						         messageBodyPart.setFileName(attachement);
+						         multipart.addBodyPart(messageBodyPart);
+							}
+							
+							Transport.send(this.message);
+							if(keep){
+								this.messages.add(this.message);
+							}
+							id = this.message.getMessageNumber();
+						}else
+						{
+							logger.error("MAIL : Pas de sujet d√©fini, le mail n'a pas √©t√© envoy√©");
+							throw new CannotSendMailException("MAIL : Pas de sujet d√©fini, le mail n'a pas √©t√© envoy√©");
+						}
+					}else
+					{
+						logger.error("MAIL : Pas d'exp√©diteur d√©fini, le mail n'a pas √©t√© envoy√©");
+						throw new CannotSendMailException("MAIL : Pas d'exp√©diteur d√©fini, le mail n'a pas √©t√© envoy√©");
+					}
+				}else{
+					logger.error("MAIL : Pas d'√©metteur d√©fini, le mail n'a pas √©t√© envoy√©");
+					throw new CannotSendMailException("MAIL : Pas d'√©metteur d√©fini, le mail n'a pas √©t√© envoy√©");
+				}
+			}
+			catch(MessagingException me)
+			{
+				logger.error("Weuhl, mon mail y part p√† ! M√©ga glandasses !\n" + me.getLocalizedMessage());
+				throw new CannotSendMailException(me.getLocalizedMessage());
+			}
+		}
+		return id;
+	}
+
+
+	/**
+	 * @return the subject
+	 */
+	public String getSubject() {
+		return subject;
+	}
+
+	/**
+	 * @param subject the subject to set
+	 */
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
+	public MimeMessage getMessage(){
+		return message;
+	}
+
+	/**
+	 * 
+	 * @return du texte
+	 */
+	public String getMainText(){
+		return mainText;
+	}
+
+
+	/**
+	 * @return the from
+	 */
+	public String getFrom() {
+		return from;
+	}
+
+
+	/**
+	 * @param from the from to set
+	 */
+	public void setFrom(String from) {
+		this.from = from;
+	}
+
+
+	/**
+	 * @return the to
+	 */
+	public String getTo() {
+		return to;
+	}
+
+
+	/**
+	 * @param to the to to set
+	 */
+	public void setTo(String to) {
+		this.to = to;
+	}
+
+
+	/**
+	 * @return the host
+	 */
+	public String getHost() {
+		return host;
+	}
+
+
+	/**
+	 * @param host the host to set
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+
+
+	/**
+	 * @param logger the logger to set
+	 */
+	public void setLogger(Logger logger) {
+		this.logger = logger;
+	}
+
+
+	/**
+	 * @return the props
+	 */
+	public Properties getProps() {
+		return props;
+	}
+
+
+	/**
+	 * @param props the props to set
+	 */
+	public void setProps(Properties props) {
+		this.props = props;
+	}
+
+
+	/**
+	 * @return the haveAttachment
+	 */
+	public boolean isHaveAttachment() {
+		return haveAttachment;
+	}
+
+
+	/**
+	 * @param haveAttachment the haveAttachment to set
+	 */
+	public void setHaveAttachment(boolean haveAttachment) {
+		this.haveAttachment = haveAttachment;
+	}
+
+
+	/**
+	 * @return the multipart
+	 */
+	public Multipart getMultipart() {
+		return multipart;
+	}
+
+
+	/**
+	 * @param multipart the multipart to set
+	 */
+	public void setMultipart(Multipart multipart) {
+		this.multipart = multipart;
+	}
+
+
+	/**
+	 * @return the session
+	 */
+	public Session getSession() {
+		return session;
+	}
+
+
+	/**
+	 * @param session the session to set
+	 */
+	public void setSession(Session session) {
+		this.session = session;
+	}
+
+
+	/**
+	 * @param message the message to set
+	 */
+	public void setMessage(MimeMessage message) {
+		this.message = message;
+	}
+
+
 }
 
