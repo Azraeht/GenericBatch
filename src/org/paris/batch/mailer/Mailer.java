@@ -135,7 +135,7 @@ public class Mailer {
 							return new PasswordAuthentication("username", "password");
 						}
 					}));
-				}else if(this.props.getProperty(MailerParameters.AUTHMODE).equals(MailerParameters.AUTHSSL)){
+				}else if(this.props.getProperty(MailerParameters.AUTHMODE).equals(MailerParameters.AUTHTLS)){
 					// Mode de connexion TLS
 					this.session = Session.getDefaultInstance(props,
 							new javax.mail.Authenticator() {
