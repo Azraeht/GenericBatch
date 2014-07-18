@@ -81,20 +81,75 @@ public class Mailer {
 	 */
 	protected ArrayList<String> attachements = new ArrayList<String>(); 
 
-	
+
 	protected ArrayList<MimeMessage> messages = new ArrayList<MimeMessage>();
-	
-	
+
+	private String port;
+
+	/**
+	 * Constructeur : Initialise la session d'envoi de mail en suivant le paramétrage de mail.properties
+	 * */
 	public Mailer(Properties properties, Logger logger)
 	{	
 
 		// Initialisation des propriétés
 		this.setLogger(logger);
 		this.setProps(properties);
+		// On crée la session d'envoi de mail
+		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
 
-		// Get the default Session object.
-		this.setSession(Session.getDefaultInstance(this.props));	
+			// Si on est en mode authentifié : Récupération du login et mot de passe
+			final String username = this.props.getProperty(MailerParameters.USERNAME); 
+			final String password = this.props.getProperty(MailerParameters.PASSWORD);
 
+			// Récupération de l'hôte et du port
+			this.host = this.props.getProperty(MailerParameters.SMTPHOST);
+			this.port = this.props.getProperty(MailerParameters.SMTPPORT);
+
+			// si les info d'authentificatino sont présentes
+			if(username != null && password != null && !username.equals("") && !password.equals("")){
+
+				if(this.props.getProperty(MailerParameters.AUTHMODE).equals(MailerParameters.AUTHSSL)){
+					// Mode de connexion SSL
+					// Ajout de la classe de connexion SSL
+					props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+					props.put("mail.smtp.socketFactory.port",this.props.getProperty(MailerParameters.SMTPPORT));
+					this.setSession(Session.getInstance(props,
+							new javax.mail.Authenticator() {
+						protected PasswordAuthentication getPasswordAuthentication() {
+							return new PasswordAuthentication("username", "password");
+						}
+					}));
+				}else if(this.props.getProperty(MailerParameters.AUTHMODE).equals(MailerParameters.AUTHSSL)){
+					// Mode de connexion TLS
+					this.session = Session.getDefaultInstance(props,
+							new javax.mail.Authenticator() {
+						protected PasswordAuthentication getPasswordAuthentication() {
+							return new PasswordAuthentication(username,password);
+						}
+					});
+				}else{
+					this.logger.error("Mail : Erreur de création de la session Mail. Le mode d'authentification n'est pas connu (SSL ou TLS acceptés)");
+				}
+			}else{
+				this.logger.error("MAIL : Impossible de s'authentifier au serveur SMTP, les paramètres mail.smtp.username et mail.smtp.password ne sont pas renseignés dans mailer.properties");
+			}
+		}else{
+			this.setSession(Session.getDefaultInstance(this.props));
+		}
+
+
+		// DEBUG : Affichage du paramétrage du mailer
+		StringBuilder parametrage = new StringBuilder("Mail : Paramétrage de session\n");
+		parametrage.append("Hôte : "+this.host+" : "+this.port+"\n");
+		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
+			parametrage.append("Auth : "+this.props.getProperty(MailerParameters.AUTHMODE)+" using login: "+this.props.getProperty(MailerParameters.USERNAME)+"\n");
+		}else
+			parametrage.append("Auth : Non authentifié\n");
+		if(this.props.getProperty(MailerParameters.IPV6ENABLE).equals("false")){
+			parametrage.append("Mail : Mode IPV4");
+		}
+		this.logger.debug(parametrage);
 	}
 
 	/**
@@ -107,11 +162,11 @@ public class Mailer {
 		haveAttachment=false;
 		try
 		{
-			logger.debug("Nouveau message créé (ID = " + message.getMessageID() + ")");
+			logger.debug("Mail : Nouveau message créé (ID = " + message.getMessageID() + ")");
 		}
 		catch(MessagingException me)
 		{
-			logger.error("Ouhla, j'ai créé un nouveau message et ce gros chacal veut pas me donner son ID... ah l'bàtard !\n" + me.getLocalizedMessage());			
+			logger.error("Mail : Erreur lors de la création de l'ID du message \n" + me.getLocalizedMessage());			
 		}
 	}
 
@@ -122,7 +177,7 @@ public class Mailer {
 	 */
 	public void setMainText(String text) throws CannotWriteTextToMessageException
 	{
-			this.mainText = text;
+		this.mainText = text;
 	}
 
 	/**
@@ -168,7 +223,7 @@ public class Mailer {
 			try {
 				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 			} catch (AddressException e) {
-				logger.error("MAIL : Erreur de création de l'adresse :\n" + e.getLocalizedMessage());
+				logger.error("MAIL : Erreur de création de l'adresse du destinataire :\n" + e.getLocalizedMessage());
 				throw new MessagingException(e.getLocalizedMessage());
 			} catch (MessagingException e) {
 				logger.error("MAIL : Erreur d'ajout du destinataire :\n" + e.getLocalizedMessage());
@@ -191,7 +246,7 @@ public class Mailer {
 			try {
 				message.setFrom(new InternetAddress(from));
 			} catch (AddressException e) {
-				logger.error("MAIL : Erreur de création de l'adresse :\n" + e.getLocalizedMessage());
+				logger.error("MAIL : Erreur de création de l'adresse  de l'émetteur :\n" + e.getLocalizedMessage());
 				throw new MessagingException(e.getLocalizedMessage());
 			} catch (MessagingException e) {
 				logger.error("MAIL : Erreur d'ajout de l'émetteur :\n" + e.getLocalizedMessage());
@@ -272,30 +327,43 @@ public class Mailer {
 	public int send(boolean keep) throws CannotSendMailException
 	{
 		int id = 0;
+		this.newMessage();
 		if(this.message != null){
 			try
 			{
 				if(this.setDestinataire()){
+
 					if(this.setExpediteur()){
+
 						if(this.setSujet()){
+
 							// Initialisation du multipart
 							this.multipart = new MimeMultipart();
-							
+
 							// Ajout du corps
-							 BodyPart messageBodyPart = new MimeBodyPart();
-							 messageBodyPart.setText(this.mainText);
-							 multipart.addBodyPart(messageBodyPart);
-							 
+							MimeBodyPart messagePart = new MimeBodyPart();
+							messagePart.setText(this.mainText);
+							multipart.addBodyPart(messagePart);
+
 							// Ajout des pièces jointes
-							for (String attachement : this.attachements) {
-								 messageBodyPart = new MimeBodyPart();
-						         DataSource source = new FileDataSource(attachement);
-						         messageBodyPart.setDataHandler(new DataHandler(source));
-						         messageBodyPart.setFileName(attachement);
-						         multipart.addBodyPart(messageBodyPart);
+							for (String attachement : this.attachements) {				
+								MimeBodyPart messageBodyPart = new MimeBodyPart();
+								DataSource source = new FileDataSource(attachement);
+								messageBodyPart.setDataHandler(new DataHandler(source));
+								messageBodyPart.setFileName(attachement);
+								multipart.addBodyPart(messageBodyPart);
 							}
-							
-							Transport.send(this.message);
+							this.message.setContent(this.multipart);
+
+
+							if(this.props.getProperty(MailerParameters.AUTH).equals("true")){
+								System.out.println("Envoi Authentifié");
+								Transport transport = session.getTransport("smtp");
+								transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
+								transport.sendMessage(this.message,this.message.getAllRecipients());
+							}else{
+								Transport.send(this.message);
+							}
 							if(keep){
 								this.messages.add(this.message);
 							}
@@ -321,7 +389,54 @@ public class Mailer {
 				throw new CannotSendMailException(me.getLocalizedMessage());
 			}
 		}
+
+		// DEBUG : Récapitulatif de l'envoi de mail
+		StringBuilder recap = new StringBuilder("Mail : Récapitulatif envoi de mail\n");
+		recap.append("ID : "+id+"(Sauvegardé: ");
+		if(keep){
+			recap.append("oui");
+		}else{
+			recap.append("non");
+		}
+		recap.append(")/n");
+		recap.append("Emetteur : "+this.from+"/n");
+		recap.append("Destinataire : "+this.to+"/n");
+		recap.append("Sujet : "+this.subject+"/n");
+		recap.append("Pièces jointes : ");
+		for (String attachement : this.attachements) {
+			recap.append(attachement+" / ");
+		}
+		recap.append("\n");
+		recap.append("Corps : "+this.mainText+"/n");
+
+		this.logger.debug(recap);
+
 		return id;
+	}
+	/**
+	 * Méthode simple d'envoi de mail à la volée
+	 */
+	public void quickSend(String from,String to,String titre,String message,Properties props) throws CannotSendMailException{
+
+		// Création d'une session simple
+		props.put("mail.transport.protocol", "smtp");
+		Session session = Session.getDefaultInstance(props, null);
+		try {
+			// Création du message
+			Message msg = new MimeMessage(session);
+			msg.setFrom(new InternetAddress(from));
+			InternetAddress[] address = {new InternetAddress(to)};
+			msg.setRecipients(Message.RecipientType.TO, address);
+			msg.setSubject(titre);
+			msg.setSentDate(new Date());
+			msg.setText(message);
+			// Envoi du message
+			Transport.send(msg);
+		}
+		catch (MessagingException me) {
+			logger.error("\n" + me.getLocalizedMessage());
+			throw new CannotSendMailException(me.getLocalizedMessage());
+		}
 	}
 
 
