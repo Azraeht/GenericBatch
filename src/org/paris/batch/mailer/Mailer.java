@@ -8,6 +8,7 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 import org.apache.log4j.Logger;
+import org.paris.batch.exception.CannotJoinAttachementException;
 import org.paris.batch.exception.CannotSendMailException;
 import org.paris.batch.exception.CannotWriteTextToMessageException;
 import org.paris.batch.exception.GeneralMailingException;
@@ -81,6 +82,10 @@ public class Mailer {
 	 */
 	protected ArrayList<String> attachements = new ArrayList<String>(); 
 
+	/**
+	 * Propriété contenant la liste des pièces jointes mail
+	 */
+	protected ArrayList<Integer> attachementsMail = new ArrayList<Integer>(); 
 
 	protected ArrayList<MimeMessage> messages = new ArrayList<MimeMessage>();
 
@@ -91,10 +96,14 @@ public class Mailer {
 	 * */
 	public Mailer(Properties properties, Logger logger)
 	{	
-
 		// Initialisation des propriétés
 		this.setLogger(logger);
 		this.setProps(properties);
+		
+		if(this.props.getProperty(MailerParameters.IPV6ENABLE).equals("false")){
+			System.setProperty("java.net.preferIPv4Stack" , "true");
+		}
+		
 		// On crée la session d'envoi de mail
 		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
 
@@ -287,30 +296,16 @@ public class Mailer {
 	 * @throws IOException 
 	 * @throws MessagingException 
 	 */
-	public void addMailAsAttachment(MimeMessage attachment,int numMail) throws MessagingException, IOException{
+	public void addMailAsAttachment(int numMail) throws MessagingException, IOException{
 		//on crée une nouvelle partie du message
-		BodyPart messageBodyPart = new MimeBodyPart();
-		messageBodyPart.setContent(new MimeMessage(attachment),"mail n°"+numMail);
-		multipart.addBodyPart(messageBodyPart);
+		this.attachementsMail.add(numMail);
 		//le boolean est maintenant true car le mail contient une pièce jointe
 		if(haveAttachment==false){
 			haveAttachment=true;
 		}	
 	}
 
-	/**
-	 * Méthode permettant d'ajouter le contenu du multipart dans le mail
-	 * @throws MessagingException
-	 */
-	public void addMultipartInMail() throws MessagingException{
-		if(message == null){
-			this.newMessage();
-		}
-
-		message.setContent(multipart);
-	}
-
-	public void addMailAttachement(String fileName) throws MessagingException{
+	public void addMailAttachement(String fileName) throws CannotJoinAttachementException{
 		//on crée une nouvelle partie du message
 		this.attachements.add(fileName);
 		//le boolean est maintenant true car le mail contient une pièce jointe
@@ -352,6 +347,12 @@ public class Mailer {
 								messageBodyPart.setDataHandler(new DataHandler(source));
 								messageBodyPart.setFileName(attachement);
 								multipart.addBodyPart(messageBodyPart);
+							}
+							this.message.setContent(this.multipart);
+							
+							// Ajout des pièces jointes Mail
+							for (int attachementMail : this.attachementsMail) {				
+								//TODO
 							}
 							this.message.setContent(this.multipart);
 
@@ -411,8 +412,25 @@ public class Mailer {
 
 		this.logger.debug(recap);
 
+		// Message envoyé, on vide les informations en attente
+		this.cleanMessage();
+		
 		return id;
 	}
+	
+	/**
+	 * Méthode permetant de vider les informations en attente d'envoi
+	 */
+	private void cleanMessage() {
+		this.from = null;
+		this.to = null;
+		this.subject = null;
+		this.mainText = null;
+		this.message = null;
+		this.attachements = new ArrayList<String>();
+		this.attachementsMail = new ArrayList<Integer>();
+	}
+
 	/**
 	 * Méthode simple d'envoi de mail à la volée
 	 */
@@ -432,6 +450,9 @@ public class Mailer {
 			msg.setText(message);
 			// Envoi du message
 			Transport.send(msg);
+			
+			// Message envoyé, on vide les informations en attente
+			this.cleanMessage();
 		}
 		catch (MessagingException me) {
 			logger.error("\n" + me.getLocalizedMessage());
