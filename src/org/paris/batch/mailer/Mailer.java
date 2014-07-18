@@ -1,5 +1,8 @@
 package org.paris.batch.mailer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -8,6 +11,9 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 import org.apache.log4j.Logger;
+import org.paris.batch.config.ConfigurationManagerBatch;
+import org.paris.batch.config.ConfigurationParameters;
+import org.paris.batch.exception.CannotFindMessageException;
 import org.paris.batch.exception.CannotJoinAttachementException;
 import org.paris.batch.exception.CannotSendMailException;
 import org.paris.batch.exception.CannotWriteTextToMessageException;
@@ -85,7 +91,7 @@ public class Mailer {
 	/**
 	 * Propriété contenant la liste des pièces jointes mail
 	 */
-	protected ArrayList<Integer> attachementsMail = new ArrayList<Integer>(); 
+	protected ArrayList<String> attachementsMail = new ArrayList<String>(); 
 
 	protected ArrayList<MimeMessage> messages = new ArrayList<MimeMessage>();
 
@@ -99,11 +105,11 @@ public class Mailer {
 		// Initialisation des propriétés
 		this.setLogger(logger);
 		this.setProps(properties);
-		
+
 		if(this.props.getProperty(MailerParameters.IPV6ENABLE).equals("false")){
 			System.setProperty("java.net.preferIPv4Stack" , "true");
 		}
-		
+
 		// On crée la session d'envoi de mail
 		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
 
@@ -296,9 +302,9 @@ public class Mailer {
 	 * @throws IOException 
 	 * @throws MessagingException 
 	 */
-	public void addMailAsAttachment(int numMail) throws MessagingException, IOException{
+	public void addMailAsAttachment(String idMail) throws MessagingException, IOException{
 		//on crée une nouvelle partie du message
-		this.attachementsMail.add(numMail);
+		this.attachementsMail.add(idMail);
 		//le boolean est maintenant true car le mail contient une pièce jointe
 		if(haveAttachment==false){
 			haveAttachment=true;
@@ -318,10 +324,11 @@ public class Mailer {
 	 * @param keep : Défini le message doit être sauvegardé par le mailer après envoi
 	 * @return id : id du mail envoyé (0 si echec de l'envoi de mail)
 	 * @throws CannotSendMailException signale que l'envoi du mail a échoué
+	 * @throws CannotJoinAttachementException 
 	 */
-	public int send(boolean keep) throws CannotSendMailException
+	public String send(boolean keep) throws CannotSendMailException, CannotJoinAttachementException
 	{
-		int id = 0;
+		String id = "";
 		this.newMessage();
 		if(this.message != null){
 			try
@@ -348,27 +355,53 @@ public class Mailer {
 								messageBodyPart.setFileName(attachement);
 								multipart.addBodyPart(messageBodyPart);
 							}
-							this.message.setContent(this.multipart);
-							
+
 							// Ajout des pièces jointes Mail
-							for (int attachementMail : this.attachementsMail) {				
-								//TODO
+							for (String attachementMail : this.attachementsMail) {				
+								//on crée une nouvelle partie du message
+								MimeBodyPart messageBodyPart = new MimeBodyPart();
+								MimeMessage messagetosend;
+								try {
+									messagetosend = this.searchMessage(attachementMail);
+								} catch (CannotFindMessageException e1) {
+									throw new CannotSendMailException(e1.getLocalizedMessage());
+								}
+								
+								// On sauvegarde le mail à joindre dans le répertoire temporaire du batch
+								String emlfile = (this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+attachementMail.replaceAll("<", "").replaceAll(">","")+".eml");
+								try {
+									messagetosend.writeTo(new FileOutputStream(new File(emlfile)));
+								} catch (FileNotFoundException e) {
+									logger.error("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
+									throw new CannotJoinAttachementException("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
+								} catch (IOException e) {
+									logger.error("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
+									throw new CannotJoinAttachementException("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
+								}
+								
+								// On joint le fichier local eml au mail
+								DataSource source = new FileDataSource(emlfile);
+								messageBodyPart.setDataHandler(new DataHandler(source));
+								messageBodyPart.setFileName(messagetosend.getSubject()+".eml");
+								multipart.addBodyPart(messageBodyPart);
 							}
 							this.message.setContent(this.multipart);
 
 
 							if(this.props.getProperty(MailerParameters.AUTH).equals("true")){
-								System.out.println("Envoi Authentifié");
+								// Pour le mode connecté on se connect au serveur smtp
 								Transport transport = session.getTransport("smtp");
 								transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
 								transport.sendMessage(this.message,this.message.getAllRecipients());
 							}else{
 								Transport.send(this.message);
 							}
+							
+							// On sauvegarde le mail si nécessaire
 							if(keep){
 								this.messages.add(this.message);
 							}
-							id = this.message.getMessageNumber();
+							id = this.message.getMessageID();
 						}else
 						{
 							logger.error("MAIL : Pas de sujet défini, le mail n'a pas été envoyé");
@@ -414,21 +447,55 @@ public class Mailer {
 
 		// Message envoyé, on vide les informations en attente
 		this.cleanMessage();
-		
+
 		return id;
 	}
-	
+
 	/**
 	 * Méthode permetant de vider les informations en attente d'envoi
 	 */
 	private void cleanMessage() {
+		
+		// On vide les info du mail
 		this.from = null;
 		this.to = null;
 		this.subject = null;
 		this.mainText = null;
 		this.message = null;
 		this.attachements = new ArrayList<String>();
-		this.attachementsMail = new ArrayList<Integer>();
+		this.attachementsMail = new ArrayList<String>();
+		
+		// On supprime les eml temporaire
+		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
+		String [] listefichiers;
+		int i;
+		listefichiers=folder.list();
+		for(i=0;i<listefichiers.length;i++){
+			if(listefichiers[i].endsWith(".eml")==true){
+				File eml = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+listefichiers[i]);
+				eml.delete();
+			}
+		} 
+		
+	}
+	/**
+	 * Méthode de recherche de Message dans la liste des messages sauvegardés
+	 * @param id du message
+	 * @return
+	 * @throws CannotFindMessageException 
+	 */
+	private MimeMessage searchMessage(String id) throws CannotFindMessageException{
+		MimeMessage mes = null;
+		for (MimeMessage messave : this.messages) {
+			try {
+				if(messave.getMessageID().equals(id))
+					mes = messave;
+			} catch (MessagingException e) {
+				this.logger.error("Mail : Impossible de recherche le mail dans la liste des mails sauvegardés : "+e.getLocalizedMessage());
+				throw new CannotFindMessageException("Mail : Impossible de recherche le mail dans la liste des mails sauvegardés : "+e.getLocalizedMessage());
+			}
+		}
+		return mes;
 	}
 
 	/**
@@ -450,7 +517,7 @@ public class Mailer {
 			msg.setText(message);
 			// Envoi du message
 			Transport.send(msg);
-			
+
 			// Message envoyé, on vide les informations en attente
 			this.cleanMessage();
 		}

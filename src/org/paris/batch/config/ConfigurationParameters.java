@@ -132,5 +132,7 @@ public class ConfigurationParameters {
      * Paramètre contenant la version du batch
      */
 	public static final String VERSION = "gen.version";
+
+	public static final String TEMPDIR = "config.gen.tempdir";
     
 }

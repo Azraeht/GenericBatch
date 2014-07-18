@@ -253,7 +253,7 @@ public abstract class GenericBatch {
 				
 				//Module Mailer
 				if(configfile.equals("mail")){
-					this.mailer = new Mailer(ConfigurationManagerBatch.filterProperties(props, "mail.", false), this.logger);
+					this.mailer = new Mailer(props, this.logger);
 				}
 				this.logger.info("Module complémentaire chargé : "+configfile);
 			}
