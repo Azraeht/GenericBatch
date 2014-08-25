@@ -93,9 +93,20 @@ public class Mailer {
 	 */
 	protected ArrayList<String> attachementsMail = new ArrayList<String>(); 
 
+	/**
+	 * Propriété contenant la liste des messages sauvegardés
+	 */
 	protected ArrayList<MimeMessage> messages = new ArrayList<MimeMessage>();
 
+	/**
+	 * Propriété contenant le port sur serveur d'envoi de mail 
+	 */
 	private String port;
+
+	/**
+	 *  Propriété contenant la valeur du mode no-commit
+	 */
+	private Boolean nocommit;
 
 	/**
 	 * Constructeur : Initialise la session d'envoi de mail en suivant le paramétrage de mail.properties
@@ -165,6 +176,14 @@ public class Mailer {
 			parametrage.append("Mail : Mode IPV4");
 		}
 		this.logger.debug(parametrage);
+
+		// Mode no-commit
+		if(properties.getProperty(ConfigurationParameters.NOCOMMIT_KEY).equals("true")){
+			this.nocommit = true;
+		}else{
+			this.nocommit = false;
+		}
+		System.out.println(this.nocommit);
 	}
 
 	/**
@@ -298,7 +317,7 @@ public class Mailer {
 
 	/**
 	 * Méthode permettant d'ajouter un mail en tant que pièce jointe
-	 * @param attachment
+	 * @param idMail : id de l'E-mail à joindre
 	 * @throws IOException 
 	 * @throws MessagingException 
 	 */
@@ -366,7 +385,7 @@ public class Mailer {
 								} catch (CannotFindMessageException e1) {
 									throw new CannotSendMailException(e1.getLocalizedMessage());
 								}
-								
+
 								// On sauvegarde le mail à joindre dans le répertoire temporaire du batch
 								String emlfile = (this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+attachementMail.replaceAll("<", "").replaceAll(">","")+".eml");
 								try {
@@ -378,7 +397,7 @@ public class Mailer {
 									logger.error("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
 									throw new CannotJoinAttachementException("MAIL : Impossible de stocker temporairement le mail à mettre en pièce jointe :"+e.getLocalizedMessage());
 								}
-								
+
 								// On joint le fichier local eml au mail
 								DataSource source = new FileDataSource(emlfile);
 								messageBodyPart.setDataHandler(new DataHandler(source));
@@ -390,13 +409,23 @@ public class Mailer {
 
 							if(this.props.getProperty(MailerParameters.AUTH).equals("true")){
 								// Pour le mode connecté on se connect au serveur smtp
-								Transport transport = session.getTransport("smtp");
-								transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
-								transport.sendMessage(this.message,this.message.getAllRecipients());
+								if(!this.nocommit){
+									Transport transport = session.getTransport("smtp");
+									transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
+									transport.sendMessage(this.message,this.message.getAllRecipients());
+									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+								}else{
+									this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+								}
 							}else{
-								Transport.send(this.message);
+								if(!this.nocommit){
+									Transport.send(this.message);
+									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+								}else{
+									this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+								}
 							}
-							
+
 							// On sauvegarde le mail si nécessaire
 							if(keep){
 								this.messages.add(this.message);
@@ -425,25 +454,20 @@ public class Mailer {
 		}
 
 		// DEBUG : Récapitulatif de l'envoi de mail
-		StringBuilder recap = new StringBuilder("Mail : Récapitulatif envoi de mail\n");
-		recap.append("ID : "+id+"(Sauvegardé: ");
-		if(keep){
-			recap.append("oui");
-		}else{
-			recap.append("non");
-		}
-		recap.append(")/n");
-		recap.append("Emetteur : "+this.from+"/n");
-		recap.append("Destinataire : "+this.to+"/n");
-		recap.append("Sujet : "+this.subject+"/n");
-		recap.append("Pièces jointes : ");
-		for (String attachement : this.attachements) {
-			recap.append(attachement+" / ");
-		}
-		recap.append("\n");
-		recap.append("Corps : "+this.mainText+"/n");
+		String recap ="";
 
-		this.logger.debug(recap);
+		this.logger.debug("Mail : Récapitulatif envoi de mail");
+		this.logger.debug("ID : "+id+"(Sauvegardé: "+keep);
+
+		this.logger.debug("Emetteur : "+this.from);
+		this.logger.debug("Destinataire : "+this.to);
+		this.logger.debug("Sujet : "+this.subject);
+		for (String attachement : this.attachements) {
+			recap+=attachement+" / ";
+		}
+		this.logger.debug("Pièces jointes : "+recap);
+		this.logger.debug("Corps : "+this.mainText);
+
 
 		// Message envoyé, on vide les informations en attente
 		this.cleanMessage();
@@ -455,7 +479,7 @@ public class Mailer {
 	 * Méthode permetant de vider les informations en attente d'envoi
 	 */
 	private void cleanMessage() {
-		
+
 		// On vide les info du mail
 		this.from = null;
 		this.to = null;
@@ -464,7 +488,7 @@ public class Mailer {
 		this.message = null;
 		this.attachements = new ArrayList<String>();
 		this.attachementsMail = new ArrayList<String>();
-		
+
 		// On supprime les eml temporaire
 		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
 		String [] listefichiers;
@@ -476,12 +500,12 @@ public class Mailer {
 				eml.delete();
 			}
 		} 
-		
+
 	}
 	/**
 	 * Méthode de recherche de Message dans la liste des messages sauvegardés
 	 * @param id du message
-	 * @return
+	 * @return Message envoyé
 	 * @throws CannotFindMessageException 
 	 */
 	private MimeMessage searchMessage(String id) throws CannotFindMessageException{
@@ -507,19 +531,33 @@ public class Mailer {
 		props.put("mail.transport.protocol", "smtp");
 		Session session = Session.getDefaultInstance(props, null);
 		try {
-			// Création du message
-			Message msg = new MimeMessage(session);
-			msg.setFrom(new InternetAddress(from));
-			InternetAddress[] address = {new InternetAddress(to)};
-			msg.setRecipients(Message.RecipientType.TO, address);
-			msg.setSubject(titre);
-			msg.setSentDate(new Date());
-			msg.setText(message);
-			// Envoi du message
-			Transport.send(msg);
+			if(!this.props.getProperty(MailerParameters.AUTH).equals("true")){
+				// Création du message
+				Message msg = new MimeMessage(session);
+				msg.setFrom(new InternetAddress(from));
+				InternetAddress[] address = {new InternetAddress(to)};
+				msg.setRecipients(Message.RecipientType.TO, address);
+				msg.setSubject(titre);
+				msg.setSentDate(new Date());
+				msg.setText(message);
 
-			// Message envoyé, on vide les informations en attente
-			this.cleanMessage();
+				// Envoi du message
+				if(!this.nocommit){
+					Transport.send(msg);
+					this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+					this.logger.debug("MAIL Expéditeur : "+this.from);
+					this.logger.debug("MAIL Destinataire : "+this.to);
+					this.logger.debug("MAIL Objet : "+this.subject);
+				}else{
+					this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+					this.logger.debug("MAIL Expéditeur : "+this.from);
+					this.logger.debug("MAIL Destinataire : "+this.to);
+					this.logger.debug("MAIL Objet : "+this.subject);
+				}
+				
+			}else{
+				this.logger.info("Erreur envoi message : QuickSend ne permet pas le mode d'envoi Authentifié"); 
+			}
 		}
 		catch (MessagingException me) {
 			logger.error("\n" + me.getLocalizedMessage());

@@ -51,11 +51,11 @@ import org.paris.batch.datafile.DataFile;
       //getting username using System.getProperty in Java
        String user = System.getProperty("user.name") ;
        System.out.println("Username using system property: "  + user);
-    
+
      //getting username as environment variable in java, only works in windows
        String userWindows = System.getenv("USERNAME");
        System.out.println("Username using environment variable in windows : "  + userWindows);
-          
+
      //name and value of all environment variable in Java  program
       Map<String, String> env = System.getenv();
         for (String envName : env.keySet()) {
@@ -127,7 +127,7 @@ public abstract class GenericBatch {
 	 * ArrayList permettant de stocker les datafiles
 	 */
 	protected ArrayList<DataFile> dataFileList;
-	
+
 	protected Mailer mailer = null;
 
 
@@ -173,10 +173,9 @@ public abstract class GenericBatch {
 		}
 		//
 		if (DEBUG) {
-			System.out
-			.println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
+			System.out.println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
 		}
-		
+
 		// Initialisation des properties
 		props = ConfigurationManagerBatch.initProperties();
 
@@ -194,8 +193,7 @@ public abstract class GenericBatch {
 
 
 		if (DEBUG) {
-			System.out
-			.println("Instanciation de GenericBatch::Création du logger");
+			System.out.println("Instanciation de GenericBatch::Création du logger");
 		}
 		// -------------------- Versionning Batcht ---------------------------------------
 
@@ -233,7 +231,7 @@ public abstract class GenericBatch {
 		this.logger.info("Version : "+props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION));
 		this.logger.info("Version GenericBatch: "+versionGenericBatch);
 		this.logger.info("----------- Chargement des modules -----------");
-		
+
 		// Initialisation du writer et de la Datafilelist
 		this.writer = new FileWriter(this.logger);
 		this.logger.info("Module chargé : FileWriter");
@@ -247,10 +245,10 @@ public abstract class GenericBatch {
 		String ConfigFiles = props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
 
 		// On liste dans le log la liste des modules chargés : Mail, Datafile etc...
-		if(ConfigFiles != null){
+		if(!ConfigFiles.equals("")){
 			String[] listConfigFiles = ConfigFiles.split(",");
 			for (String configfile : listConfigFiles) {
-				
+
 				//Module Mailer
 				if(configfile.equals("mail")){
 					this.mailer = new Mailer(props, this.logger);
@@ -258,7 +256,19 @@ public abstract class GenericBatch {
 				this.logger.info("Module complémentaire chargé : "+configfile);
 			}
 		}
-		
+		// ---------------------------- Mode No-Commit ----------------------------------------
+		if(this.props.getProperty(ConfigurationParameters.NOCOMMIT_KEY).equals("true")){
+			Properties connexions = ConfigurationManagerBatch.filterProperties(this.props, ConfigurationParameters.DB_HOST_KEY, true);
+
+			// Pour chaque connexion présente dans le fichier de conf on passe celle-ci en mode No-Commit
+			Enumeration e = connexions.propertyNames();
+			for (; e.hasMoreElements();) {
+				String con = e.nextElement().toString();
+				this.props.setProperty(ConfigurationParameters.DB_NOCOMMIT_KEY+con, "true");
+			}
+			this.logger.info("Mode No-Commit : ON - Pas de modifications SQL ni envoi de mail");
+		}
+
 		// --------------------------- Fin de l'initialisation ---------------------------------
 		this.logger.info("Initialisation terminée.");
 	}

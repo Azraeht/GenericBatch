@@ -34,7 +34,10 @@ public class ConfigurationParameters {
      */
     public final static String ENV_DEBUG = "MDP_BATCH_DEBUG";
     
-    
+    /**
+     *  Général : no-commit mode
+    */
+    public static final String NOCOMMIT_KEY = "config.gen.no-commit-mode";
     
     /**
      * log : patron du format
@@ -102,7 +105,10 @@ public class ConfigurationParameters {
      * Database : Autocommit
      */
     public static final String DB_AUTOCOMMIT_KEY = "config.db.autocommit";
-    
+    /**
+     *  Database : no-commit mode
+    */
+    public static final String DB_NOCOMMIT_KEY = "config.db.no-commit-mode";
     /**
      * Préfix des formats types de properties de conf
      * format : préfix des properties de format pour les DataFiles
@@ -133,6 +139,9 @@ public class ConfigurationParameters {
      */
 	public static final String VERSION = "gen.version";
 
+	/**
+	 * Paramètre de l'emplacement du répertoire temporaire
+	 * */
 	public static final String TEMPDIR = "config.gen.tempdir";
     
 }

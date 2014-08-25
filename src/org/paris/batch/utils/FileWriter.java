@@ -150,11 +150,7 @@ public class FileWriter {
 
     /**
      * Wrapper de la méthode
-<<<<<<< HEAD
      * <code>writeXMLFile(String filename, Document document)</code> pour écrire
-=======
-     * <code>writeXMLFile(String filename, Document document)</code> pour �crire
->>>>>>> refs/remotes/GitServer/master
      * un fichier au format XML à partir d'un objet
      * <code>org.jdom2.Element</code>. Le document conteneur est automatiquement
      * créé.

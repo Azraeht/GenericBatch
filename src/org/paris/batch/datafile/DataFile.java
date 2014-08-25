@@ -45,7 +45,7 @@ public class DataFile {
 	protected DataFileFormat in = null;
 	protected DataFileFormat out = null;
 
-	protected DataStructure datas = null;
+	public DataStructure datas = null;
 	
 	protected Logger logger=null;
 
