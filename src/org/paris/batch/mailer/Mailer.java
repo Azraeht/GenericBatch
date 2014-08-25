@@ -121,6 +121,10 @@ public class Mailer {
 			System.setProperty("java.net.preferIPv4Stack" , "true");
 		}
 
+		// Récupération de l'hôte et du port
+		this.host = this.props.getProperty(MailerParameters.SMTPHOST);
+		this.port = this.props.getProperty(MailerParameters.SMTPPORT);
+
 		// On crée la session d'envoi de mail
 		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
 
@@ -128,9 +132,7 @@ public class Mailer {
 			final String username = this.props.getProperty(MailerParameters.USERNAME); 
 			final String password = this.props.getProperty(MailerParameters.PASSWORD);
 
-			// Récupération de l'hôte et du port
-			this.host = this.props.getProperty(MailerParameters.SMTPHOST);
-			this.port = this.props.getProperty(MailerParameters.SMTPPORT);
+
 
 			// si les info d'authentificatino sont présentes
 			if(username != null && password != null && !username.equals("") && !password.equals("")){
@@ -166,16 +168,15 @@ public class Mailer {
 
 
 		// DEBUG : Affichage du paramétrage du mailer
-		StringBuilder parametrage = new StringBuilder("Mail : Paramétrage de session\n");
-		parametrage.append("Hôte : "+this.host+" : "+this.port+"\n");
+		this.logger.debug("Mail : Paramétrage de session");
+		this.logger.debug("Hôte : "+this.host+" : "+this.port);
 		if (this.props.getProperty(MailerParameters.AUTH).equals("true")){
-			parametrage.append("Auth : "+this.props.getProperty(MailerParameters.AUTHMODE)+" using login: "+this.props.getProperty(MailerParameters.USERNAME)+"\n");
+			this.logger.debug("Auth : "+this.props.getProperty(MailerParameters.AUTHMODE)+" using login: "+this.props.getProperty(MailerParameters.USERNAME));
 		}else
-			parametrage.append("Auth : Non authentifié\n");
+			this.logger.debug("Auth : Non authentifié");
 		if(this.props.getProperty(MailerParameters.IPV6ENABLE).equals("false")){
-			parametrage.append("Mail : Mode IPV4");
+			this.logger.debug("Mail : Mode IPV4");
 		}
-		this.logger.debug(parametrage);
 
 		// Mode no-commit
 		if(properties.getProperty(ConfigurationParameters.NOCOMMIT_KEY).equals("true")){
@@ -183,7 +184,6 @@ public class Mailer {
 		}else{
 			this.nocommit = false;
 		}
-		System.out.println(this.nocommit);
 	}
 
 	/**
@@ -554,7 +554,7 @@ public class Mailer {
 					this.logger.debug("MAIL Destinataire : "+this.to);
 					this.logger.debug("MAIL Objet : "+this.subject);
 				}
-				
+
 			}else{
 				this.logger.info("Erreur envoi message : QuickSend ne permet pas le mode d'envoi Authentifié"); 
 			}

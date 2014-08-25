@@ -70,7 +70,6 @@ public class DBConnection {
         // else if (){} and so on...
 
         // établissement de la connexion au SGBD
-
         try {
             connect = DriverManager.getConnection(url,
                     p.getProperty(ConfigurationParameters.DB_USER_KEY),

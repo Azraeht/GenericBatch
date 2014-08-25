@@ -44,18 +44,24 @@ public class SQLExecutor {
             throws DatabaseDriverNotFoundException, ConfigurationBatchException {
         super();
         // Création de la connexion
+        this.logger.debug("Ouverture de la connection en cours...");
         this.connection = DBConnection.getConnection(properties);
+        this.logger.debug("Connection ouverte.");
         // Attribution du logger
         this.logger = logger;
         // Préparation du runner
         runner = new QueryRunner();
+        
         // Mode no-commit
         if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true")){
         	this.nocommit = true;
         }else{
         	this.nocommit = false;
         }
-        logger.debug("SQLExecutor configured.");
+        this.logger.debug("SQLExecutor : Paramétrage");
+        this.logger.debug("Connexion : "+properties.getProperty(ConfigurationParameters.DB_USER_KEY)+"/"+properties.getProperty(ConfigurationParameters.DB_PASS_KEY)+"@"+properties.getProperty(ConfigurationParameters.DB_HOST_KEY)+":"+properties.getProperty(ConfigurationParameters.DB_PORT_KEY));
+        this.logger.debug("Mode Auto-Commit :"+properties.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY));
+        
     }
 
     /**
@@ -66,8 +72,6 @@ public class SQLExecutor {
     public void close() throws SQLExecutorException {
         try {
             logger.debug("Fermeture de la connection en cours...");
-            
-            
             this.connection.close();
             logger.debug("Fermeture de la connection effectuée.");
 
@@ -94,9 +98,9 @@ public class SQLExecutor {
         int result = 0;
         try {
         	// Exécution de la requête
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             result = runner.update(connection, query);
-            logger.info("Requète exécutée. Résultat retourné : " + result);
+            logger.debug("Requète exécutée. Résultat retourné : " + result);
             
             // Rollback si mode no-commit
             if(nocommit){
@@ -131,12 +135,12 @@ public class SQLExecutor {
         int result = 0;
         try {
         	// Exécution de la requête
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             for(Object arg:params){
             	logger.info("Param : "+arg.toString());
              }            
             result = runner.update(connection, query, params);
-            logger.info("Requète exécutée. Résultat retourné : " + result);
+            logger.debug("Requète exécutée. Résultat retourné : " + result);
             
             // Rollback si mode no-commit
             if(nocommit){
@@ -165,9 +169,9 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             result = runner.query(connection, query, handler);
-            logger.info("Requète exécutée. Eléments retournés : "
+            logger.debug("Requète exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
@@ -191,14 +195,14 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             for(Object arg:params){
-            	logger.info("Param : "+arg.toString());
+            	logger.debug("Param : "+arg.toString());
              }        
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, new MapListHandler(),
                     params);
-            logger.info("Requète exécutée. Eléments retournés : "
+            logger.debug("Requète exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
@@ -238,9 +242,9 @@ public class SQLExecutor {
             throws SQLExecutorException {
         ResultSet result = null;
         try {
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             for(Object arg:params){
-            	logger.info("Param : "+arg.toString());
+            	logger.debug("Param : "+arg.toString());
              }         
             PreparedStatement ps = connection.prepareStatement(query);
             if (params != null)
@@ -248,7 +252,7 @@ public class SQLExecutor {
                     ps.setObject(i + 1, params[i]);
                 }
             result = ps.executeQuery();
-            logger.info("Requète exécutée.");
+            logger.debug("Requète exécutée.");
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
@@ -274,13 +278,13 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
-            logger.info("Requète SQL : " + query);
+            logger.debug("Requète SQL : " + query);
             for(Object arg:params){
-            	logger.info("Param : "+arg.toString());
+            	logger.debug("Param : "+arg.toString());
              }        
             // org.apache.commons.dbutils.ResultSetHandler<T>
             result = runner.query(connection, query, handler, params);
-            logger.info("Requète exécutée. Eléments retournés : "
+            logger.debug("Requète exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
@@ -296,7 +300,9 @@ public class SQLExecutor {
      */
     public void commit(){
     	try {
+    		// Commit des changement
 			this.connection.commit();
+			this.logger.debug("Commit effectué");
 		} catch (SQLException sqle) {
 			String msg = "Exception lors du rollback : "+ sqle.getMessage();
             logger.error(msg);
@@ -308,7 +314,9 @@ public class SQLExecutor {
      */
     public void rollback(){
     	try {
+    		// Rollback des changement
 			this.connection.rollback();
+			this.logger.debug("RollBack effectué");
 		} catch (SQLException sqle) {
 			String msg = "Exception lors du rollback : "+ sqle.getMessage();
             logger.error(msg);
