@@ -508,7 +508,7 @@ public class Mailer {
 	 * @return Message envoyé
 	 * @throws CannotFindMessageException 
 	 */
-	private MimeMessage searchMessage(String id) throws CannotFindMessageException{
+	protected MimeMessage searchMessage(String id) throws CannotFindMessageException{
 		MimeMessage mes = null;
 		for (MimeMessage messave : this.messages) {
 			try {
