@@ -1,37 +1,35 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
 <HEAD>
-<TITLE>MDPH001 - Batch de notification unique</TITLE>
+<TITLE>Documentation GénéricBatch</TITLE>
 </HEAD>
 <BODY>
-	GenericBatchSampleProject - Squelette de projet pour les batches MDP.
+	GenericBatch - Squelette de projet pour les batches MDP.
 
 	<h2>Introduction</h2>
-	Décrire ici les objectifs du batch.
+	Le GenericBatch est un framework Java permettant le développement de batch dans le cadre des contraintes Ville de Paris
 	<p></p>
 
-
-	<h2>Synopsis</h2>
-	Décrire les étapes du batch.
-	<br> Example:
-	<ol>
-		<li>Etape d'initialisation</li>
-		<li>Travail sur les enregistrements</li>
-		<li>Libération des ressources</li>
-		<li>...</li>
-	</ol>
 	<h2>Support</h2>
-	<p>Indiquer les contacts pour le support...</p>
+	<p>Pour le support du GenericBatch contactez Brice SANTUS ou Guillaume LANNOO</p>
 
 	<h2>Historique</h2>
-	Insérer l'historique des versions significatives...
-
-	<table width="100%" border="1" cellspacing="0" cellpadding="3">
+		<table width="100%" border="1" cellspacing="0" cellpadding="3">
 		<tbody>
 			<tr bgcolor="#CCCCFF" class="TableHeadingColor">
 				<th align="left"><b>Version</b></th>
 				<th align="left"><b>Date</b></th>
 				<th align="left"><b>Commentaires</b></th>
+			</tr>
+			<tr bgcolor="white" class="TableRowColor">
+				<td><code>1.5 </code></td>
+				<td><code>26/08/2014 </code></td>
+				<td>Intégration module Mailer. Implémentation Mode No-Commit. Implémentatino Mode Debug</td>
+			</tr>
+			<tr bgcolor="white" class="TableRowColor">
+				<td><code>1.4 </code></td>
+				<td><code>20/06/2014 </code></td>
+				<td>Modification de la configuration du batch. Intégration du module Datafile</td>
 			</tr>
 			<tr bgcolor="white" class="TableRowColor">
 				<td><code>1.1 </code></td>
@@ -53,35 +51,6 @@
 	<hr>
 
 	<h2>Création d'un nouveau batch</h2>
-
-	<h3>manuellement</h3>
-	En attendant d'avoir la tâche ant de création d'un nouveau projet
-	(automatique), il convient de suivre les instructions suivantes pour
-	créer un nouveau projet :
-	<ol>
-		<li>Créer un nouveau projet Java</li>
-		<li>Copier le contenu du dossier <code>templates</code> à la
-			racine du nouveau projet
-		</li>
-		<li>Modifier le fichier <code>build.properties</code></li>
-		<li>Le build.xml (ant) doit alors être opérationnel</li>
-		<li>La classe principale (exécutant le <code>main</code>) doit
-			hériter de la classe <code>GenericBatch</code></li>
-		<li>Implémenter les méthodes abstraites</li>
-	</ol>
-	ou (méthode préférée) avec le build.xml
-
-	<h3>tache ant : new</h3>
-	Cette cible permet de créer un nouveau projet basé sur GenericBatch.
-
-	<h2>Cibles importantes du fichier ant des projets hérités</h2>
-	<h3>dist</h3>
-	Cette cible permet de construire le batch avec sa documentation.
-	<p>
-		Le dossier
-		<code>dist</code>
-		contiendra tous les éléments nécessaires à son exécution autonome.
-	<h3>run</h3>
-	Cette cible permet d'exécuter le batch.
+	<p>Pour créer un nouveau batch référez-vous à la documentation de <a href="http://10.161.129.90/wiki/index.php/GenericBatchSampleProject" >GenericBatchSampleProject</a></p>
 </BODY>
 </HTML>
