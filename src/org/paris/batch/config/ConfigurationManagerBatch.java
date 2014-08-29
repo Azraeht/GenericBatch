@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import org.paris.batch.GenericBatch;
 import org.paris.batch.exception.ConfigurationBatchException;
 
 
@@ -19,7 +20,7 @@ public class ConfigurationManagerBatch {
 
     /**
 	 * 
-	 * Charge le fichier de propriétés spécifié
+	 * Charge le fichier de propriétés spécifié en paramètre, sauf si celui-ci est redéfini localement par une variable d'environnement
 	 *  
 	 * 
 	 * @param properties_type
@@ -36,26 +37,34 @@ public class ConfigurationManagerBatch {
 
 		// Quel est le type de fichier de configuration ?
 		if (properties_type.equals(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME)) {
+		    //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
 			env_var = ConfigurationParameters.ENV_CONFIG_FILENAME;
 			env = System.getenv(env_var);
 		} 
 		else if (properties_type.equals(ConfigurationParameters.PROPERTIES_QUERY_FILENAME)) {
-			env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
+            //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
+		    env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
 			env = System.getenv(env_var);
 		}
 
-
-		// L'environnement surcharge les valeurs par défaut (dossier `config`).
+		//la chaîne env vaut null si aucune variable d'env n'a été trouvée.
+		// Si elle a été trouvée, l'environnement surcharge les valeurs par défaut (dossier `config`).
 		if (env != null && (new File(env)).exists()) {
 			properties_filename = env;
 		} else {
+		    //construire le chemin d'accès au fichier de propriétés à charger
 			properties_filename = System.getProperty("user.dir")
 					+ ConfigurationParameters.CONFIG_DIRNAME + properties_type;
 		}
-		try {
+		
+		//on tente le chargement du fichier demandé
+		try
+		{
 			properties.load(new FileInputStream(new File(properties_filename)));
 			return properties;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			String msg = "Erreur lors du traitement de chargement de configuration - Fichier concerné: "
 					+ properties_filename + "\nException : " + e.getMessage();
 			System.err.println(msg);
@@ -68,32 +77,51 @@ public class ConfigurationManagerBatch {
 	 * config.configfiles de config.properties(fichier de conf par défaut et obligatoire)
 	 * */
 	public static Properties initProperties() throws ConfigurationBatchException{
-
+	    boolean DEBUG = false;
+	    
+        //debug defini dans l'environnement ?
+        if (System.getenv(GenericBatch.ENV_DEBUG) != null) {
+            DEBUG = true;
+        }
+        
 		Properties basicsProperties = new Properties();
 		Properties finalProperties = new Properties();
 		try{
+		    if(DEBUG) System.out.println("Chargement des propriétés élémentaires (fichier " + ConfigurationParameters.PROPERTIES_CONFIG_FILENAME + ")");
 			// Initialisation à partir des fichiers par défaut config.properties
 			basicsProperties = ConfigurationManagerBatch.loadProperties(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME);
-
+			if(DEBUG) System.out.println("Propriétés élémentaires chargées.");
+			
+			
 			// Récupération de la liste des fichiers de config de modules présents dans le répertoire 'config'
+			if(DEBUG) System.out.println("Chargement des propriétés supplémentaires (définies dans le fichier " + ConfigurationParameters.PROPERTIES_CONFIG_FILENAME + ", clé : " + ConfigurationParameters.CONFIG_PREFIX + "." + ConfigurationParameters.CONFIG_MODULES + ")");
+			String configFiles = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
 
-			String ConfigFiles = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
-
-			if(ConfigFiles != null){
-				String[] listConfigFiles = ConfigFiles.split(",");
+			//si la liste est renseignée (pas null, pas vide)
+			if(configFiles != null && !configFiles.trim().equals(""))
+			{
+			    //créer un tableau de String à partir de la liste 
+				String[] listConfigFiles = configFiles.split(",");
+				
+				//déverser les propriétés élémentaires dans le paquet de propriétés final
 				finalProperties.putAll(basicsProperties);
 
-				// Chargement de chaque fichier de properties
-				for (String configfile : listConfigFiles) {
+				// Chargement de chaque fichier de properties indiqué dans la liste
+				for (String configfile : listConfigFiles)
+				{
+				    //pour le fichier considéré, intégrer les propriétés chargées au paquet de propriétés final
 					finalProperties.putAll(ConfigurationManagerBatch.loadProperties(configfile+".properties"));
 				}
 			}
-		}catch(Exception e){
+		}
+		catch(Exception e)
+		{
 			String msg = "Erreur lors de l'initialisation de la configuration\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new ConfigurationBatchException(msg);
 		}
 
+		//chargement fini : on renvoie le paquet de propriétés final, et zou !
 		return finalProperties;
 	}
 	/**

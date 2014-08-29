@@ -26,7 +26,7 @@
 		</delete>
 	</target>
 	<!-- ========== compile =========== -->
-	<target name="compile" depends="clean">
+	<target name="compile" depends="clean" description="compilation des sources Java">
 		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" encoding="UTF-8"/>
@@ -46,7 +46,7 @@
 		</javadoc>
 	</target>
 	<!-- ========== jar =========== -->
-	<target name="jar" depends="compile,javadoc">
+	<target name="jar" depends="compile,javadoc" description="Création de l'archive Jar">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/${ant.project.name}-${version}.jar">
 			<fileset dir="${classes.dir}" />
@@ -58,7 +58,7 @@
 		</jar>
 	</target>
 	<!-- ========== new batch project =========== -->
-	<target name="new" depends="jar">
+	<target name="new" depends="jar" description="initialisation d'un nouveau projet">
 		<input message="Nom du nouveau projet : " addproperty="project" defaultvalue="NouveauProjet" />
 		<echo>projet à créer : "${project}"</echo>
 		<property name="class" value="org.paris.batch.${project}" />
