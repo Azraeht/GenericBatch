@@ -191,12 +191,13 @@ public abstract class GenericBatch {
 			}
 		}
 
+		
+		
 
 		if (DEBUG) {
-			System.out.println("Instanciation de GenericBatch::Création du logger");
+			System.out.println("Instanciation de GenericBatch::Récupération du numéro de version du framework");
 		}
-		// -------------------- Versionning Batcht ---------------------------------------
-
+		// -------------------- Versionning Batch ---------------------------------------
 
 		// Récupération de la version du GénéricBatch
 		String classSimpleName = GenericBatch.class.getSimpleName() + ".class";
@@ -214,16 +215,24 @@ public abstract class GenericBatch {
 			// Lire la propriété "Implementation-Version" du Manifest
 			versionGenericBatch = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
 			jar.close();
-
-		} catch (IOException e) {
-			String msg = "Erreur de l'accès au Manifest de GenericBatch :\nException : " + e.getMessage();
+			if(DEBUG) System.out.println("Version du framework récupérée dans le fichier manifest : " + versionGenericBatch);
+		}
+		catch (IOException ioe)
+		{
+			String msg = "IOEXception à l'accès au Manifest de GenericBatch :\nException : " + ioe.getMessage();
 			System.err.println(msg);
 			throw new ConfigurationBatchException(msg);
 		}
+		catch (Exception e)
+		{
+		    String msg = "Erreur inattendue lors de l'accès au Manifest du framework.\nException :" + e.getMessage();
+		    System.err.println(msg);
+		    throw new ConfigurationBatchException(msg);
+		}
 
 		// --------------------Initialisation des modules---------------------------------------
-
-
+	    if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du logger");
+        
 		// Initialisation du logger
 		this.logger = LogBatch.getLogBatch(props);
 		this.logger.info("---------- Initialisation du batch -----------");
@@ -231,23 +240,30 @@ public abstract class GenericBatch {
 		this.logger.info("Version : "+props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION));
 		this.logger.info("Version GenericBatch: "+versionGenericBatch);
 		this.logger.info("----------- Chargement des modules -----------");
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::logger instancié");
 
 		// Initialisation du writer et de la Datafilelist
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du FileWriter");
 		this.writer = new FileWriter(this.logger);
 		this.logger.info("Module chargé : FileWriter");
 		this.dataFileList = new ArrayList<DataFile>();
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::FileWriter instancié");
 
 		// Initialisation de l'executeur de commande
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du CommandExecutor");
 		this.command = new CommandExecutor(this.logger);
 		this.logger.info("Module chargé : CommandExecutor");
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::CommandExecutor instancié");
 
 		// Initialisation des fichiers de config
 		String ConfigFiles = props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
 
 		// On liste dans le log la liste des modules chargés : Mail, Datafile etc...
-		if(!ConfigFiles.equals("")){
+		if(!ConfigFiles.equals(""))
+		{
 			String[] listConfigFiles = ConfigFiles.split(",");
-			for (String configfile : listConfigFiles) {
+			for (String configfile : listConfigFiles)
+			{
 
 				//Module Mailer
 				if(configfile.equals("mail")){
@@ -271,6 +287,7 @@ public abstract class GenericBatch {
 
 		// --------------------------- Fin de l'initialisation ---------------------------------
 		this.logger.info("Initialisation terminée.");
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::Fin de l'instanciation, prêt à taffer");
 	}
 
 	/**

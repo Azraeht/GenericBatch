@@ -13,6 +13,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.log4j.Logger;
+import org.paris.batch.config.ConfigurationManagerBatch;
 import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
@@ -31,6 +32,52 @@ public class SQLExecutor {
     private Boolean nocommit;
 
     /**
+     * Constructeur permettant d'exploiter l'indicateur no-commit
+     * @param props Jeu de propriétés complet
+     * @param propsFilter Chaîne à utiliser pour filtrer les propriétés nécessaires à l'élaboration de la connexion
+     * @param keepRadix indicateur pour conserver ou non la chaîne filtrée dans les propriétés filtrées
+     * @param logger logger à utiliser pour la trace du SQLExecutor
+     * @throws DatabaseDriverNotFoundException si le chargement du driver échoue
+     * @throws ConfigurationBatchException si un problème de configuration intervient
+     */
+    public SQLExecutor(Properties props, String propsFilter, boolean keepRadix, Logger logger)
+        throws DatabaseDriverNotFoundException, ConfigurationBatchException {
+        //instanciation
+        super();
+        
+        //récupération du logger
+        this.logger = logger;
+        
+        Properties filteredProps = ConfigurationManagerBatch.filterProperties(props, propsFilter, true);
+        
+        // Création de la connexion en fonction des propriétés transmises en paramètre
+        this.logger.debug("Ouverture de la connexion en cours...");
+        this.connection = DBConnection.getConnection(filteredProps);
+        this.logger.debug("Connexion ouverte.");
+        
+        // Préparation du runner
+        runner = new QueryRunner();
+        
+        // Mode no-commit
+        if(props.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true"))
+        {
+            this.nocommit = true;
+        }
+        else
+        {
+            this.nocommit = false;
+        }
+        this.logger.debug("SQLExecutor : Paramétrage");
+        this.logger.debug("Connexion : "+
+                        filteredProps.getProperty(ConfigurationParameters.DB_USER_KEY)+"/"+
+                        filteredProps.getProperty(ConfigurationParameters.DB_PASS_KEY)+"@"+
+                        filteredProps.getProperty(ConfigurationParameters.DB_HOST_KEY)+":"+
+                        filteredProps.getProperty(ConfigurationParameters.DB_PORT_KEY));
+        this.logger.debug("Mode Auto-Commit :"+filteredProps.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY));
+        
+    }
+    
+    /**
      * Constructeur
      * 
      * @param properties
@@ -43,19 +90,40 @@ public class SQLExecutor {
     public SQLExecutor(Properties properties, Logger logger)
             throws DatabaseDriverNotFoundException, ConfigurationBatchException {
         super();
-        // Création de la connexion
-        this.logger.debug("Ouverture de la connection en cours...");
-        this.connection = DBConnection.getConnection(properties);
-        this.logger.debug("Connection ouverte.");
-        // Attribution du logger
+        
+        //TODO : supprimer la ligne ci-dessous
+        System.out.println("super effectué.");
+        
+        //affecter le logger transmis en paramètre comme logger de cette classe
         this.logger = logger;
+
+        //TODO : supprimer la ligne ci-dessous
+        System.out.println("affectation du logger effectuée.");
+        
+        // Création de la connexion en fonction des propriétés transmises en paramètre
+        this.logger.debug("Ouverture de la connexion en cours...");
+        this.connection = DBConnection.getConnection(properties);
+        this.logger.debug("Connexion ouverte.");
+
+        // Attribution du logger
+        //this.logger = logger;
+        
+        //TODO : supprimer la ligne ci-dessous
+        System.out.println("ouverture de la connexion effectuée.");
+        
         // Préparation du runner
         runner = new QueryRunner();
+
+        //TODO : supprimer la ligne ci-dessous
+        System.out.println("query runner instancié.");
         
         // Mode no-commit
-        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true")){
+        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY, "false").equals("true"))
+        {
         	this.nocommit = true;
-        }else{
+        }
+        else
+        {
         	this.nocommit = false;
         }
         this.logger.debug("SQLExecutor : Paramétrage");

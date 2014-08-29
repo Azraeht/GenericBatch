@@ -81,7 +81,7 @@ public class DBConnection {
 
         } catch (SQLException sqle) {
 
-            String msg = "Probléme de connexion à la base de données :\n\t"
+            String msg = "Problème de connexion à la base de données :\n\t"
 
                     + "\n" + sqle.getMessage();
             System.err.println(msg);
