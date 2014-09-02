@@ -84,6 +84,10 @@ public class ConfigurationManagerBatch {
             DEBUG = true;
         }
         
+        /*---------------------------Vérification des properties----------------------------*/
+        
+        /*----------------------------------------------------------------------------------*/
+        
 		Properties basicsProperties = new Properties();
 		Properties finalProperties = new Properties();
 		try{
@@ -92,6 +96,51 @@ public class ConfigurationManagerBatch {
 			basicsProperties = ConfigurationManagerBatch.loadProperties(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME);
 			if(DEBUG) System.out.println("Propriétés élémentaires chargées.");
 			
+	        /*---------------------------Vérification des properties----------------------------*/
+			// Vérification du nom du batch
+	        String propertie = basicsProperties.getProperty(ConfigurationParameters.NOM_BATCH);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.NOM_BATCH, "Batch généré à partir du GenericBatch");
+	        }
+	        // Vérification de la version du batch
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.VERSION);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.VERSION, "Version non définie");
+	        }
+	        // Vérification du répertoire temporaire
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.TEMPDIR);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.TEMPDIR, "autotempdir");
+	        	 File dir = new File("autotempdir");
+	        	 if(!dir.exists())
+	        		 dir.mkdir();
+	        }
+	        // Vérification du mode no-commit
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.NOCOMMIT_KEY);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.NOCOMMIT_KEY, "false");
+	        }
+	        // Vérification du paramétrage du log : Nom du fichier, emplacement
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATTERN_KEY);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.LOG_PATTERN_KEY, ConfigurationParameters.LOG_PATTERN_DFT);
+	        }
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_FILE_KEY);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
+	        }
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATH_KEY);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.LOG_PATH_KEY, ConfigurationParameters.LOG_PATH_DFT);
+	        }
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_LEVEL_KEY);
+	        if(propertie == null || propertie.equals("")){
+	        	basicsProperties.put(ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
+	        }
+	        
+	  
+			
+	        /*----------------------------------------------------------------------------------*/
 			
 			// Récupération de la liste des fichiers de config de modules présents dans le répertoire 'config'
 			if(DEBUG) System.out.println("Chargement des propriétés supplémentaires (définies dans le fichier " + ConfigurationParameters.PROPERTIES_CONFIG_FILENAME + ", clé : " + ConfigurationParameters.CONFIG_PREFIX + "." + ConfigurationParameters.CONFIG_MODULES + ")");

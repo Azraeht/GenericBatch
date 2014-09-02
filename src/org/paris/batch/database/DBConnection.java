@@ -17,77 +17,86 @@ import org.paris.batch.exception.DatabaseDriverNotFoundException;
  *
  */
 public class DBConnection {
-    /**
-     * URL JDBC pour Oracle
-     */
-    private static final String URL_ORACLE = "jdbc:oracle:thin:@%s:%s:%s";
-    /**
-     * URL JDBC pour MySQL
-     */
-    private static final String URL_MYSQL = "jdbc:mysql://%s:%s/%s";
+	/**
+	 * URL JDBC pour Oracle
+	 */
+	private static final String URL_ORACLE = "jdbc:oracle:thin:@%s:%s:%s";
+	/**
+	 * URL JDBC pour MySQL
+	 */
+	private static final String URL_MYSQL = "jdbc:mysql://%s:%s/%s";
+	/**
+	 * URL JDBC pour PostGreSQL
+	 */
+	private static final String URL_POSTGRE = "jdbc:postgresql://%s:%s/%s";
 
-    /**
-     * constructeur
-     * 
-     * @param p
-     *            propriétés pour la création de la connection
-     * @return Connection object
-     * @throws DatabaseDriverNotFoundException
-     * @throws ConfigurationBatchException
-     */
-    public static Connection getConnection(Properties p)
-            throws DatabaseDriverNotFoundException, ConfigurationBatchException {
-        Connection connect;
-        
-        // System.out.print(p); 
+	/**
+	 * constructeur
+	 * 
+	 * @param p
+	 *            propriétés pour la création de la connection
+	 * @return Connection object
+	 * @throws DatabaseDriverNotFoundException
+	 * @throws ConfigurationBatchException
+	 */
+	public static Connection getConnection(Properties p)
+			throws DatabaseDriverNotFoundException, ConfigurationBatchException {
+		Connection connect;
 
-        String driver = p
-                .getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY);
-        if (!DbUtils.loadDriver(driver)) {
+		// System.out.print(p); 
 
-            // Si le driver n'est pas détecté l'application s'arréte
+		String driver = p
+				.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY);
+		if (!DbUtils.loadDriver(driver)) {
 
-            String msg = "Driver `" + driver + "` absent.";
-            System.err.println(msg);
+			// Si le driver n'est pas détecté l'application s'arréte
 
-            throw new DatabaseDriverNotFoundException(msg);
-        }
-        // Set jdbc database url according driver.
-        String url = "";
-        if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("oracle")) {
-            url = String.format(URL_ORACLE,
+			String msg = "Driver `" + driver + "` absent.";
+			System.err.println(msg);
 
-                    p.getProperty(ConfigurationParameters.DB_HOST_KEY),
-                    p.getProperty(ConfigurationParameters.DB_PORT_KEY),
-                    p.getProperty(ConfigurationParameters.DB_ID_KEY));
+			throw new DatabaseDriverNotFoundException(msg);
+		}
+		// Set jdbc database url according driver.
+		String url = "";
+		if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("oracle")) {
+			url = String.format(URL_ORACLE,
 
-        } else if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("mysql")) {
-            url = String.format(URL_MYSQL,
-                    p.getProperty(ConfigurationParameters.DB_HOST_KEY),
-                    p.getProperty(ConfigurationParameters.DB_PORT_KEY),
-                    p.getProperty(ConfigurationParameters.DB_ID_KEY));
-        }
-        // else if (){} and so on...
+					p.getProperty(ConfigurationParameters.DB_HOST_KEY),
+					p.getProperty(ConfigurationParameters.DB_PORT_KEY),
+					p.getProperty(ConfigurationParameters.DB_ID_KEY));
 
-        // établissement de la connexion au SGBD
-        try {
-            connect = DriverManager.getConnection(url,
-                    p.getProperty(ConfigurationParameters.DB_USER_KEY),
-                    p.getProperty(ConfigurationParameters.DB_PASS_KEY));
+		} else if (p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("mysql")) {
+			url = String.format(URL_MYSQL,
+					p.getProperty(ConfigurationParameters.DB_HOST_KEY),
+					p.getProperty(ConfigurationParameters.DB_PORT_KEY),
+					p.getProperty(ConfigurationParameters.DB_ID_KEY));
+		}else if(p.getProperty(ConfigurationParameters.DB_JDBC_DRIVER_KEY).contains("postgresql")){
+			url = String.format(URL_POSTGRE,
+					p.getProperty(ConfigurationParameters.DB_HOST_KEY),
+					p.getProperty(ConfigurationParameters.DB_PORT_KEY),
+					p.getProperty(ConfigurationParameters.DB_ID_KEY));
+		}
+		// else if (){} and so on...
 
-            // TODO : ATTENTION au CAST !!!!!!!!   
-            connect.setAutoCommit(Boolean.parseBoolean(p.getProperty(
-            		ConfigurationParameters.DB_AUTOCOMMIT_KEY, "false")));
+		// établissement de la connexion au SGBD
+		try {
+			connect = DriverManager.getConnection(url,
+					p.getProperty(ConfigurationParameters.DB_USER_KEY),
+					p.getProperty(ConfigurationParameters.DB_PASS_KEY));
 
-        } catch (SQLException sqle) {
+			// TODO : ATTENTION au CAST !!!!!!!!   
+			connect.setAutoCommit(Boolean.parseBoolean(p.getProperty(
+					ConfigurationParameters.DB_AUTOCOMMIT_KEY, "false")));
 
-            String msg = "Problème de connexion à la base de données :\n\t"
+		} catch (SQLException sqle) {
+
+			String msg = "Problème de connexion à la base de données :\n\t"
 
                     + "\n" + sqle.getMessage();
-            System.err.println(msg);
-            throw new ConfigurationBatchException(msg);
-        }
+			System.err.println(msg);
+			throw new ConfigurationBatchException(msg);
+		}
 
-        return connect;
-    }
+		return connect;
+	}
 }

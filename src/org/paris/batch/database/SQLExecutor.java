@@ -29,6 +29,7 @@ public class SQLExecutor {
     private Connection connection;
     private Logger logger;
     private QueryRunner runner;
+    private ProcRunner procRunner;
     private Boolean nocommit;
 
     /**
@@ -132,6 +133,38 @@ public class SQLExecutor {
         
     }
 
+    /**
+     * La méthode execute une procédure ou un package Oracle.
+     * Elle s'appuie sur la classe ProcRunner qui vient compléter la librairie DBUtils
+     * @throws SQLExecutorException
+     */
+    public List<?> executeCallableStatement(String statementCall) throws SQLExecutorException {
+        @SuppressWarnings("rawtypes")
+        List<?> result = new ArrayList();
+        try {
+            logger.info("Appel à exécuter : " + statementCall);
+            
+            //result = runner.update(connection, query);
+            result = procRunner.queryProc(connection, statementCall, new MapListHandler());
+            logger.info("Traitement exécuté. Eléments retournés : " + result.size());
+        } catch (SQLException sqle) {
+            String msg = "Exception à l'exécution de '" + statementCall + "'\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+
+            throw new SQLExecutorException(msg);
+        }
+        catch (Exception e)
+        {
+            String msg = "Exception à l'exécution de '" + statementCall + "'\n" + e.getMessage();
+            logger.error(msg);
+            throw new SQLExecutorException(msg);
+        }
+        return result;
+
+        
+    }
+    
     /**
      * Ferme la connection ouverte par {@link #SQLExecutor(Properties, Logger)}
      * 
