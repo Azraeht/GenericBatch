@@ -544,7 +544,7 @@ public class Mailer {
 				// Envoi du message
 				if(!this.nocommit){
 					Transport.send(msg);
-					this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+					this.logger.info("MAIL Envoyé");
 					this.logger.debug("MAIL Expéditeur : "+this.from);
 					this.logger.debug("MAIL Destinataire : "+this.to);
 					this.logger.debug("MAIL Objet : "+this.subject);
@@ -559,9 +559,9 @@ public class Mailer {
 				this.logger.info("Erreur envoi message : QuickSend ne permet pas le mode d'envoi Authentifié"); 
 			}
 		}
-		catch (MessagingException me) {
-			logger.error("\n" + me.getLocalizedMessage());
-			throw new CannotSendMailException(me.getLocalizedMessage());
+		catch (Exception me) {
+			logger.error("\n" + me.getMessage());
+			throw new CannotSendMailException(me.getMessage());
 		}
 	}
 

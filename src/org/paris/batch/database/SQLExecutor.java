@@ -92,14 +92,10 @@ public class SQLExecutor {
             throws DatabaseDriverNotFoundException, ConfigurationBatchException {
         super();
         
-        //TODO : supprimer la ligne ci-dessous
-        System.out.println("super effectué.");
         
         //affecter le logger transmis en paramètre comme logger de cette classe
         this.logger = logger;
 
-        //TODO : supprimer la ligne ci-dessous
-        System.out.println("affectation du logger effectuée.");
         
         // Création de la connexion en fonction des propriétés transmises en paramètre
         this.logger.debug("Ouverture de la connexion en cours...");
@@ -109,14 +105,9 @@ public class SQLExecutor {
         // Attribution du logger
         //this.logger = logger;
         
-        //TODO : supprimer la ligne ci-dessous
-        System.out.println("ouverture de la connexion effectuée.");
-        
         // Préparation du runner
         runner = new QueryRunner();
 
-        //TODO : supprimer la ligne ci-dessous
-        System.out.println("query runner instancié.");
         
         // Mode no-commit
         if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY, "false").equals("true"))

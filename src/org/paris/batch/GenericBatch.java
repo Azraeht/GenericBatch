@@ -191,48 +191,49 @@ public abstract class GenericBatch {
 			}
 		}
 
-		
-		
+
+
 
 		if (DEBUG) {
 			System.out.println("Instanciation de GenericBatch::Récupération du numéro de version du framework");
 		}
 		// -------------------- Versionning Batch ---------------------------------------
-
-		// Récupération de la version du GénéricBatch
-		String classSimpleName = GenericBatch.class.getSimpleName() + ".class";
-		// 2 - Récupérer le chemin physique de la classe
-		String pathToClass = GenericBatch.class.getResource(classSimpleName).toString();
-
-		// 3 - Récupérer le chemin de la classe à partir de la racine du classpath
-		String classFullName = GenericBatch.class.getName().replace('.', '/') + ".class";
-		// 4 - Récupérer le chemin complet vers MANIFEST.MF
-		String pathToJar = pathToClass.substring( 0, pathToClass.length() - (classFullName.length()+2)).replace("jar:file:", "");
 		String versionGenericBatch = "non définie";
-		try {
-			JarFile jar = new JarFile(pathToJar);
-			Manifest manifest = jar.getManifest();
-			// Lire la propriété "Implementation-Version" du Manifest
-			versionGenericBatch = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-			jar.close();
-			if(DEBUG) System.out.println("Version du framework récupérée dans le fichier manifest : " + versionGenericBatch);
-		}
-		catch (IOException ioe)
-		{
-			String msg = "IOEXception à l'accès au Manifest de GenericBatch :\nException : " + ioe.getMessage();
-			System.err.println(msg);
-			throw new ConfigurationBatchException(msg);
-		}
-		catch (Exception e)
-		{
-		    String msg = "Erreur inattendue lors de l'accès au Manifest du framework.\nException :" + e.getMessage();
-		    System.err.println(msg);
-		    throw new ConfigurationBatchException(msg);
-		}
+		if (!DEBUG) {
+			// Récupération de la version du GénéricBatch
+			String classSimpleName = GenericBatch.class.getSimpleName() + ".class";
+			// 2 - Récupérer le chemin physique de la classe
+			String pathToClass = GenericBatch.class.getResource(classSimpleName).toString();
 
+			// 3 - Récupérer le chemin de la classe à partir de la racine du classpath
+			String classFullName = GenericBatch.class.getName().replace('.', '/') + ".class";
+			// 4 - Récupérer le chemin complet vers MANIFEST.MF
+			String pathToJar = pathToClass.substring( 0, pathToClass.length() - (classFullName.length()+2)).replace("jar:file:", "");
+			
+			try {
+				JarFile jar = new JarFile(pathToJar);
+				Manifest manifest = jar.getManifest();
+				// Lire la propriété "Implementation-Version" du Manifest
+				versionGenericBatch = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+				jar.close();
+				if(DEBUG) System.out.println("Version du framework récupérée dans le fichier manifest : " + versionGenericBatch);
+			}
+			catch (IOException ioe)
+			{
+				String msg = "IOEXception à l'accès au Manifest de GenericBatch :\nException : " + ioe.getMessage();
+				System.err.println(msg);
+				throw new ConfigurationBatchException(msg);
+			}
+			catch (Exception e)
+			{
+				String msg = "Erreur inattendue lors de l'accès au Manifest du framework.\nException :" + e.getMessage();
+				System.err.println(msg);
+				throw new ConfigurationBatchException(msg);
+			}
+		}
 		// --------------------Initialisation des modules---------------------------------------
-	    if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du logger");
-        
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du logger");
+
 		// Initialisation du logger
 		this.logger = LogBatch.getLogBatch(props);
 		this.logger.info("---------- Initialisation du batch -----------");
@@ -257,21 +258,26 @@ public abstract class GenericBatch {
 
 		// Initialisation des fichiers de config
 		String ConfigFiles = props.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
-
+		
 		// On liste dans le log la liste des modules chargés : Mail, Datafile etc...
-		if(!ConfigFiles.equals(""))
-		{
-			String[] listConfigFiles = ConfigFiles.split(",");
-			for (String configfile : listConfigFiles)
+		if(ConfigFiles != null){
+			if(!ConfigFiles.equals(""))
 			{
-
-				//Module Mailer
-				if(configfile.equals("mail")){
-					this.mailer = new Mailer(props, this.logger);
+				System.out.println("OK");
+				String[] listConfigFiles = ConfigFiles.split(",");
+				for (String configfile : listConfigFiles)
+				{
+					System.out.println("OK1");
+					//Module Mailer
+					if(configfile.equals("mail")){
+						System.out.println("OK2");
+						this.mailer = new Mailer(props, this.logger);
+					}
+					this.logger.info("Module complémentaire chargé : "+configfile);
 				}
-				this.logger.info("Module complémentaire chargé : "+configfile);
 			}
 		}
+		if (DEBUG)System.out.println("Instanciation de GenericBatch::Fichiers de config complémentaire ");
 		// ---------------------------- Mode No-Commit ----------------------------------------
 		if(this.props.getProperty(ConfigurationParameters.NOCOMMIT_KEY).equals("true")){
 			Properties connexions = ConfigurationManagerBatch.filterProperties(this.props, ConfigurationParameters.DB_HOST_KEY, true);

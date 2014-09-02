@@ -100,12 +100,12 @@ public class ConfigurationManagerBatch {
 			// Vérification du nom du batch
 	        String propertie = basicsProperties.getProperty(ConfigurationParameters.NOM_BATCH);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.NOM_BATCH, "Batch généré à partir du GenericBatch");
+	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.NOM_BATCH, "Batch généré à partir du GenericBatch");
 	        }
 	        // Vérification de la version du batch
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.VERSION);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.VERSION, "Version non définie");
+	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION, "Version non définie");
 	        }
 	        // Vérification du répertoire temporaire
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.TEMPDIR);
@@ -117,21 +117,24 @@ public class ConfigurationManagerBatch {
 	        }
 	        // Vérification du mode no-commit
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.NOCOMMIT_KEY);
+	        System.out.println("No COMIT"+ propertie);
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.NOCOMMIT_KEY, "false");
 	        }
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.NOCOMMIT_KEY);
+	        System.out.println("No COMIT After"+ propertie);
 	        // Vérification du paramétrage du log : Nom du fichier, emplacement
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATTERN_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.LOG_PATTERN_KEY, ConfigurationParameters.LOG_PATTERN_DFT);
+	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_PATTERN_KEY, ConfigurationParameters.LOG_PATTERN_DFT);
 	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_FILE_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
+	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
 	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_LEVEL_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
+	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
 	        }
 	        
 	  
@@ -141,15 +144,16 @@ public class ConfigurationManagerBatch {
 			// Récupération de la liste des fichiers de config de modules présents dans le répertoire 'config'
 			if(DEBUG) System.out.println("Chargement des propriétés supplémentaires (définies dans le fichier " + ConfigurationParameters.PROPERTIES_CONFIG_FILENAME + ", clé : " + ConfigurationParameters.CONFIG_PREFIX + "." + ConfigurationParameters.CONFIG_MODULES + ")");
 			String configFiles = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.CONFIG_MODULES);
-
+			//déverser les propriétés élémentaires dans le paquet de propriétés final
+			finalProperties.putAll(basicsProperties);
+			
 			//si la liste est renseignée (pas null, pas vide)
 			if(configFiles != null && !configFiles.trim().equals(""))
 			{
 			    //créer un tableau de String à partir de la liste 
 				String[] listConfigFiles = configFiles.split(",");
 				
-				//déverser les propriétés élémentaires dans le paquet de propriétés final
-				finalProperties.putAll(basicsProperties);
+				
 
 				// Chargement de chaque fichier de properties indiqué dans la liste
 				for (String configfile : listConfigFiles)
