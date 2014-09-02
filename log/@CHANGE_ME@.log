@@ -1,0 +1,35 @@
+2014-09-02 18:07:16,310 [INFO ] (GenericBatch) ---------- Initialisation du batch -----------
+2014-09-02 18:07:16,312 [INFO ] (GenericBatch) Batch : Batch généré à partir du GenericBatch
+2014-09-02 18:07:16,312 [INFO ] (GenericBatch) Version : Version non définie
+2014-09-02 18:07:16,313 [INFO ] (GenericBatch) Version GenericBatch: non définie
+2014-09-02 18:07:16,314 [INFO ] (GenericBatch) ----------- Chargement des modules -----------
+2014-09-02 18:07:16,316 [INFO ] (GenericBatch) Module chargé : FileWriter
+2014-09-02 18:07:16,318 [INFO ] (GenericBatch) Module chargé : CommandExecutor
+2014-09-02 18:07:16,391 [DEBUG] (Mailer) Mail : Paramétrage de session
+2014-09-02 18:07:16,391 [DEBUG] (Mailer) Hôte : localhost : 25
+2014-09-02 18:07:16,392 [DEBUG] (Mailer) Auth : Non authentifié
+2014-09-02 18:07:16,394 [DEBUG] (Mailer) Mail : Mode IPV4
+2014-09-02 18:07:16,394 [INFO ] (GenericBatch) Module complémentaire chargé : mail
+2014-09-02 18:07:16,394 [INFO ] (GenericBatch) Initialisation terminée.
+2014-09-02 18:07:16,400 [DEBUG] (SQLExecutor) Ouverture de la connexion en cours...
+2014-09-02 18:07:16,683 [DEBUG] (SQLExecutor) Connexion ouverte.
+2014-09-02 18:07:16,685 [DEBUG] (SQLExecutor) SQLExecutor : Paramétrage
+2014-09-02 18:07:16,686 [DEBUG] (SQLExecutor) Connexion : AXEL/AXL@10.161.146.24:1521
+2014-09-02 18:07:16,686 [DEBUG] (SQLExecutor) Mode Auto-Commit :false
+2014-09-02 18:07:16,686 [DEBUG] (SQLExecutor) Fermeture de la connection en cours...
+2014-09-02 18:07:16,689 [DEBUG] (SQLExecutor) Fermeture de la connection effectuée.
+2014-09-02 18:07:16,704 [DEBUG] (Mailer) Mail : Nouveau message créé (ID = null)
+2014-09-02 18:07:17,034 [INFO ] (Mailer) MAIL Envoyé : N°<31457736.1.1409674036750.JavaMail.santusbr@DSTIBPHAB33851F>
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) Mail : Récapitulatif envoi de mail
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) ID : <31457736.1.1409674036750.JavaMail.santusbr@DSTIBPHAB33851F>(Sauvegardé: true
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) Emetteur : exempl@paris.fr
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) Destinataire : destinataire@paris.fr
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) Sujet : Test Mail Generic Batch
+2014-09-02 18:07:17,034 [DEBUG] (Mailer) Pièces jointes : 
+2014-09-02 18:07:17,038 [DEBUG] (Mailer) Corps : Ceci est un test 
+
+ Bonne journée
+2014-09-02 18:07:17,055 [INFO ] (Mailer) MAIL Envoyé
+2014-09-02 18:07:17,055 [DEBUG] (Mailer) MAIL Expéditeur : null
+2014-09-02 18:07:17,055 [DEBUG] (Mailer) MAIL Destinataire : null
+2014-09-02 18:07:17,055 [DEBUG] (Mailer) MAIL Objet : null

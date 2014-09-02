@@ -1,0 +1,7 @@
+2014-09-02 17:54:09,486 INFO  root - GenericBatch.java:239 - ---------- Initialisation du batch -----------
+2014-09-02 17:54:09,488 INFO  root - GenericBatch.java:240 - Batch : null
+2014-09-02 17:54:09,489 INFO  root - GenericBatch.java:241 - Version : null
+2014-09-02 17:54:09,489 INFO  root - GenericBatch.java:242 - Version GenericBatch: non définie
+2014-09-02 17:54:09,491 INFO  root - GenericBatch.java:243 - ----------- Chargement des modules -----------
+2014-09-02 17:54:09,494 INFO  root - GenericBatch.java:249 - Module chargé : FileWriter
+2014-09-02 17:54:09,496 INFO  root - GenericBatch.java:256 - Module chargé : CommandExecutor
