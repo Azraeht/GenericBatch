@@ -129,10 +129,6 @@ public class ConfigurationManagerBatch {
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
 	        }
-	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATH_KEY);
-	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.LOG_PATH_KEY, ConfigurationParameters.LOG_PATH_DFT);
-	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_LEVEL_KEY);
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
