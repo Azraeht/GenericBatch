@@ -98,12 +98,12 @@ public class ConfigurationManagerBatch {
 			
 	        /*---------------------------Vérification des properties----------------------------*/
 			// Vérification du nom du batch
-	        String propertie = basicsProperties.getProperty(ConfigurationParameters.NOM_BATCH);
+	        String propertie = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.NOM_BATCH);
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.NOM_BATCH, "Batch généré à partir du GenericBatch");
 	        }
 	        // Vérification de la version du batch
-	        propertie = basicsProperties.getProperty(ConfigurationParameters.VERSION);
+	        propertie = basicsProperties.getProperty(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION);
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.VERSION, "Version non définie");
 	        }
@@ -126,15 +126,15 @@ public class ConfigurationManagerBatch {
 	        // Vérification du paramétrage du log : Nom du fichier, emplacement
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATTERN_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_PATTERN_KEY, ConfigurationParameters.LOG_PATTERN_DFT);
+	        	basicsProperties.put(ConfigurationParameters.LOG_PATTERN_KEY, ConfigurationParameters.LOG_PATTERN_DFT);
 	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_FILE_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
+	        	basicsProperties.put(ConfigurationParameters.LOG_FILE_KEY, ConfigurationParameters.LOG_FILE_DFT);
 	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_LEVEL_KEY);
 	        if(propertie == null || propertie.equals("")){
-	        	basicsProperties.put(ConfigurationParameters.CONFIG_PREFIX+"."+ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
+	        	basicsProperties.put(ConfigurationParameters.LOG_LEVEL_KEY, ConfigurationParameters.LOG_LEVEL_KEY);
 	        }
 	        
 	  
