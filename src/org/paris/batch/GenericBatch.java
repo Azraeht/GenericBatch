@@ -263,14 +263,11 @@ public abstract class GenericBatch {
 		if(ConfigFiles != null){
 			if(!ConfigFiles.equals(""))
 			{
-				System.out.println("OK");
 				String[] listConfigFiles = ConfigFiles.split(",");
 				for (String configfile : listConfigFiles)
 				{
-					System.out.println("OK1");
 					//Module Mailer
 					if(configfile.equals("mail")){
-						System.out.println("OK2");
 						this.mailer = new Mailer(props, this.logger);
 					}
 					this.logger.info("Module complémentaire chargé : "+configfile);

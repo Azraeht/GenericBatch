@@ -117,12 +117,10 @@ public class ConfigurationManagerBatch {
 	        }
 	        // Vérification du mode no-commit
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.NOCOMMIT_KEY);
-	        System.out.println("No COMIT"+ propertie);
 	        if(propertie == null || propertie.equals("")){
 	        	basicsProperties.put(ConfigurationParameters.NOCOMMIT_KEY, "false");
 	        }
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.NOCOMMIT_KEY);
-	        System.out.println("No COMIT After"+ propertie);
 	        // Vérification du paramétrage du log : Nom du fichier, emplacement
 	        propertie = basicsProperties.getProperty(ConfigurationParameters.LOG_PATTERN_KEY);
 	        if(propertie == null || propertie.equals("")){
