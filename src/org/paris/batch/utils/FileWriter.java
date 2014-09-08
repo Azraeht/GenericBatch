@@ -168,10 +168,9 @@ public class FileWriter {
         writeXMLFile(filename, document);
     }
 
-    
     /**
 
-     * Ecrit le résultat d'une requéte dans un fichier au format CSV. Attention,
+     * Ecrit le résultat d'une requéte dans un fichier au format CSV dans le format par défaut UTF8. Attention,
      * dans cette méthode il n'y a pas d'entétes.<br>
      * Evolutions futures:<br>
      * - passer le séparateur de champ en option.
@@ -194,12 +193,42 @@ public class FileWriter {
      */
     public void writeCSVFile(String filename, List<Object[]> values, String columnHeader) throws FileWriterException
     {
+    	writeCSVFile(filename,values,columnHeader,DEFAULT_ENCODING);
+    }
+    
+    /**
+
+     * Ecrit le résultat d'une requéte dans un fichier au format CSV. Attention,
+     * dans cette méthode il n'y a pas d'entétes.<br>
+     * Evolutions futures:<br>
+     * - passer le séparateur de champ en option.
+     * 
+     * @param filename
+     *            le fichier de destination. Exemple :
+     *            <code>C:\Users\galloiem\workspace\GenericBatchSampleProject\log\out.txt</code>
+     *      
+     * @param values
+     *            l'ensemble de résultat d'une requéte sous la forme d'un
+
+     *            <code>ArrayListHandler</code>
+     *            
+     * @param columnHeader
+     *            la ligne d'en-tête devant apparaître au début du fichier CSV (si elle est vide ou nulle, on
+     *            ne met rien, évidemment !)  
+     * @param encoding
+     * 			format d'encodage du fichier de sortie
+     * 
+     * @throws FileWriterException
+     *            si quelque chose foire à l'écriture du fichier
+     */
+    public void writeCSVFile(String filename, List<Object[]> values, String columnHeader,String encoding) throws FileWriterException
+    {
         logger.info("Ecriture du fichier : " + filename); 
         try 
         {
             //ouvrir le fichier et déclarer un BufferedWriter dessus (en utilisant l'encodage par défaut)
             File file = new File(filename);
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),DEFAULT_ENCODING));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),encoding));
             
             //traiter la ligne d'en-tête
             if(columnHeader != null)
