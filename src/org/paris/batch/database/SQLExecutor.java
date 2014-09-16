@@ -229,7 +229,7 @@ public class SQLExecutor {
         	// Exécution de la requête
             logger.debug("Requète SQL : " + query);
             for(Object arg:params){
-            	logger.info("Param : "+arg.toString());
+            	logger.debug("Param : "+arg.toString());
              }            
             result = runner.update(connection, query, params);
             logger.debug("Requète exécutée. Résultat retourné : " + result);
