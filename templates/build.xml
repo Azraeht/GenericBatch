@@ -79,7 +79,7 @@
     </target>
 
     <!-- ========== dist =========== -->
-    <target name="dist" depends="jar,javadoc,build_cmd">
+    <target name="dist" depends="jar,javadoc"> <!--,build_cmd" -->
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${dist.dir}/lib" />
         <mkdir dir="${dist.dir}/config" />

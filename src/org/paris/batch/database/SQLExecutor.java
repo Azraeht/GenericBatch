@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -133,6 +134,11 @@ public class SQLExecutor {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
         try {
+        	// En cas de rollback
+        	if(nocommit){
+        		this.logger.info("Mode No-Commit On : Rollback effectué");
+        		this.logger.info("Traitement non exécuté car rollback surement impossible.");
+        	}
             logger.info("Appel à exécuter : " + statementCall);
             
             //result = runner.update(connection, query);
@@ -189,16 +195,24 @@ public class SQLExecutor {
     public int executeUpdate(String query) throws SQLExecutorException {
         int result = 0;
         try {
-        	// Exécution de la requête
-            logger.debug("Requète SQL : " + query);
-            result = runner.update(connection, query);
-            logger.debug("Requète exécutée. Résultat retourné : " + result);
-            
-            // Rollback si mode no-commit
-            if(nocommit){
-            	this.rollback();
-            	this.logger.info("Mode No-Commit On : Rollback effectué");
-            }
+        	// Cas de rollback impossible sur une commande SQL 
+			if((nocommit) && (query.indexOf("ALTER") != -1 || query.indexOf("TRUNCATE") != -1 || query.indexOf("DROP") != -1 || query.indexOf("CREATE") != -1)){
+				logger.debug("Requête SQL : " + query);
+				this.logger.info("Mode No-Commit On : Rollback effectué");
+				logger.debug("Requête non exécutée car rollback impossible.");
+			}else{
+	        	// Exécution de la requête
+	            logger.debug("Requète SQL : " + query);
+	            result = runner.update(connection, query);
+	            logger.debug("Requète exécutée. Résultat retourné : " + result);
+	            
+	            // Rollback si mode no-commit
+	            if(nocommit){
+	            	this.rollback();
+	            	this.logger.info("Mode No-Commit On : Rollback effectué");
+	            }
+				
+			}
             
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
@@ -226,19 +240,26 @@ public class SQLExecutor {
             throws SQLExecutorException {
         int result = 0;
         try {
-        	// Exécution de la requête
-            logger.debug("Requète SQL : " + query);
-            for(Object arg:params){
-            	logger.info("Param : "+arg.toString());
-             }            
-            result = runner.update(connection, query, params);
-            logger.debug("Requète exécutée. Résultat retourné : " + result);
-            
-            // Rollback si mode no-commit
-            if(nocommit){
-            	this.rollback();
-            	this.logger.info("Mode No-Commit On : Rollback effectué");
-            }
+        	// Cas de rollback impossible sur une commande SQL 
+        	if((nocommit) && (query.indexOf("ALTER") != -1 || query.indexOf("TRUNCATE") != -1 || query.indexOf("DROP") != -1 || query.indexOf("CREATE") != -1)){
+				logger.debug("Requête SQL : " + query);
+				this.logger.info("Mode No-Commit On : Rollback effectué");
+				logger.debug("Requête non exécutée car rollback impossible.");
+			}else{
+	        	// Exécution de la requête
+	            logger.debug("Requète SQL : " + query);
+	            for(Object arg:params){
+	            	logger.info("Param : "+arg.toString());
+	             }            
+	            result = runner.update(connection, query, params);
+	            logger.debug("Requète exécutée. Résultat retourné : " + result);
+	            
+	            // Rollback si mode no-commit
+	            if(nocommit){
+	            	this.rollback();
+	            	this.logger.info("Mode No-Commit On : Rollback effectué");
+	            }
+			}
         } catch (Exception sqle) {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
