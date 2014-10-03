@@ -1,6 +1,8 @@
 package org.paris.batch.logging;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import org.apache.log4j.ConsoleAppender;
@@ -76,9 +78,15 @@ public class LogBatch {
         
         // récupérer dans les propriétés du GenericBatch les informations de configuration de la trace (suite) :
         // - nom du fichier
-        String log_filename = properties.getProperty(
+        String datePattern = "yyyy-MM-dd_HH-mm-ss";
+        String strDate;
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat(datePattern);
+        strDate = sdf.format(new Date());
+        String filename = properties.getProperty(
         		ConfigurationParameters.LOG_FILE_KEY,
         		ConfigurationParameters.LOG_FILE_DFT);
+        String log_filename = filename.replaceAll("%date%", strDate);
         // - profondeur de la trace
         Level level = Level.toLevel(properties.getProperty(
         		ConfigurationParameters.LOG_LEVEL_KEY,
