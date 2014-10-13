@@ -333,7 +333,11 @@ public class Mailer {
 			haveAttachment=true;
 		}	
 	}
-
+	/**
+	 * Méthode permettant d'ajouter une pièce jointe à un mail
+	 * @param fileName
+	 * @throws CannotJoinAttachementException
+	 */
 	public void addMailAttachement(String fileName) throws CannotJoinAttachementException{
 		//on crée une nouvelle partie du message
 		this.attachements.add(fileName);
@@ -476,41 +480,41 @@ public class Mailer {
 		}
 		this.logger.debug("Pièces jointes : "+recap);
 		this.logger.debug("Corps : "+this.mainText);
-//
-//
-//		// Message envoyé, on vide les informations en attente
-//		this.cleanMessage();
-//
+
+
+		// Message envoyé, on vide les informations en attente
+		this.cleanMessage();
+
 		return id;
 	}
 
 	/**
 	 * Méthode permetant de vider les informations en attente d'envoi
 	 */
-//	private void cleanMessage() {
-//
-//		// On vide les info du mail
-//		this.from = null;
-//		this.to = null;
-//		this.subject = null;
-//		this.mainText = null;
-//		this.message = null;
-//		this.attachements = new ArrayList<String>();
-//		this.attachementsMail = new ArrayList<String>();
-//
-//		// On supprime les eml temporaire
-//		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
-//		String [] listefichiers;
-//		int i;
-//		listefichiers=folder.list();
-//		for(i=0;i<listefichiers.length;i++){
-//			if(listefichiers[i].endsWith(".eml")==true){
-//				File eml = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+listefichiers[i]);
-//				eml.delete();
-//			}
-//		} 
-//
-//	}
+	private void cleanMessage() {
+
+		// On vide les info du mail
+		this.from = null;
+		this.to = null;
+		this.subject = null;
+		this.mainText = null;
+		this.message = null;
+		this.attachements = new ArrayList<String>();
+		this.attachementsMail = new ArrayList<String>();
+
+		// On supprime les eml temporaire
+		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
+		String [] listefichiers;
+		int i;
+		listefichiers=folder.list();
+		for(i=0;i<listefichiers.length;i++){
+			if(listefichiers[i].endsWith(".eml")==true){
+				File eml = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+listefichiers[i]);
+				eml.delete();
+			}
+		} 
+
+	}
 	/**
 	 * Méthode de recherche de Message dans la liste des messages sauvegardés
 	 * @param id du message
@@ -545,11 +549,6 @@ public class Mailer {
 				Message msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(from));
 				InternetAddress[] address = InternetAddress.parse(to,true);
-//				for(int i =0;i<address.length;i++){
-//					InternetAddress[] addresses = InternetAddress.parse(to);
-//					logger.debug("test adresses multiples : " + addresses[i]);
-//					msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-//				}
 				msg.setRecipients(Message.RecipientType.TO, address);
 				msg.setSubject(titre);
 				msg.setSentDate(new Date());

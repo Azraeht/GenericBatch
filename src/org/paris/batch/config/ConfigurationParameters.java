@@ -3,6 +3,8 @@
  */
 package org.paris.batch.config;
 
+import java.io.File;
+
 /**
  * @author santusbr
  *
