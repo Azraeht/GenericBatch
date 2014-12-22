@@ -90,9 +90,12 @@ public class DBConnection {
 
 		} catch (SQLException sqle) {
 
-			String msg = "Problème de connexion à la base de données :\n\t"
-
-                    + "\n" + sqle.getMessage();
+			String msg = "Problème de connexion à la base de données :\n"
+                    + "URL = " + url + "\n"
+			        + "User = " + p.getProperty(ConfigurationParameters.DB_USER_KEY) + "\n"
+                    + "Password = " + p.getProperty(ConfigurationParameters.DB_PASS_KEY) + "\n"
+                    + "Autocommit " + (Boolean.parseBoolean(p.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY, "false")) ? "on" : "off") + "\n"
+			        + sqle.getMessage();
 			System.err.println(msg);
 			throw new ConfigurationBatchException(msg);
 		}

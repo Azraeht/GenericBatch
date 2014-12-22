@@ -107,6 +107,10 @@ public class SQLExecutor {
         
         // Préparation du runner
         runner = new QueryRunner();
+        this.logger.debug("QueryRunner instancié");
+        // préparation du procrunner
+        procRunner = new ProcRunner();
+        this.logger.debug("ProcRunner instancié");
 
         
         // Mode no-commit
@@ -129,12 +133,15 @@ public class SQLExecutor {
      * Elle s'appuie sur la classe ProcRunner qui vient compléter la librairie DBUtils
      * @throws SQLExecutorException
      */
-    public List<?> executeCallableStatement(String statementCall) throws SQLExecutorException {
+    public List<?> executeCallableStatement(String statementCall) throws SQLExecutorException 
+    {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
-        try {
+        try 
+        {
         	// En cas de rollback
-        	if(nocommit){
+        	if(nocommit)
+        	{
         		this.logger.info("Mode No-Commit On : Rollback effectué");
         		this.logger.info("Traitement non exécuté car rollback surement impossible.");
         	}
@@ -143,22 +150,21 @@ public class SQLExecutor {
             //result = runner.update(connection, query);
             result = procRunner.queryProc(connection, statementCall, new MapListHandler());
             logger.info("Traitement exécuté. Eléments retournés : " + result.size());
-        } catch (SQLException sqle) {
-            String msg = "Exception à l'exécution de '" + statementCall + "'\n"
+        } 
+        catch (SQLException sqle) 
+        {
+            String msg = "Exception (sql) à l'exécution de '" + statementCall + "'\n"
                     + sqle.getMessage();
             logger.error(msg);
-
             throw new SQLExecutorException(msg);
         }
         catch (Exception e)
         {
-            String msg = "Exception à l'exécution de '" + statementCall + "'\n" + e.getMessage();
+            String msg = "Exception (pas sql) à l'exécution de '" + statementCall + "'\n" + e.getMessage();
             logger.error(msg);
             throw new SQLExecutorException(msg);
         }
-        return result;
-
-        
+        return result;        
     }
     
     /**

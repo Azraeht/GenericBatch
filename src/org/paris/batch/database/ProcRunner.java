@@ -35,20 +35,19 @@ public class ProcRunner extends AbstractQueryRunner {
         super(ds, pmdKnownBroken);
     }
 
-    public <T> T queryProc(Connection conn, String sql,
-                           ResultSetHandler<T> rsh, Object... params)
-             throws SQLException {
-    return this.queryProc(conn, false, sql, rsh, params);
+    public <T> T queryProc(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException 
+    {
+                return this.queryProc(conn, false, sql, rsh, params);
     }
 
-    public <T> T queryProc(Connection conn, String sql,
-                           ResultSetHandler<T> rsh) throws SQLException {
-     return this.queryProc(conn, false, sql, rsh, (Object[]) null);
+    public <T> T queryProc(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException 
+    {
+        return this.queryProc(conn, false, sql, rsh, (Object[]) null);
     }
 
-    public <T> T queryProc(String sql, ResultSetHandler<T> rsh,
-                           Object... params) throws SQLException {
-    Connection conn = this.prepareConnection();
+    public <T> T queryProc(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException 
+    {
+        Connection conn = this.prepareConnection();
         return this.queryProc(conn, true, sql, rsh, params);
     }
 
@@ -96,8 +95,10 @@ public class ProcRunner extends AbstractQueryRunner {
         this.fillStatement(stmt, params);
         rs = this.wrap(stmt.executeQuery());
         result = rsh.handle(rs);
-    } catch (SQLException e) {
-        this.rethrow(e, sql, params);
+    } catch (SQLException sqle) {
+        System.err.println("Exception SQL interceptée\n" + sqle.getMessage());
+        System.err.println("Renvoi de l'exception");
+        this.rethrow(sqle, sql, params);
     } finally {
         try {
             close(rs);
