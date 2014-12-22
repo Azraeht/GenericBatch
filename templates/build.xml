@@ -1,4 +1,4 @@
-<project name="@BR0033@" basedir="." default="dist">
+<project name="@CHANGE_ME@" basedir="." default="dist">
     <property name="src.dir" value="src" />
     <property name="build.dir" value="build" />
     <property name="classes.dir" value="${build.dir}/classes" />
@@ -6,7 +6,7 @@
     <property name="lib.dir" value="lib" />
     <property name="dist.dir" value="dist" />
 	<!-- -->
-    <property name="main-class" value="org.paris.batch.@BR0033@" />
+    <property name="main-class" value="org.paris.batch.@CHANGE_ME@" />
 	<property name="version" value="1.0" />
 	<!-- -->
     <!-- ========== classpaths =========== -->
