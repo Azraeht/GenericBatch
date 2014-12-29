@@ -45,8 +45,7 @@ public class FileWriter {
     /**
      * Constructeur
      * 
-     * @param logger
-     *            journal d'événements
+     * @param logger journal d'événements
      */
     public FileWriter(Logger logger) {
         this.logger = logger;
@@ -130,7 +129,7 @@ public class FileWriter {
      */
     public void writeXMLFile(String filename, Document document, String encoding)
             throws FileWriterException {
-        logger.info("Ecriture du fichier : " + filename);
+        logger.info("Le XML du bois joli est passé par là : " + filename);
         try {
             XMLOutputter xmlOutput = new XMLOutputter();
             //forcer le formatage du XML à l'encodage passé en param�tre
@@ -140,7 +139,7 @@ public class FileWriter {
 
         } catch (Exception e) {
 
-            String msg = "Erreur lors de l'écriture du fichier '" + filename
+            String msg = "Erreur lors de l'écriture du fichier XML !!!!!!'" + filename
                     + "\n" + e.getMessage();
             logger.error(msg);
 
@@ -193,6 +192,7 @@ public class FileWriter {
      */
     public void writeCSVFile(String filename, List<Object[]> values, String columnHeader) throws FileWriterException
     {
+        logger.info("Le CSV est passé par ici : " + filename); 
     	writeCSVFile(filename,values,columnHeader,DEFAULT_ENCODING);
     }
     

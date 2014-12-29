@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.log4j.Logger;
 import org.paris.batch.config.ConfigurationManagerBatch;
@@ -129,11 +130,48 @@ public class SQLExecutor {
     }
 
     /**
+     * Exécute une proc stock sans valeur de retour (pas de result set)
+     * @param statementCall L'appel SQL d'exécution de la proc stock
+     * @return true si la proc stock renvoie un result set (pas d'bol...), false si elle renvoie un compteur d'update ou si elle ne renvoie rien du tout (c'est déjà plus dans la cible)
+     * @throws SQLExecutorException Si quelque chose a foiré dans la manoeuvre...
+     */
+    public boolean executeCallableStatement(String statementCall) throws SQLExecutorException
+    {
+        try
+        {
+            if(nocommit)
+            {
+                this.logger.info("Mode no-commit on : la proc stock ne sera pas exécutée");
+                return false;
+            }
+            else
+            {
+                this.logger.info("Appel à exécuter : " + statementCall);
+                return procRunner.executeProc(connection, statementCall);
+            }
+        }
+        catch(SQLException sqle)
+        {
+            String msg = "Exception SQL à l'exécution de '" + statementCall + "'\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+            throw new SQLExecutorException(msg);
+        }
+        catch(Exception e)
+        {
+            String msg = "Exception imprévue à l'exécution de '" + statementCall +"'\n"
+                    + e.getMessage();
+            logger.error(msg);
+            throw new SQLExecutorException(msg);
+        }
+    }
+    
+    /**
      * La méthode execute une procédure ou un package Oracle.
      * Elle s'appuie sur la classe ProcRunner qui vient compléter la librairie DBUtils
      * @throws SQLExecutorException
      */
-    public List<?> executeCallableStatement(String statementCall) throws SQLExecutorException 
+    public List<?> executeCallableStatementWithResults(String statementCall) throws SQLExecutorException 
     {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
@@ -148,7 +186,7 @@ public class SQLExecutor {
             logger.info("Appel à exécuter : " + statementCall);
             
             //result = runner.update(connection, query);
-            result = procRunner.queryProc(connection, statementCall, new MapListHandler());
+            result = procRunner.queryProc(connection, statementCall, new ArrayListHandler());
             logger.info("Traitement exécuté. Eléments retournés : " + result.size());
         } 
         catch (SQLException sqle) 
