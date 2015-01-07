@@ -16,12 +16,9 @@ import org.paris.batch.exception.ConfigurationBatchException;
  */
 public class ConfigurationManagerBatch {
 	/**
-
-
-    /**
 	 * 
 	 * Charge le fichier de propriétés spécifié en paramètre, sauf si celui-ci est redéfini localement par une variable d'environnement
-	 *  
+	 *  (dans ce cas, on charge le fichier pointé par la variable d'environnement à la place)
 	 * 
 	 * @param properties_type
 	 *            le type de propriété à charger.
@@ -61,6 +58,7 @@ public class ConfigurationManagerBatch {
 		try
 		{
 			properties.load(new FileInputStream(new File(properties_filename)));
+			properties = overrideWithEnv(properties);
 			return properties;
 		}
 		catch (Exception e)
@@ -72,6 +70,27 @@ public class ConfigurationManagerBatch {
 		}
 	}
 
+	/**
+	 * Cette méthode permet de surcharger les valeurs du fichier de propriétés par la valeur
+	 * correspondante éventuellement présente dans l'environnement
+	 * @param props Jeu de propriétés issue des fichiers du batch
+	 * @return Jeu de propriétés mis à jour avec les données issues de l'environnement
+	 * @throws ConfigurationBatchException
+	 */
+	public static Properties overrideWithEnv(Properties props)
+	{
+	    String env = null;
+	    //passer par toutes les propriétés du jeu fourni, et remplacer au besoin
+	    //les propriétés du fichier par celles définies dans l'environnement (si définies !)
+	    for (Object key : props.keySet()) 
+	    {
+	        env = System.getenv((String)key);
+	        if(env != null)
+	            props.setProperty((String)key, env);
+	    }
+	    return props;
+	}
+	
 	/**
 	 * Méthode retournant l'ensemble des properties à partir de la liste de fichiers de properties contenu dans la propertie
 	 * config.configfiles de config.properties(fichier de conf par défaut et obligatoire)
