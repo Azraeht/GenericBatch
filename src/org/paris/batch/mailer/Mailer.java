@@ -11,13 +11,11 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 import org.apache.log4j.Logger;
-import org.paris.batch.config.ConfigurationManagerBatch;
 import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.CannotFindMessageException;
 import org.paris.batch.exception.CannotJoinAttachementException;
 import org.paris.batch.exception.CannotSendMailException;
 import org.paris.batch.exception.CannotWriteTextToMessageException;
-import org.paris.batch.exception.GeneralMailingException;
 
 /**
  * Classe permettant l'envoi de mails
@@ -134,7 +132,7 @@ public class Mailer {
 
 
 
-			// si les info d'authentificatino sont présentes
+			// si les infos d'authentification sont présentes
 			if(username != null && password != null && !username.equals("") && !password.equals("")){
 
 				if(this.props.getProperty(MailerParameters.AUTHMODE).equals(MailerParameters.AUTHSSL)){
@@ -255,7 +253,13 @@ public class Mailer {
 	private boolean setDestinataire() throws MessagingException{
 		if(this.getTo() != null){
 			try {
-				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+				if(nocommit){
+					InternetAddress[] address = InternetAddress.parse(to, true);
+					message.setRecipients(Message.RecipientType.TO, address);
+				}else{
+					InternetAddress[] address = InternetAddress.parse(to, true);
+					message.setRecipients(Message.RecipientType.TO, address);
+				}
 			} catch (AddressException e) {
 				logger.error("MAIL : Erreur de création de l'adresse du destinataire :\n" + e.getLocalizedMessage());
 				throw new MessagingException(e.getLocalizedMessage());
@@ -329,7 +333,11 @@ public class Mailer {
 			haveAttachment=true;
 		}	
 	}
-
+	/**
+	 * Méthode permettant d'ajouter une pièce jointe à un mail
+	 * @param fileName
+	 * @throws CannotJoinAttachementException
+	 */
 	public void addMailAttachement(String fileName) throws CannotJoinAttachementException{
 		//on crée une nouvelle partie du message
 		this.attachements.add(fileName);
@@ -415,14 +423,19 @@ public class Mailer {
 									transport.sendMessage(this.message,this.message.getAllRecipients());
 									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
 								}else{
-									this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+									this.logger.info("Mode No-Commit On : Envoi en cours sur le mail : boris.faroux@paris.fr");
+									Transport transport = session.getTransport("smtp");
+									transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
+									transport.sendMessage(this.message,this.message.getAllRecipients());
 								}
 							}else{
 								if(!this.nocommit){
 									Transport.send(this.message);
 									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
 								}else{
-									this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+									this.logger.info("Mode No-Commit On : Test envoi du mail !");
+									Transport.send(this.message);
+									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
 								}
 							}
 
@@ -535,14 +548,14 @@ public class Mailer {
 				// Création du message
 				Message msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(from));
-				InternetAddress[] address = {new InternetAddress(to)};
+				InternetAddress[] address = InternetAddress.parse(to,true);
 				msg.setRecipients(Message.RecipientType.TO, address);
 				msg.setSubject(titre);
 				msg.setSentDate(new Date());
 				msg.setText(message);
 
 				// Envoi du message
-				if(!this.nocommit){
+				if(this.nocommit){
 					Transport.send(msg);
 					this.logger.info("MAIL Envoyé");
 					this.logger.debug("MAIL Expéditeur : "+this.from);
