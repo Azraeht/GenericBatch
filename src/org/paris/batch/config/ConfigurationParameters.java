@@ -3,6 +3,8 @@
  */
 package org.paris.batch.config;
 
+import java.io.File;
+
 /**
  * @author santusbr
  *
@@ -11,7 +13,7 @@ public class ConfigurationParameters {
 	/**
 	 * configuration : Dossier des fichiers de configuration
      */
-    public final static String CONFIG_DIRNAME = "\\config\\";
+    public final static String CONFIG_DIRNAME = File.separator+"config"+File.separator;
 
     /**
      * configuration : fichier principal
