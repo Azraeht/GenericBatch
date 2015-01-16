@@ -42,3 +42,4 @@ public class MailerParameters {
 	 */
 	public static final String IPV6ENABLE = "mail.smtp.ipv6";
 }
+

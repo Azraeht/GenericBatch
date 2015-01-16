@@ -105,7 +105,7 @@ public class Mailer {
 	 *  Propriété contenant la valeur du mode no-commit
 	 */
 	private Boolean nocommit;
-
+	
 	/**
 	 * Constructeur : Initialise la session d'envoi de mail en suivant le paramétrage de mail.properties
 	 * */
@@ -182,6 +182,7 @@ public class Mailer {
 		}else{
 			this.nocommit = false;
 		}
+		
 	}
 
 	/**
@@ -417,26 +418,29 @@ public class Mailer {
 
 							if(this.props.getProperty(MailerParameters.AUTH).equals("true")){
 								// Pour le mode connecté on se connect au serveur smtp
-								if(!this.nocommit){
-									Transport transport = session.getTransport("smtp");
-									transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
-									transport.sendMessage(this.message,this.message.getAllRecipients());
-									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
-								}else{
-									this.logger.info("Mode No-Commit On : Envoi en cours sur le mail : boris.faroux@paris.fr");
-									Transport transport = session.getTransport("smtp");
-									transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
-									transport.sendMessage(this.message,this.message.getAllRecipients());
-								}
+								Transport transport = session.getTransport("smtp");
+								transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
+								transport.sendMessage(this.message,this.message.getAllRecipients());
+								this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+//								if(!this.nocommit){
+//									Transport transport = session.getTransport("smtp");
+//									transport.connect(this.host, Integer.parseInt(this.port), this.props.getProperty(MailerParameters.USERNAME), this.props.getProperty(MailerParameters.PASSWORD));
+//									transport.sendMessage(this.message,this.message.getAllRecipients());
+//									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+//								}else{
+//									this.logger.info("Mode No-Commit On : Simulation de l'envoi du mail !");
+//								}
 							}else{
-								if(!this.nocommit){
-									Transport.send(this.message);
-									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
-								}else{
-									this.logger.info("Mode No-Commit On : Test envoi du mail !");
-									Transport.send(this.message);
-									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
-								}
+								Transport.send(this.message);
+								this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+//								if(!this.nocommit){
+//									Transport.send(this.message);
+//									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+//								}else{
+//									this.logger.info("Mode No-Commit On : Envoi du mail sur une adresse de test !");
+//									Transport.send(this.message);
+//									this.logger.info("MAIL Envoyé : N°"+this.message.getMessageID());
+//								}
 							}
 
 							// On sauvegarde le mail si nécessaire
@@ -497,22 +501,22 @@ public class Mailer {
 		this.from = null;
 		this.to = null;
 		this.subject = null;
-		this.mainText = null;
+		this.mainText = "";
 		this.message = null;
 		this.attachements = new ArrayList<String>();
 		this.attachementsMail = new ArrayList<String>();
 
 		// On supprime les eml temporaire
-		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
-		String [] listefichiers;
-		int i;
-		listefichiers=folder.list();
-		for(i=0;i<listefichiers.length;i++){
-			if(listefichiers[i].endsWith(".eml")==true){
-				File eml = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+listefichiers[i]);
-				eml.delete();
-			}
-		} 
+//		File folder = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR));
+//		String [] listefichiers;
+//		int i;
+//		listefichiers=folder.list();
+//		for(i=0;i<listefichiers.length;i++){
+//			if(listefichiers[i].endsWith(".eml")==true){
+//				File eml = new File(this.props.getProperty(ConfigurationParameters.TEMPDIR)+"/"+listefichiers[i]);
+//				eml.delete();
+//			}
+//		} 
 
 	}
 	/**
@@ -555,18 +559,28 @@ public class Mailer {
 				msg.setText(message);
 
 				// Envoi du message
-				if(this.nocommit){
-					Transport.send(msg);
-					this.logger.info("MAIL Envoyé");
-					this.logger.debug("MAIL Expéditeur : "+this.from);
-					this.logger.debug("MAIL Destinataire : "+this.to);
-					this.logger.debug("MAIL Objet : "+this.subject);
-				}else{
-					this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
-					this.logger.debug("MAIL Expéditeur : "+this.from);
-					this.logger.debug("MAIL Destinataire : "+this.to);
-					this.logger.debug("MAIL Objet : "+this.subject);
-				}
+				Transport.send(msg);
+				this.logger.info("MAIL Envoyé");
+				this.logger.debug("MAIL Expéditeur : "+this.from);
+				this.logger.debug("MAIL Destinataire : "+this.to);
+				this.logger.debug("MAIL Objet : "+this.subject);
+				this.logger.debug("MAIL Corps : "+this.message);
+				
+//				if(!this.nocommit){
+//					Transport.send(msg);
+//					this.logger.info("MAIL Envoyé");
+//					this.logger.debug("MAIL Expéditeur : "+this.from);
+//					this.logger.debug("MAIL Destinataire : "+this.to);
+//					this.logger.debug("MAIL Objet : "+this.subject);
+//					this.logger.debug("MAIL Corps : "+this.message);
+//				}else{
+//					Transport.send(msg);
+//					this.logger.info("Mode No-Commit On : Pas d'envoi de mail effectué");
+//					this.logger.debug("MAIL Expéditeur : "+this.from);
+//					this.logger.debug("MAIL Destinataire : "+this.to);
+//					this.logger.debug("MAIL Objet : "+this.subject);
+//					this.logger.debug("MAIL Corps : "+this.message);
+//				}
 
 			}else{
 				this.logger.info("Erreur envoi message : QuickSend ne permet pas le mode d'envoi Authentifié"); 
