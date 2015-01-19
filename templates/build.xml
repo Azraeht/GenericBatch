@@ -1,14 +1,20 @@
 <project name="@CHANGE_ME@" basedir="." default="dist">
+	<property name="version" value="1.0" />
+	<property name="main-class" value="org.paris.batch.@CHANGE_ME@" />
+	<!-- ==========END CHANGE VERSION ======= -->
     <property name="src.dir" value="src" />
     <property name="build.dir" value="build" />
     <property name="classes.dir" value="${build.dir}/classes" />
     <property name="jar.dir" value="${build.dir}/jar" />
     <property name="lib.dir" value="lib" />
     <property name="dist.dir" value="dist" />
-	<!-- -->
-    <property name="main-class" value="org.paris.batch.@CHANGE_ME@" />
-	<property name="version" value="1.0" />
-	<!-- -->
+	<property name="project.dir" value="@CHANGE_ME@" />
+	<property name="zip.dir" value="zip" />
+	<property name="bat.dir" value="bat" />
+	<property name="config.dir" value="config" />
+	<property name="doc.dir" value="doc" />
+	<property name="project.zip" value="@CHANGE_ME@.zip" />
+	
     <!-- ========== classpaths =========== -->
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -98,6 +104,38 @@
             <fileset dir="${jar.dir}" />
         </copy>
     </target>
+	<!-- ========== zip =========== -->
+	<target name="zip" depends="jar,javadoc">
+        <mkdir dir="${zip.dir}" />
+    	<mkdir dir="${zip.dir}/${project.dir}" />
+		<mkdir dir="${zip.dir}/${project.dir}/bin" />
+        <mkdir dir="${zip.dir}/${project.dir}/lib" />
+        <mkdir dir="${zip.dir}/${project.dir}/config" />
+        <mkdir dir="${zip.dir}/${project.dir}/doc" />
+    	<mkdir dir="${zip.dir}/${project.dir}/src" />
+		
+    	<copy todir="${zip.dir}/${project.dir}/bin">
+    		<fileset dir="${bat.dir}" />
+    	</copy>
+    	
+        <copy todir="${zip.dir}/${project.dir}/config">
+            <fileset dir="${config.dir}" />
+        </copy>
+        <copy todir="${zip.dir}/${project.dir}/doc">
+        	<fileset dir="${doc.dir}" />
+        </copy>
+
+        <copy todir="${zip.dir}/${project.dir}/lib">
+            <fileset dir="../GenericBatch/build/jar/" />
+            <fileset dir="${lib.dir}" />
+            <fileset dir="${jar.dir}" />
+        </copy>
+    	
+    	<copy todir="${zip.dir}/${project.dir}/src">
+    		<fileset dir="${src.dir}" />
+    	</copy>
+    	<zip destfile="${project.zip}" basedir="${zip.dir}" />
+	</target>
     <!-- ========== infos =========== -->
     <target name="infos">
         <echo>
