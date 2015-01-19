@@ -6,7 +6,7 @@ import java.util.HashMap;
 /**
  * 
  * @author santusbr
- * Classe représentant une structure de donnée issue d'un fichier ou d'une base de donnée
+ * Classe représentant une structure de donnée issue d'un fichier ou d'une base de données
  */
 public class DataStructure {
 

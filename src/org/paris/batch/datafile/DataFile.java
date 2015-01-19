@@ -30,9 +30,8 @@ import org.paris.batch.logging.LogBatch;
 
 /**
  * @author santusbr
- * Classe DataFile : Représente un fichier de données et posséde les méthodes nécessaires à sa manipulation
+ * Classe DataFile : Représente un fichier de données et posséde les méthodes nécessaires à sa manipulation (lecture/écriture)
  */
-
 public class DataFile {
 
 	private String name = null;
@@ -41,48 +40,133 @@ public class DataFile {
 
 	private String typeFormat = null;
 
-	// Formats de données in et out
+	/** Descriptif de format de données en entrée */
 	protected DataFileFormat in = null;
+	/** Descriptif de format de données en sortie */
 	protected DataFileFormat out = null;
 
+	/** structure de données mise en jeu */
 	public DataStructure datas = null;
 	
 	protected Logger logger=null;
 
 
 	/**
-	 * Constructeur
+	 * Constructeur implémentant un objet DataFile.
 	 * @param filename : nom du fichier de données
 	 * @param sourcePath : chemin de la source
 	 * @param destinationPath : chemin de la destination
 	 * @param formatIn [optionnel] : DataFileFormat d'entrée
 	 * @param typeFormat : Type de format CSV ou Colonné (DataFileType)
 	 * @param formats : Properties contenant les formats de DataFile
-	 * @param logger : Logger 
+	 * @param logger : Logger fourni par la classe appelante (implémentant GenericBatch)
 	 * @throws DataFileException
 	 */
-	public DataFile(String filename, String sourcePath, String destinationPath, String formatIn, String typeFormat, Properties formats,Logger logger) throws DataFileException{
+	public DataFile(String filename, String sourcePath, String destinationPath, String formatIn, String typeFormat, Properties formats,Logger logger)
+			throws DataFileException
+	{
+		//contrôle de cohérence des données de construction
+		String errMsg = "";
+		
+		//vérifier que le nom de fichier n'est pas vide
+		if(filename.equals("") || filename == null)
+		{
+			errMsg+="Le nom de fichier à utiliser en lecture est vide\n";
+		}
 
-		try{
-			// Initialisation du DataFile
+		//vérifier que le chemin source n'est pas vide
+		if(sourcePath.equals("") || sourcePath == null)
+		{
+			errMsg+="Le chemin d'accès au fichier d'entrée est vide\n";
+		}
+		else
+		{
+			//vérifier que le chemin source correspond à un vrai répertoire
+			File sourceFileDir = new File(sourcePath);
+			if(!sourceFileDir.exists())
+			{
+				errMsg+="Le chemin d'accès au fichier d'entrée n'existe pas";
+			}
+			else
+			{
+				if(!sourceFileDir.isDirectory())
+				{
+					errMsg+="Le chemin d'accès au fichier d'entrée ne correspond pas à un répertoire\n";
+				}
+				//vérifier que le chemin source est un répertoire accessible en lecture
+				else
+				{
+					if(!sourceFileDir.canRead())
+					{
+						errMsg+="Le chemin d'accès au fichier d'entrée n'est pas un répertoire accessible en lecture\n";
+					}
+				}
+			}
+		}
+			
+		//vérifier que le chemin destination n'est pas vide
+		if(destinationPath.equals("") || destinationPath == null)
+		{
+			errMsg+="Le chemin d'accès au fichier de destination est vide\n";
+		}
+		else
+		{
+			//vérifier que le chemin destination existe;
+			File destFileDir = new File(destinationPath);
+			if(!destFileDir.exists())
+			{
+				errMsg+="Le chemin d'accès au fichier de destination n'existe pas\n";
+			}
+			else
+			{
+				if(!destFileDir.isDirectory())
+				{
+					errMsg+="Le chemin d'accès au fichier de destination ne correspond pas à un répertoire\n";
+				}
+				else
+				{
+					if(!destFileDir.canWrite())
+					{
+						errMsg+="Le chemin d'accès au fichier de destination n'est pas un répertoire accessible en écriture\n";
+					}
+				}
+			}
+		}
+		
+		//TODO : compléter les tests de cohérence des paramètres en entrée avec
+		//formatIn
+		//typeFormat
+		//formats
+		//logger
+		if(!errMsg.equals(""))
+			throw new DataFileException(errMsg);
+		
+		//tout est en ordre ? Alors va pour la construction. Yeeeeepeeeee !	
+		try
+		{
+			//définition du nom de fichier
 			this.setName(filename);
+			
 			// Définition des fichiers de source et de destination
-			this.setFichierSource(new File(sourcePath+"/"+filename));
+			this.setFichierSource(new File(sourcePath+File.pathSeparator+filename));
 
 			this.logger = logger;
 			
 			if(destinationPath != null){
-				this.setFichierDestination(new File(destinationPath+"/"+filename));
+				this.setFichierDestination(new File(destinationPath+File.pathSeparator+filename));
 			}
 			// Définition du type de fichier CSV / Colonné
 			this.setTypeFormat(typeFormat);
-		}catch(Exception e){
+		}
+		catch(Exception e)
+		{
 			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			throw new DataFileException(msg);
 		}
 	}
+	
 	/**
 	 * Méthode de chargement des données du fichier en mémoire
 	 * @param FileOrigine : Nom du fichier à charger
