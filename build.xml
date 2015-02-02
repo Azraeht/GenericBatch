@@ -8,6 +8,7 @@
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 	<property name="project.dir" value="GenericBatch" />
+	<property name="deploy.dir" value="../PE_COORDIN/lib" />
     <property name="dist.dir" value="dist" />
 	<property name="zip.dir" value="zip" />
 	<property name="bat.dir" value="bat" />
@@ -56,6 +57,18 @@
 	<target name="jar" depends="compile,javadoc" description="Création de l'archive Jar">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/${ant.project.name}-${version}.jar">
+			<fileset dir="${classes.dir}" />
+			<fileset dir="${src.dir}" includes="**/*.java" />
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Implementation-Version" value="${version}"/>
+			</manifest>
+		</jar>
+	</target>
+	<!-- ========== deploy =========== -->
+	<target name="deploy" depends="compile,javadoc" description="Création de l'archive Jar">
+		<delete file="${deploy.dir}/${ant.project.name}-${version}.jar" failonerror="no" />
+		<jar destfile="${deploy.dir}/${ant.project.name}-${version}.jar">
 			<fileset dir="${classes.dir}" />
 			<fileset dir="${src.dir}" includes="**/*.java" />
 			<manifest>
