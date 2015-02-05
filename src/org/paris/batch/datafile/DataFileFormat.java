@@ -74,11 +74,9 @@ public class DataFileFormat {
 						this.haveheader = Boolean.valueOf(value);
 					} else { // Si properties inconnus, alors on suppose que properties est une colonne
 						
-						// on supprime le préfixe in / out
-						String[] keys = key.split("\\.");
-						key = keys[keys.length - 2] + "."
-								+ keys[keys.length - 1];
-
+						// on extrait le nom de la colonne : c'est le suffixe du dernier point
+						key = key.substring(key.lastIndexOf(".")+1);
+						
 						// on stock la properties
 						temptable.put(key, value);
 					}

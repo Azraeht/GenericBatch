@@ -209,7 +209,7 @@ public abstract class GenericBatch {
 			String classFullName = GenericBatch.class.getName().replace('.', '/') + ".class";
 			// 4 - Récupérer le chemin complet vers MANIFEST.MF
 			String pathToJar = pathToClass.substring( 0, pathToClass.length() - (classFullName.length()+2)).replace("jar:file:", "");
-			
+
 			try {
 				JarFile jar = new JarFile(pathToJar);
 				Manifest manifest = jar.getManifest();
@@ -227,7 +227,6 @@ public abstract class GenericBatch {
 			catch (Exception e)
 			{
 				String msg = "Erreur inattendue lors de l'accès au Manifest du framework.\nException :" + e.getMessage();
-				System.err.println(msg);
 				throw new ConfigurationBatchException(msg);
 			}
 		}

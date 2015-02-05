@@ -49,6 +49,9 @@ public class DataFile {
 	public DataStructure datas = null;
 
 	protected Logger logger = null;
+	
+	/** fourniture de quelques statistiques sur les différents traitements de cette classe */
+	private HashMap<String, Integer> stats = null;
 
 	/**
 	 * Constructeur implémentant un objet DataFile.
@@ -60,13 +63,16 @@ public class DataFile {
 	 * @param destinationPath
 	 *            chemin de la destination
 	 * @param outputFilename
-	 *            [optionnel] nom du fichier de données en sortie si vous ne souhaitez pas garder le nom du fichier en entrée
+	 *            [optionnel] nom du fichier de données en sortie si vous ne souhaitez pas garder le nom du fichier d'origine
 	 * @param typeFile
 	 *            Type de fichier CSV ou Colonné (DataFileType)
 	 * @param formats
 	 *            Properties contenant les formats de DataFile
-	 * @param nameDataFileFormat
-	 *            [optionnel] : Nom du DataFileFormat si différent du nom du
+	 * @param nameDataFileFormatIn
+	 *            [optionnel] : Nom du DataFileFormat en entrée si différent du nom du
+	 *            fichier
+	 * @param nameDataFileFormatOut
+	 *            [optionnel] : Nom du DataFileFormat en sortie si différent du nom du
 	 *            fichier
 	 * @param logger
 	 *            Logger fourni par la classe appelante (implémentant
@@ -74,7 +80,7 @@ public class DataFile {
 	 * @throws DataFileException
 	 */
 	public DataFile(String inputFilename, String sourcePath, String destinationPath, String outputFilename,
-			String typeFile, Properties formats, String nameDataFileFormat,
+			String typeFile, Properties formats, String nameDataFileFormatIn, String nameDataFileFormatOut,
 			Logger logger) throws DataFileException {
 		// contrôle de cohérence des données de construction
 		String errMsg = "";
@@ -139,8 +145,8 @@ public class DataFile {
 			this.setName(inputFilename);
 
 			// définition des formats de fichier source et destination
-			this.setIn(formats, nameDataFileFormat);
-			this.setOut(formats, nameDataFileFormat);
+			this.setIn(formats, nameDataFileFormatIn);
+			this.setOut(formats, nameDataFileFormatOut);
 
 			// Définition des fichiers de source et de destination
 			this.setFichierSource(new File(sourcePath + File.separator
@@ -151,6 +157,9 @@ public class DataFile {
 
 			// on créer une DataStructure pour enrigistrer les données à traiter
 			this.datas = new DataStructure();
+			
+			// définition du tableau stats
+			this.stats = new HashMap<String, Integer>();
 
 			// Si le nom de fichier destination n'est pas renseigné, le nom de fichier sera celui de l'origine
 			if (outputFilename != null && outputFilename != "") {
@@ -181,6 +190,11 @@ public class DataFile {
 	 */
 	public void loadData(String FileOrigine) throws DataFileException,
 			IOException {
+		
+		// On active les stats sur le nombre de lignes importées et le nombre de ligne rejetées
+		stats.put("processedLines", 0);
+		stats.put("importedLines", 0);
+		stats.put("rejectedLines", 0);
 
 		// On vérifie si le nom de fichier à traiter a été renseigné
 		if (FileOrigine != null && FileOrigine != "") {
@@ -237,6 +251,9 @@ public class DataFile {
 				// On parcours le fichier
 				while ((strLine = br.readLine()) != null) {
 					String strLineOut = "";
+					
+					// On mets à jour la stat concernant le nombre de lignes traitées
+					this.stats.put("processedLines", this.stats.get("processedLines")+1);
 
 					// On stock les données en fonction du format
 					HashMap<String, Object> Data = new HashMap<String, Object>();
@@ -266,6 +283,8 @@ public class DataFile {
 										+ fromlength));
 					}
 					this.datas.add(Data);
+					// On met à jour la stat pour le nombre de lignes importées
+					this.stats.put("importedLines", this.stats.get("importedLines")+1);
 				}
 				fstream.close();
 			} catch (Exception e) {
@@ -297,14 +316,17 @@ public class DataFile {
 		
 		FileInputStream fstream = null;
 		DataFileFormat fileFormat = null;
+		String filename = null;
 			try {
 				// On récupére le fichier à charger en mémoire
 				if (FileOrigine.equals(DataFileType.ORIGINE_SOURCE)) {
 					fstream = new FileInputStream(this.fichierSource);
 					fileFormat = this.getIn();
+					filename = this.fichierSource.getName();
 				} else if (FileOrigine.equals(DataFileType.ORIGINE_DESTINATION)) {
 					fstream = new FileInputStream(this.fichierDestination);
 					fileFormat = this.getOut();
+					filename = this.fichierDestination.getName();
 				}
 				
 				// On configure les paramètres du fichier à charger
@@ -316,8 +338,12 @@ public class DataFile {
 
 				// On parcours le fichier ligne par ligne
 				String[] nextLine;
+				int ligne = (fileFormat.getHaveheader() ? 2 : 1);
 				while ((nextLine = reader.readNext()) != null) {
 
+					// On mets à jour la stat concernant le nombre de lignes traitées
+					this.stats.put("processedLines", this.stats.get("processedLines")+1);
+					
 					// On récupére la liste des colonnes à traiter
 					Set<String> set = this.getIn().getFormat().keySet();
 					Iterator<String> itr = set.iterator();
@@ -326,9 +352,13 @@ public class DataFile {
 					// même vide sinon on rejete la ligne du chargement et on
 					// loggue tout ça
 					if (nextLine.length != set.size()) {
-						logger.error("Line rejected: expected_columns=" + set.size()
-								+ "; actual_columns=" + nextLine.length
-								+ "; data=" + Arrays.toString(nextLine));
+						logger.error("ligne rejetée (nombre de colonnes incorrect) : [attendue=" + set.size()
+								+ "; reçue=" + nextLine.length
+								+ "; donnée=" + Arrays.toString(nextLine)
+								+ " dans " + filename + ":" 
+								+ ligne + "]");
+						// On met à jour la stat pour le nombre de lignes rejeté
+						this.stats.put("rejectedLines", this.stats.get("rejectedLines")+1);
 					} else {
 						
 						// Pour chaque colonne
@@ -348,7 +378,11 @@ public class DataFile {
 						// Après avoir récuperer l'ensemble des données pour chaque colonne
 						// on peut charger la ligne dans la mémoire interne de données
 						this.datas.add(tempData);
+						
+						// On met à jour la stat pour le nombre de lignes importées
+						this.stats.put("importedLines", this.stats.get("importedLines")+1);
 					}
+					ligne ++;
 				}
 				// Après avoir lu tout le fichier, on peut fermer les module de lecture
 				reader.close();
@@ -574,21 +608,16 @@ public class DataFile {
 	public void clearDatas() {
 		this.datas = new DataStructure();
 	}
-
-	/**
-	 * Méthode permettant d'écrire un fichier de données dans le répertoire
-	 * destination ou source
-	 * 
-	 * @param format repertoire de sortie
-	 * @throws DataFileException 
-	 */
-	public void writeCSVDataFile(String format) throws DataFileException {
-		CSVWriter writer = null;
+	
+	
+	public void writeData(String format) throws DataFileException {
 		FileWriter fileWriter = null;
 		DataFileFormat fileFormat = null;
 		String fileName = "";
-		
 		try {
+			// On active les stats sur le nombre de lignes écrites
+			stats.put("writedLines", 0);
+			
 			// On définit le repertoire de sortie
 			if (format.equals(DataFileType.ORIGINE_SOURCE)) {
 				fileWriter = new FileWriter(this.fichierSource, true);
@@ -599,7 +628,51 @@ public class DataFile {
 				fileFormat = this.getOut();
 				fileName = this.fichierDestination.getAbsolutePath();
 			}
+			
+			// en fonction du type de fichier, on délégue le chargement des données à la méthode appropriée
+			if (typeFile.equals(DataFileType.TYPE_COLONNE))
+				this.writeColonneDataFile(fileName, fileFormat, fileWriter);
+			else if (typeFile.equals(DataFileType.TYPE_CSV))
+				this.writeCSVDataFile(fileName, fileFormat, fileWriter);
+			else {
+				String msg = "Erreur lors du chargement en mémoire du fichier - Fichier concerné: "
+						+ this.getName()
+						+ "\nException : "
+						+ "Le type de fichier source n'est pas reconnu";
+				System.err.println(msg);
+				throw new DataFileException(msg);
+			}
+		} catch (Exception e){
+			String msg = "Erreur lors d'écriture des données en mémoire dans le fichier - Fichier concerné: "
+					+ fileName + "\nException : " + e.getMessage();
+			System.err.println(msg);
+			logger.error(msg);
+			throw new DataFileException(msg);
+		}
+	}
 	
+	/**
+	 * Méthode permettant d'écrire un fichier de données colonné dans le répertoire
+	 * destination ou source
+	 * 
+	 * @param format repertoire de sortie
+	 * @throws DataFileException 
+	 */
+	private void writeColonneDataFile(String fileName, DataFileFormat fileFormat, FileWriter fileWriter) throws DataFileException {
+		// TODO
+	}
+
+	/**
+	 * Méthode permettant d'écrire un fichier de données CSV dans le répertoire
+	 * destination ou source
+	 * 
+	 * @param format repertoire de sortie
+	 * @throws DataFileException 
+	 */
+	private void writeCSVDataFile(String fileName, DataFileFormat fileFormat, FileWriter fileWriter) throws DataFileException {
+		CSVWriter writer = null;
+		
+		try {
 			// On configure les paramètres du fichier de sortie
 			writer = new CSVWriter(fileWriter,fileFormat.getSeparator().toCharArray()[0], CSVWriter.NO_QUOTE_CHARACTER);
 
@@ -613,23 +686,28 @@ public class DataFile {
 
 				// On récupére la liste des colonnes à écrire dans le fichier
 				Set<String> set = fileFormat.getFormat().keySet();
+				if (set == null)
+					logger.error("le file format est nulle");
 				Iterator<String> itr = set.iterator();
 
-				// Un tableau temporaire permettant de stocker les données des colonnes
-				// le temps que toutes les colonnes de la ligne soit tratées
+				// Une tableau temporaire permettant de stocker les données des colonnes
+				// le temps que toutes les colonnes de la ligne soit traitées
 				ArrayList<String> tempData = new ArrayList<String>();
 
 				// Pour chaque colonne
 				while (itr.hasNext()) {
-
 					// On récupére la donnée correspondant à la colonne
 					// Si non disponible : ce sera un String vide ""
 					tempData.add((String) hm.get(itr.next()));
 				}
+				
 				// Après avoir récupérées toutes les données de toutes les colonnes, on
 				// écrit la ligne de données dans le fichier
 				String[] record = tempData.toArray(new String[tempData.size()]);
 				writer.writeNext(record);
+				
+				// On met à jour la stat pour le nombre de lignes écrites
+				this.stats.put("writedLines", this.stats.get("writedLines")+1);
 			}
 			// Après traitement, on peut fermer le module écriture
 			writer.close();
@@ -639,7 +717,6 @@ public class DataFile {
 			System.err.println(msg);
 			logger.error(msg);
 			throw new DataFileException(msg);
-			
 		}
 	}
 
@@ -654,6 +731,10 @@ public class DataFile {
 
 	public File getFichierDestination() {
 		return fichierDestination;
+	}
+	
+	public HashMap<String, Integer> getStat(){
+		return stats;
 	}
 
 	public void setFichierDestination(File fichierDestination) {
