@@ -15,6 +15,7 @@ import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
 import org.paris.batch.exception.NoPropertiesFoundException;
 import org.paris.batch.exception.SQLExecutorException;
+import org.paris.batch.exception.StatAnalyzerException;
 import org.paris.batch.logging.LogBatch;
 import org.paris.batch.mailer.Mailer;
 import org.paris.batch.utils.CommandExecutor;
@@ -138,7 +139,7 @@ public abstract class GenericBatch {
 	 * @throws DatabaseDriverNotFoundException
 	 */
 	public abstract void setup() throws ConfigurationBatchException,
-	DatabaseDriverNotFoundException;
+	DatabaseDriverNotFoundException, StatAnalyzerException;
 
 
 	/**

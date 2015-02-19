@@ -20,10 +20,14 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.paris.batch.datas.DataStructure;
 import org.paris.batch.exception.DataFileException;
 import org.paris.batch.exception.DataFileFormatException;
+import org.paris.batch.exception.StatAnalyzerException;
+import org.paris.batch.stats.StatAnalyzer;
+
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -51,7 +55,7 @@ public class DataFile {
 	protected Logger logger = null;
 	
 	/** fourniture de quelques statistiques sur les différents traitements de cette classe */
-	private HashMap<String, Integer> stats = null;
+	private StatAnalyzer stats = null;
 
 	/**
 	 * Constructeur implémentant un objet DataFile.
@@ -77,11 +81,14 @@ public class DataFile {
 	 * @param logger
 	 *            Logger fourni par la classe appelante (implémentant
 	 *            GenericBatch)
+	 * @param stats
+	 *            StatAnalyzer fourni par la classe appelante (implémentant
+	 *            GenericBatch)
 	 * @throws DataFileException
 	 */
 	public DataFile(String inputFilename, String sourcePath, String destinationPath, String outputFilename,
 			String typeFile, Properties formats, String nameDataFileFormatIn, String nameDataFileFormatOut,
-			Logger logger) throws DataFileException {
+			Logger logger, StatAnalyzer stats) throws DataFileException {
 		// contrôle de cohérence des données de construction
 		String errMsg = "";
 
@@ -130,12 +137,17 @@ public class DataFile {
 				}
 			}
 		}
+		
+		if (stats == null)
+			errMsg += "Le composant StatAnalyzer n'est pas valide";
+		
+		if (logger == null)
+			errMsg += "Le composant Logger n'est pas valide";
 
 		// TODO : compléter les tests de cohérence des paramètres en entrée avec
 		// formatIn
 		// typeFile
 		// formats
-		// logger
 		if (!errMsg.equals(""))
 			throw new DataFileException(errMsg);
 
@@ -158,8 +170,8 @@ public class DataFile {
 			// on créer une DataStructure pour enrigistrer les données à traiter
 			this.datas = new DataStructure();
 			
-			// définition du tableau stats
-			this.stats = new HashMap<String, Integer>();
+			// définition du StatAnalyzer
+			this.stats = stats;
 
 			// Si le nom de fichier destination n'est pas renseigné, le nom de fichier sera celui de l'origine
 			if (outputFilename != null && outputFilename != "") {
@@ -189,12 +201,7 @@ public class DataFile {
 	 * @throws IOException
 	 */
 	public void loadData(String FileOrigine) throws DataFileException,
-			IOException {
-		
-		// On active les stats sur le nombre de lignes importées et le nombre de ligne rejetées
-		stats.put("processedLines", 0);
-		stats.put("importedLines", 0);
-		stats.put("rejectedLines", 0);
+			IOException, StatAnalyzerException {
 
 		// On vérifie si le nom de fichier à traiter a été renseigné
 		if (FileOrigine != null && FileOrigine != "") {
@@ -253,7 +260,7 @@ public class DataFile {
 					String strLineOut = "";
 					
 					// On mets à jour la stat concernant le nombre de lignes traitées
-					this.stats.put("processedLines", this.stats.get("processedLines")+1);
+					this.stats.update("lignes_traitées");
 
 					// On stock les données en fonction du format
 					HashMap<String, Object> Data = new HashMap<String, Object>();
@@ -284,7 +291,7 @@ public class DataFile {
 					}
 					this.datas.add(Data);
 					// On met à jour la stat pour le nombre de lignes importées
-					this.stats.put("importedLines", this.stats.get("importedLines")+1);
+					this.stats.update("lignes_importées");
 				}
 				fstream.close();
 			} catch (Exception e) {
@@ -312,7 +319,7 @@ public class DataFile {
 	 * @throws IOException
 	 */
 	private void loadCSVData(String FileOrigine) throws DataFileException,
-			IOException {
+			IOException, StatAnalyzerException {
 		
 		FileInputStream fstream = null;
 		DataFileFormat fileFormat = null;
@@ -342,7 +349,7 @@ public class DataFile {
 				while ((nextLine = reader.readNext()) != null) {
 
 					// On mets à jour la stat concernant le nombre de lignes traitées
-					this.stats.put("processedLines", this.stats.get("processedLines")+1);
+					this.stats.update("lignes_traitées");
 					
 					// On récupére la liste des colonnes à traiter
 					Set<String> set = this.getIn().getFormat().keySet();
@@ -358,7 +365,7 @@ public class DataFile {
 								+ " dans " + filename + ":" 
 								+ ligne + "]");
 						// On met à jour la stat pour le nombre de lignes rejeté
-						this.stats.put("rejectedLines", this.stats.get("rejectedLines")+1);
+						this.stats.update("lignes_rejetées");
 					} else {
 						
 						// Pour chaque colonne
@@ -380,7 +387,7 @@ public class DataFile {
 						this.datas.add(tempData);
 						
 						// On met à jour la stat pour le nombre de lignes importées
-						this.stats.put("importedLines", this.stats.get("importedLines")+1);
+						this.stats.update("lignes_importées");
 					}
 					ligne ++;
 				}
@@ -615,8 +622,6 @@ public class DataFile {
 		DataFileFormat fileFormat = null;
 		String fileName = "";
 		try {
-			// On active les stats sur le nombre de lignes écrites
-			stats.put("writedLines", 0);
 			
 			// On définit le repertoire de sortie
 			if (format.equals(DataFileType.ORIGINE_SOURCE)) {
@@ -669,7 +674,7 @@ public class DataFile {
 	 * @param format repertoire de sortie
 	 * @throws DataFileException 
 	 */
-	private void writeCSVDataFile(String fileName, DataFileFormat fileFormat, FileWriter fileWriter) throws DataFileException {
+	private void writeCSVDataFile(String fileName, DataFileFormat fileFormat, FileWriter fileWriter) throws DataFileException, StatAnalyzerException {
 		CSVWriter writer = null;
 		
 		try {
@@ -707,7 +712,7 @@ public class DataFile {
 				writer.writeNext(record);
 				
 				// On met à jour la stat pour le nombre de lignes écrites
-				this.stats.put("writedLines", this.stats.get("writedLines")+1);
+				this.stats.update("lignes_écrites");
 			}
 			// Après traitement, on peut fermer le module écriture
 			writer.close();
@@ -731,10 +736,6 @@ public class DataFile {
 
 	public File getFichierDestination() {
 		return fichierDestination;
-	}
-	
-	public HashMap<String, Integer> getStat(){
-		return stats;
 	}
 
 	public void setFichierDestination(File fichierDestination) {

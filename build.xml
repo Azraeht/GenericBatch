@@ -1,5 +1,5 @@
 <project name="GenericBatch" basedir="." default="jar">
-	<property name="version" value="1.5" />
+	<property name="version" value="1.6" />
 	<property name="main-class" value="No Main Class Name Here" />
 	<!-- ==========END CHANGE VERSION ======= -->
 	<property name="lib.dir" value="lib" />
