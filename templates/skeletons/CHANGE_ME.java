@@ -1,6 +1,6 @@
 package org.paris.batch;
 
-import org.paris.batch.ConfigurationManagerBatch;
+import org.paris.batch.config.ConfigurationManagerBatch;
 import org.paris.batch.GenericBatch;
 import org.paris.batch.database.SQLExecutor;
 import org.paris.batch.exception.ConfigurationBatchException;
