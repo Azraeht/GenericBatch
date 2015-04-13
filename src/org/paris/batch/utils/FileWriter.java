@@ -268,8 +268,26 @@ public class FileWriter {
             out.close();
             logger.info("Fichier écrit.");
 
-
-        } catch (Exception e) {
+        }
+        catch (FileNotFoundException fnfe)
+        {
+        	String msg = "Impossible de localiser le fichier à ouvrir : " + filename + "\n" + fnfe.getMessage();
+        	logger.error(msg);
+        	throw new FileWriterException(msg);
+        }
+        catch(UnsupportedEncodingException uee)
+        {
+        	String msg = "L'encodage demandé (" + encoding + " pour le fichier : " + filename + " n'est pas pris en charge par Java.\n" + uee.getMessage();
+        	logger.error(msg);
+        	throw new FileWriterException(msg);
+        }
+        catch(IOException ioe)
+        {
+        	String msg = "Erreur de lecture/écriture avec le fichier : " + filename + "\n" + ioe.getMessage();
+        	logger.error(msg);
+        	throw new FileWriterException(msg);
+        }
+        catch (Exception e) {
             String msg = "Erreur lors de l'écriture du fichier '" + filename
                     + "\n" + e.getMessage();
             logger.error(msg);

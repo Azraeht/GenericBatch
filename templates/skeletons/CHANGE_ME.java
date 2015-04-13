@@ -9,7 +9,8 @@ import org.paris.batch.exception.NoPropertiesFoundException;
 import org.paris.batch.exception.SQLExecutorException;
 
 /**
- * @CHANGE_ME@
+ * @CHANGE_ME@ - Batch de ...
+ * Veuillez décrire ici succinctement le fonctionnement du batch
  * 
  * @author
  * 
@@ -17,17 +18,22 @@ import org.paris.batch.exception.SQLExecutorException;
 public class @CHANGE_ME@ extends GenericBatch {
 
     /**
+     * Méthode de démarrage du batch. On y traite les éventuels paramètres d'exécution reçus de la ligne de commande.
      * @param args
      */
     public static void main(String[] args) {
         @CHANGE_ME@ batch = null;
         int result = -1;
         try {
+        	//appel au constructeur
             batch = new @CHANGE_ME@();
             try {
+            	//préparer l'exécution du batch (connexion à la base de données, etc...)
                 batch.setup();
+                //exécuter le batch
                 result = batch.run();
 
+                //traiter le résultat reçu de l'exécution
                 switch (result) {
                 case @CHANGE_ME@.EXIT_OK:
                     batch.exitSuccess();
@@ -54,8 +60,9 @@ public class @CHANGE_ME@ extends GenericBatch {
     }
 
     /**
-     * @throws ConfigurationBatchException
-     * @throws NoPropertiesFoundException
+* Constructeur de la classe. Celui-ci exécute les tâches de configuration par le biais de la mécanique standard de la classe parente (GenericBatch)
+     * @throws ConfigurationBatchException Dans le cas où le traitement de la configuration provoque une erreur irrécupérable
+     * @throws NoPropertiesFoundException Dans le cas où un fichier de propriété indispensable à la configuration est introuvable.
      */
     public @CHANGE_ME@() throws ConfigurationBatchException,
             NoPropertiesFoundException {
