@@ -235,33 +235,46 @@ public class SQLExecutor {
      *         correctement exécutée.
      * @throws SQLExecutorException
      */
-    public int executeUpdate(String query) throws SQLExecutorException {
+    public int executeUpdate(String query) throws SQLExecutorException
+    {
+    	logger.debug("executeUpdate - requête demandée : " + query);
         int result = 0;
+        String uCaseQuery = query.toUpperCase();
         try {
         	// Cas de rollback impossible sur une commande SQL 
-			if((nocommit) && (query.indexOf("ALTER") != -1 || query.indexOf("TRUNCATE") != -1 || query.indexOf("DROP") != -1 || query.indexOf("CREATE") != -1)){
-				logger.debug("Requête SQL : " + query);
-				this.logger.info("Mode No-Commit On : Rollback effectué");
-				logger.debug("Requête non exécutée car rollback impossible.");
-			}else{
+			if((nocommit) && (uCaseQuery.indexOf("ALTER") != -1 || uCaseQuery.indexOf("TRUNCATE") != -1 || uCaseQuery.indexOf("DROP") != -1 || uCaseQuery.indexOf("CREATE") != -1))
+			{
+				logger.info("Mode No-Commit On : requête non exécutée car Rollback impossible");
+			}
+			else
+			{
 	        	// Exécution de la requête
-	            logger.debug("Requète SQL : " + query);
 	            result = runner.update(connection, query);
-	            logger.debug("Requète exécutée. Résultat retourné : " + result);
+	            logger.debug("Résultat de la requête : " + result);
 	            
 	            // Rollback si mode no-commit
-	            if(nocommit){
-	            	this.rollback();
-	            	this.logger.info("Mode No-Commit On : Rollback effectué");
+	            if(nocommit)
+	            {
+	            	rollback();
+	            	logger.info("Mode No-Commit On : rollback effectué");
 	            }
-				
+	            else
+	            {
+	            	commit();
+	            }
 			}
             
-        } catch (Exception sqle) {
-            String msg = "Exception à l'exécution de `" + query + "`\n"
-                    + sqle.getMessage();
+        }
+        catch(SQLException sqle)
+        {
+        	String msg = "SQLException à l'exécution de : " + query + "\n" + sqle.getMessage();
+        	logger.error(msg);
+        	throw new SQLExecutorException(msg);
+        }
+        catch (Exception e)
+        {
+            String msg = "Exception inattendue à l'exécution de : " + query + "\n" + e.getMessage();
             logger.error(msg);
-
             throw new SQLExecutorException(msg);
         }
         return result;
