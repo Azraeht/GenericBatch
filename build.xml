@@ -1,6 +1,7 @@
 <project name="GenericBatch" basedir="." default="jar">
-	<property name="version" value="1.6" />
+	<property name="version" value="1.7" />
 	<property name="main-class" value="No Main Class Name Here" />
+	<property name="java-version-target" value="1.6"/>
 	<!-- ==========END CHANGE VERSION ======= -->
 	<property name="lib.dir" value="lib" />
 	<property name="src.dir" value="src" />
@@ -8,7 +9,6 @@
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 	<property name="project.dir" value="GenericBatch" />
-	<property name="deploy.dir" value="../PE_COORDIN/lib" />
     <property name="dist.dir" value="dist" />
 	<property name="zip.dir" value="zip" />
 	<property name="bat.dir" value="bat" />
@@ -37,7 +37,7 @@
 	<target name="compile" depends="clean" description="compilation des sources Java">
 		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="no" encoding="UTF-8"/>
+		<javac srcdir="${src.dir}" destdir="${classes.dir}"  classpathref="classpath" includeantruntime="no" encoding="UTF-8" compiler="javac${java-version-target}" source="${java-version-target}" target="${java-version-target}" fork="true" taskname="javac${java-version-target}"/>
 		<copy todir="${classes.dir}">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml" />

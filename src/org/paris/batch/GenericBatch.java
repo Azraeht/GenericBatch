@@ -1,5 +1,6 @@
 package org.paris.batch;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -130,6 +131,8 @@ public abstract class GenericBatch {
 	protected ArrayList<DataFile> dataFileList;
 
 	protected Mailer mailer = null;
+	
+	private boolean noMailMode = false;
 
 
 	/**
@@ -174,7 +177,10 @@ public abstract class GenericBatch {
 		}
 		//
 		if (DEBUG) {
-			System.out.println("Instanciation de GenericBatch::Lecture des fichiers de configuration");
+			System.out.println("### MODE DEBUG ACTIVE ###");
+			System.out.println("# pour désactiver le mode debug, supprimer la variable " + ENV_DEBUG + " de l'environnement d'exécution #");
+			System.out.println("Constructeur de la classe GenericBatch");
+			System.out.println("\tLecture du fichier de configuration principal");
 		}
 
 		// Initialisation des properties
@@ -193,10 +199,8 @@ public abstract class GenericBatch {
 		}
 
 
-
-
 		if (DEBUG) {
-			System.out.println("Instanciation de GenericBatch::Récupération du numéro de version du framework");
+			System.out.println("\tRécupération du numéro de version du framework");
 		}
 		// -------------------- Versionning Batch ---------------------------------------
 		String versionGenericBatch = "non définie";
@@ -232,7 +236,7 @@ public abstract class GenericBatch {
 			}
 		}
 		// --------------------Initialisation des modules---------------------------------------
-		if (DEBUG) System.out.println("Instanciation de GenericBatch::Création du logger");
+		if (DEBUG) System.out.println("\tCréation du logger");
 
 		// Initialisation du logger
 		this.logger = LogBatch.getLogBatch(props);
@@ -267,14 +271,16 @@ public abstract class GenericBatch {
 				for (String configfile : listConfigFiles)
 				{
 					//Module Mailer
-					if(configfile.equals("mail")){
-						this.mailer = new Mailer(props, this.logger);
-					}
+					//if(configfile.equals("mail")){
+					//	this.mailer = new Mailer(props, this.logger);
+					//}
+					props = ConfigurationManagerBatch.loadAdditionalProperties(configfile + ConfigurationParameters.PROPERTIES_FILE_EXTENSION, props);
 					this.logger.info("Module complémentaire chargé : "+configfile);
 				}
 			}
 		}
-		if (DEBUG)System.out.println("Instanciation de GenericBatch::Fichiers de config complémentaire ");
+		
+		if (DEBUG) System.out.println("Instanciation de GenericBatch::Fichiers de config complémentaire ");
 		// ---------------------------- Mode No-Commit ----------------------------------------
 		if(this.props.getProperty(ConfigurationParameters.NOCOMMIT_KEY).equals("true")){
 			Properties connexions = ConfigurationManagerBatch.filterProperties(this.props, ConfigurationParameters.DB_HOST_KEY, true);
@@ -285,7 +291,12 @@ public abstract class GenericBatch {
 				String con = e.nextElement().toString();
 				this.props.setProperty(ConfigurationParameters.DB_NOCOMMIT_KEY+con, "true");
 			}
-			this.logger.info("Mode No-Commit : ON - Pas de modifications SQL ni envoi de mail");
+			this.logger.info("Mode No-Commit : ON - Pas de modifications SQL");
+		}
+		
+		if (DEBUG) System.out.println("Test de présence de la propriété nomail");
+		if(this.props.getProperty(ConfigurationParameters.NOMAIL_KEY).equals("true")){
+		    noMailMode = true;
 		}
 
 		// --------------------------- Fin de l'initialisation ---------------------------------

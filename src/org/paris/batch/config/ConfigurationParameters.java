@@ -42,6 +42,11 @@ public class ConfigurationParameters {
     public static final String NOCOMMIT_KEY = "config.gen.no-commit-mode";
     
     /**
+     *  Général : no-mail mode
+    */
+    public static final String NOMAIL_KEY = "config.gen.no-mail-mode";
+    
+    /**
      * log : patron du format
      */
     public static final String LOG_PATTERN_KEY = "config.log.pattern";
@@ -116,6 +121,7 @@ public class ConfigurationParameters {
      * format : préfix des properties de format pour les DataFiles
      * */
     public static final String FORMAT_PREFIX = "format";
+    
     /**
      * Préfix des formats types de properties de conf
      * config : préfix des properties principales du fichier config.properties
@@ -145,5 +151,10 @@ public class ConfigurationParameters {
 	 * Paramètre de l'emplacement du répertoire temporaire
 	 * */
 	public static final String TEMPDIR = "config.gen.tempdir";
+	
+	/**
+	 * Extension de fichier des fichiers de propriété
+	 */
+	public static final String PROPERTIES_FILE_EXTENSION = ".properties";
     
 }

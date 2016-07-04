@@ -1,7 +1,10 @@
 package org.paris.batch.database;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -9,6 +12,9 @@ import org.apache.commons.dbutils.DbUtils;
 import org.paris.batch.config.ConfigurationParameters;
 import org.paris.batch.exception.ConfigurationBatchException;
 import org.paris.batch.exception.DatabaseDriverNotFoundException;
+
+import oracle.jdbc.driver.OracleConnection;
+import oracle.jdbc.driver.OraclePreparedStatement;
 
 /**
  * Connection utilisée par la class {@link SQLExecutor}
@@ -30,6 +36,24 @@ public class DBConnection {
 	 */
 	private static final String URL_POSTGRE = "jdbc:postgresql://%s:%s/%s";
 
+	public static boolean isOracleConnection(Connection c)
+	{
+	    String errMsg;
+	    try
+	    {
+	        DatabaseMetaData dbmd = c.getMetaData();
+	        if(dbmd.getDriverName().toUpperCase().indexOf("ORACLE") > 0)
+	            return true;
+	        else
+	            return false;
+	    }
+	    catch(SQLException sqle)
+	    {
+	        errMsg = "DBConnection : Impossible d'obtenir les métadonnées de la connection :\n" + sqle.getMessage();
+	    }
+	    return false;
+	}
+	
 	/**
 	 * constructeur
 	 * 
@@ -101,5 +125,24 @@ public class DBConnection {
 		}
 
 		return connect;
+	}
+	
+	public static OraclePreparedStatement oraclePrepareStatement(Connection c, String query) throws SQLException
+	{
+	    OracleConnection oc;
+	    oc = (OracleConnection) c;
+	    return ((OraclePreparedStatement)oc.prepareStatement(query));
+	}
+	
+	public static void oracleSetArray(Connection c, PreparedStatement preparedStatement, int paramIndex, String dataType, Object[] paramArray) throws SQLException
+	{
+	    OraclePreparedStatement ops = (OraclePreparedStatement)preparedStatement;
+	    ops.setARRAY(paramIndex, oracle.sql.ARRAY.toARRAY(paramArray, (OracleConnection)c));
+	}
+	
+	public static ResultSet oraclePreparedStatementExecuteQuery(PreparedStatement preparedStatement) throws SQLException
+	{
+	    OraclePreparedStatement ops = (OraclePreparedStatement)preparedStatement;
+	    return(ops.executeQuery());
 	}
 }

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,7 +33,23 @@ public class SQLExecutor {
     private QueryRunner runner;
     private ProcRunner procRunner;
     private Boolean nocommit;
+    
+    private Object preparedStatement;
 
+    public static final String oracleDataTypeVarchar = "VARCHAR";
+    public static final String oracleDataTypeVarchar2 = "VARCHAR2";
+    public static final String oracleDataTypeNumber = "NUMBER";
+    public static final String oracleDataTypeDate = "DATE";
+    public static final String oracleDataTypeInteger = "INTEGER";
+    public static final String oracleDataTypeBoolean = "BOOLEAN";
+    
+    private static final String listParamMark = "??";
+    private static final String paramMark = "?";
+    private static final String paramListSeparator = ",";
+    
+    private static final String queryKey = "query";
+    private static final String paramsKey = "params";
+    
     /**
      * Constructeur permettant d'exploiter l'indicateur no-commit
      * @param props Jeu de propriétés complet
@@ -63,6 +80,7 @@ public class SQLExecutor {
         // Mode no-commit
         if(props.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true"))
         {
+            this.logger.info("Mode no-commit détecté");
             this.nocommit = true;
         }
         else
@@ -78,7 +96,7 @@ public class SQLExecutor {
         this.logger.debug("Mode Auto-Commit :"+filteredProps.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY));
         
     }
-    
+
     /**
      * Constructeur
      * 
@@ -115,20 +133,102 @@ public class SQLExecutor {
 
         
         // Mode no-commit
-        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY, "false").equals("true"))
+        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true"))
         {
-        	this.nocommit = true;
+            this.logger.info("Mode no-commit détecté");
+            this.nocommit = true;
         }
         else
         {
-        	this.nocommit = false;
+            this.nocommit = false;
         }
+        
         this.logger.debug("SQLExecutor : Paramétrage");
         this.logger.debug("Connexion : "+properties.getProperty(ConfigurationParameters.DB_USER_KEY)+"/"+properties.getProperty(ConfigurationParameters.DB_PASS_KEY)+"@"+properties.getProperty(ConfigurationParameters.DB_HOST_KEY)+":"+properties.getProperty(ConfigurationParameters.DB_PORT_KEY));
         this.logger.debug("Mode Auto-Commit :"+properties.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY));
         
     }
 
+    /**
+     * Méthode fabriquant une requête précompilée (nécessaire pour le passage de paramètres complexes, type clause SELECT... WHERE x IN (?) )
+     * @param query la requête à exécuter
+     * @return la requête précompilée, sans paramètre spécifié
+     * @throws SQLExecutorException
+     */
+    public void createPreparedStatement(String query) throws SQLExecutorException
+    {
+        String errMsg;
+        try
+        {
+            if(DBConnection.isOracleConnection(connection))
+            {
+                //ps = connection.prepareStatement(query);
+                preparedStatement = DBConnection.oraclePrepareStatement(connection, query);
+            }
+            else
+                preparedStatement = connection.prepareStatement(query);
+        }
+        catch(SQLException sqle)
+        {
+            errMsg = "Une anomalie est survenue lors de la création de la requête précompilée :\n" + sqle.getMessage();
+            this.logger.error(errMsg);
+            throw new SQLExecutorException(errMsg);
+        }
+    }
+    
+    public void setArrayInPreparedStatement(int paramIndex, String dataType, Object[] paramArray) throws SQLExecutorException
+    {
+        String errMsg;
+        try
+        {
+            if(DBConnection.isOracleConnection(connection))
+            {
+                DBConnection.oracleSetArray(connection, (PreparedStatement)preparedStatement, paramIndex, dataType, paramArray);
+            }
+            else
+                ((PreparedStatement)preparedStatement).setArray(paramIndex, connection.createArrayOf(dataType, paramArray));
+        }
+        catch(SQLException sqle)
+        {
+            errMsg = "Une anomalie est survenue lors de l'ajout du tableau de paramètres à la requête précompilée :\n" + sqle.getMessage();
+            this.logger.error(errMsg);
+            throw new SQLExecutorException(errMsg);
+        }
+    }
+    
+    /**
+     * @param handler
+     * @param query
+     *            la Requète SQL
+     * @return une liste contenant les résultats
+     * @throws SQLExecutorException
+     */
+    public List<?> executeSelectWithPreparedStatement(ResultSetHandler<List<Object[]>> handler) throws SQLExecutorException
+    {
+        @SuppressWarnings("rawtypes")
+        List<?> result = new ArrayList();
+        ResultSet res;
+        try {
+            logger.debug("Requète SQL : " + ((PreparedStatement)preparedStatement).toString());
+            if(DBConnection.isOracleConnection(connection))
+            {
+                res = DBConnection.oraclePreparedStatementExecuteQuery((PreparedStatement)preparedStatement);
+            }
+            else
+                res = ((PreparedStatement)preparedStatement).executeQuery();
+            result = handler.handle(res);
+            logger.debug("Requète exécutée. Eléments retournés : "
+                    + result.size());
+        } catch (Exception sqle) {
+            String msg = "Exception à l'exécution de `" + ((PreparedStatement)preparedStatement).toString() + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+
+            throw new SQLExecutorException(msg);
+        }
+        return result;
+    }
+    
     /**
      * Exécute une proc stock sans valeur de retour (pas de result set)
      * @param statementCall L'appel SQL d'exécution de la proc stock
@@ -295,6 +395,9 @@ public class SQLExecutor {
     public int executeUpdate(String query, Object... params)
             throws SQLExecutorException {
         int result = 0;
+        
+        HashMap<String, Object> infosAjustees;
+        
         try {
         	// Cas de rollback impossible sur une commande SQL 
         	if((nocommit) && (query.indexOf("ALTER") != -1 || query.indexOf("TRUNCATE") != -1 || query.indexOf("DROP") != -1 || query.indexOf("CREATE") != -1)){
@@ -307,7 +410,15 @@ public class SQLExecutor {
 	            for(Object arg:params){
 	            	logger.info("Param : "+arg.toString());
 	             }            
-	            result = runner.update(connection, query, params);
+	            
+	            //logger.debug("Appel à la fonction de substitution des paramètres multiples. Pour info :\n" + query + "\nNb de paramètres : " + params.length);
+	            infosAjustees = adjustQueryForMultipleParams(query, params);
+	            //logger.debug("Fonction de substitution des paramètres multiples effectuée. Pour info :\n" + (String) (infosAjustees.get(queryKey)) + "\nNb de paramètres : " + ((Object[]) (infosAjustees.get(paramsKey))).length);
+	            
+	            // org.apache.commons.dbutils.ResultSetHandler<T>
+	            result = runner.update(connection, (String) (infosAjustees.get(queryKey)), (Object[]) (infosAjustees.get(paramsKey)));
+	            
+	            //result = runner.update(connection, query, params);
 	            logger.debug("Requète exécutée. Résultat retourné : " + result);
 	            
 	            // Rollback si mode no-commit
@@ -316,7 +427,9 @@ public class SQLExecutor {
 	            	this.logger.info("Mode No-Commit On : Rollback effectué");
 	            }
 			}
-        } catch (Exception sqle) {
+        }
+        catch (SQLException sqle)
+        {
             String msg = "Exception à l'exécution de `" + query + "`\n"
                     + sqle.getMessage();
             logger.error(msg);
@@ -352,6 +465,77 @@ public class SQLExecutor {
         return result;
     }
 
+    public HashMap<String, Object> adjustQueryForMultipleParams(String query, Object...params)
+    {
+        Object[] remainingParams = new Object[params.length];
+        Object[] paramList = {};
+        Object param;
+        String queryPart = "";
+        int paramPos = query.indexOf(paramMark);
+        int paramIndex = 0;
+        int remainingParamIndex = 0;
+        HashMap<String, Object> retour = new HashMap<String, Object>();
+        logger.debug("ADJUST QUERY :\nquery :\n" + query + "\nparamPos : " + paramPos);
+        while(paramPos >= 0)
+        {
+            
+            if(paramPos == query.indexOf(listParamMark, paramPos))
+            {
+                logger.debug("substitution de double ??");
+                //c'est une marque de liste : effectuer la substitution dans query, et supprimer le paramètre correspondant
+                param = params[paramIndex];
+                if(param instanceof Object[])
+                {
+                    paramList = (Object[]) param;
+                    queryPart = "";
+                    for(Object paramListItem:paramList)
+                    {
+                        //fabriquer la liste écrite des valeurs à transmettre
+                        queryPart += paramListItem.toString() + paramListSeparator;
+                    }
+                    //remplacer la requête par 
+                    query = query.substring(0, paramPos) + queryPart.substring(0,queryPart.length()-1) + (query.length() >= paramPos+2 ? query.substring(paramPos + 2):"");
+                }
+                else
+                {
+                    query = query.substring(0, paramPos) + param.toString() + (query.length() >= paramPos+2 ? query.substring(paramPos + 2):"");
+                }
+                paramIndex++;
+            }
+            else
+            {
+                //c'est un paramètre classique : on ne touche pas à la liste, on ajoute le paramètre
+                //à la liste de ceux à conserver
+                logger.debug("paramètre classique... on conserve.");
+                remainingParams[remainingParamIndex] = params[paramIndex];
+                remainingParamIndex++;
+                paramIndex++;
+            }
+            paramPos = query.indexOf(paramMark, 
+                                    ((paramPos+1>query.length())?query.length():paramPos+1)
+                                    );
+            logger.debug("prochaine position : " + paramPos);
+        }
+        paramList = new Object[] {};
+        if(remainingParams[0] != null)
+        {
+            logger.debug("Constitution de la liste des paramètres allégée.");
+            paramList = new Object[remainingParamIndex - 1];
+            for(int i = 0; i < remainingParamIndex - 1; i++)
+            {
+                paramList[i] = remainingParams[i];
+            }
+            params = paramList;
+        }
+
+        logger.debug("Query :\n" + query);
+        logger.debug("Nb params :\n" + paramList.length);
+        retour.put(queryKey, new String(query) );
+        retour.put(paramsKey, paramList);
+        return(retour);
+    }
+    
+    
     /**
      * @param query
      *            la Requète SQL
@@ -363,14 +547,20 @@ public class SQLExecutor {
             throws SQLExecutorException {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
+        HashMap<String, Object> infosAjustees;
         try {
             logger.debug("Requète SQL : " + query);
             for(Object arg:params){
             	logger.debug("Param : "+arg.toString());
-             }        
+             }
+            
+            //logger.debug("Appel à la fonction de substitution des paramètres multiples. Pour info :\n" + query + "\nNb de paramètres : " + params.length);
+            infosAjustees = adjustQueryForMultipleParams(query, params);
+            //logger.debug("Fonction de substitution des paramètres multiples effectuée. Pour info :\n" + (String) (infosAjustees.get(queryKey)) + "\nNb de paramètres : " + ((Object[]) (infosAjustees.get(paramsKey))).length);
+            
             // org.apache.commons.dbutils.ResultSetHandler<T>
-            result = runner.query(connection, query, new MapListHandler(),
-                    params);
+            result = runner.query(connection, (String) (infosAjustees.get(queryKey)), new MapListHandler(),
+                    (Object[]) (infosAjustees.get(paramsKey)));
             logger.debug("Requète exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {
@@ -446,13 +636,19 @@ public class SQLExecutor {
             String query, Object... params) throws SQLExecutorException {
         @SuppressWarnings("rawtypes")
         List<?> result = new ArrayList();
+        HashMap<String, Object> infosAjustees;
         try {
             logger.debug("Requète SQL : " + query);
             for(Object arg:params){
             	logger.debug("Param : "+arg.toString());
              }        
             // org.apache.commons.dbutils.ResultSetHandler<T>
-            result = runner.query(connection, query, handler, params);
+
+            logger.debug("Appel à la fonction de substitution des paramètres multiples. Pour info :\n" + query + "\nNb de paramètres : " + params.length);
+            infosAjustees = adjustQueryForMultipleParams(query, params);
+            logger.debug("Fonction de substitution des paramètres multiples effectuée. Pour info :\n" + (String) (infosAjustees.get(queryKey)) + "\nNb de paramètres : " + ((Object[]) (infosAjustees.get(paramsKey))).length);
+            
+            result = runner.query(connection, (String) (infosAjustees.get(queryKey)), handler, (Object[]) (infosAjustees.get(paramsKey)));
             logger.debug("Requète exécutée. Eléments retournés : "
                     + result.size());
         } catch (Exception sqle) {

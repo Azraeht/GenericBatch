@@ -15,6 +15,58 @@ import org.paris.batch.exception.ConfigurationBatchException;
  * 
  */
 public class ConfigurationManagerBatch {
+	
+	/**
+	 * Charge le fichier de propriétés indiqué en paramètre dans le jeu de propriétés fourni en entrée.
+	 * Si une variable d'environnement existe permettant de surcharger le fichier à utiliser, c'est le fichier visé par la variable d'environnement qui sera chargé.
+	 * @param propertiesFileName nom du fichier de propriétés à charger
+	 * @param props jeu de propriétés existant
+	 * @return le jeu de propriétés existant, complété des propriétés chargées
+	 * @throws ConfigurationBatchException en cas de fichier absent ou incorrect
+	 */
+	public static Properties loadAdditionalProperties(String propertiesFileName, Properties props) throws ConfigurationBatchException
+	{
+		String env = null;
+		String env_var = null;
+
+		// Quel est le type de fichier de configuration ?
+		if (propertiesFileName.equals(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME)) {
+		    //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
+			env_var = ConfigurationParameters.ENV_CONFIG_FILENAME;
+			env = System.getenv(env_var);
+		} 
+		else if (propertiesFileName.equals(ConfigurationParameters.PROPERTIES_QUERY_FILENAME)) {
+            //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
+		    env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
+			env = System.getenv(env_var);
+		}
+
+		//la chaîne env vaut null si aucune variable d'env n'a été trouvée.
+		// Si elle a été trouvée, l'environnement surcharge les valeurs par défaut (dossier `config`).
+		if (env != null && (new File(env)).exists()) {
+			propertiesFileName = env;
+		} else {
+		    //construire le chemin d'accès au fichier de propriétés à charger
+			propertiesFileName = System.getProperty("user.dir")
+					+ ConfigurationParameters.CONFIG_DIRNAME + propertiesFileName;
+		}
+		
+		//on tente le chargement du fichier demandé
+		try
+		{
+			props.load(new FileInputStream(new File(propertiesFileName)));
+			props = overrideWithEnv(props);
+			return props;
+		}
+		catch (Exception e)
+		{
+			String msg = "Erreur lors du traitement de chargement de configuration - Fichier concerné: "
+					+ propertiesFileName + "\nException : " + e.getMessage();
+			System.err.println(msg);
+			throw new ConfigurationBatchException(msg);
+		}
+	}
+	
 	/**
 	 * 
 	 * Charge le fichier de propriétés spécifié en paramètre, sauf si celui-ci est redéfini localement par une variable d'environnement
@@ -28,46 +80,7 @@ public class ConfigurationManagerBatch {
 	public static Properties loadProperties(String properties_type)
 			throws ConfigurationBatchException {
 		Properties properties = new Properties();
-		String env = null;
-		String env_var = null;
-		String properties_filename;
-
-		// Quel est le type de fichier de configuration ?
-		if (properties_type.equals(ConfigurationParameters.PROPERTIES_CONFIG_FILENAME)) {
-		    //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
-			env_var = ConfigurationParameters.ENV_CONFIG_FILENAME;
-			env = System.getenv(env_var);
-		} 
-		else if (properties_type.equals(ConfigurationParameters.PROPERTIES_QUERY_FILENAME)) {
-            //tenter de récupérer dans les variables d'environnement le nom du fichier de conf à charger
-		    env_var = ConfigurationParameters.ENV_QUERY_FILENAME;
-			env = System.getenv(env_var);
-		}
-
-		//la chaîne env vaut null si aucune variable d'env n'a été trouvée.
-		// Si elle a été trouvée, l'environnement surcharge les valeurs par défaut (dossier `config`).
-		if (env != null && (new File(env)).exists()) {
-			properties_filename = env;
-		} else {
-		    //construire le chemin d'accès au fichier de propriétés à charger
-			properties_filename = System.getProperty("user.dir")
-					+ ConfigurationParameters.CONFIG_DIRNAME + properties_type;
-		}
-		
-		//on tente le chargement du fichier demandé
-		try
-		{
-			properties.load(new FileInputStream(new File(properties_filename)));
-			properties = overrideWithEnv(properties);
-			return properties;
-		}
-		catch (Exception e)
-		{
-			String msg = "Erreur lors du traitement de chargement de configuration - Fichier concerné: "
-					+ properties_filename + "\nException : " + e.getMessage();
-			System.err.println(msg);
-			throw new ConfigurationBatchException(msg);
-		}
+		return loadAdditionalProperties(properties_type, properties);
 	}
 
 	/**
