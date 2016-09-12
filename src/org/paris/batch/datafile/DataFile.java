@@ -184,7 +184,13 @@ public class DataFile {
 			
 			// Définition du type de fichier CSV / Colonné
 			this.setTypeFile(typeFile);
-		} catch (Exception e) {
+		} catch (DataFileException dfe) {
+			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
+					+ this.getName() + "\nDataFileException : " + dfe.getMessage();
+			System.err.println(msg);
+			throw new DataFileException(msg);
+		}
+		catch (Exception e) {
 			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
 					+ this.getName() + "\nException : " + e.getMessage();
 			System.err.println(msg);
@@ -208,9 +214,32 @@ public class DataFile {
 
 			// en fonction du type de fichier, on délégue le chargement des données à la méthode appropriée
 			if (typeFile.equals(DataFileType.TYPE_COLONNE))
-				this.loadColonneData(FileOrigine);
+			{
+				try {
+					this.loadColonneData(FileOrigine);
+				}
+				catch (DataFileException dfe) 
+				{
+					String msg = "DataFileException : "
+							+ dfe.getMessage();
+					System.err.println(msg);
+					throw new DataFileException(msg);
+				}
+			}
 			else if (typeFile.equals(DataFileType.TYPE_CSV))
-				this.loadCSVData(FileOrigine);
+			{
+				try {
+					this.loadCSVData(FileOrigine);
+				}
+				catch (DataFileException dfe) 
+				{
+					String msg = "DataFileException : "
+							+ dfe.getMessage();
+					System.err.println(msg);
+					throw new DataFileException(msg);
+				}
+			}	
+				
 			else {
 				String msg = "Erreur lors du chargement en mémoire du fichier - Fichier concerné: "
 						+ this.getName()
@@ -326,6 +355,7 @@ public class DataFile {
 		String filename = null;
 			try {
 				// On récupére le fichier à charger en mémoire
+				logger.debug("On récupére le fichier à charger en mémoire");
 				if (FileOrigine.equals(DataFileType.ORIGINE_SOURCE)) {
 					fstream = new FileInputStream(this.fichierSource);
 					fileFormat = this.getIn();
@@ -334,30 +364,43 @@ public class DataFile {
 					fstream = new FileInputStream(this.fichierDestination);
 					fileFormat = this.getOut();
 					filename = this.fichierDestination.getName();
+				} else {
+					String msg = "Erreur lors du chargement en mémoire du fichier csv - Fichier concerné: "
+							+ this.getName() + "\nDataFileException : Echec de la récupération en mémoire du fichier, le répertoire de lecture n\'a pas été indiqué correctement." 
+							+ "\nChoisir: " + DataFileType.ORIGINE_SOURCE + " ou " + DataFileType.ORIGINE_DESTINATION + " lors de l'appel de loadData().";
+					throw new DataFileException(msg);	
 				}
 				
 				// On configure les paramètres du fichier à charger
+				logger.debug("On configure les paramètres du fichier à charger");
 				DataInputStream in = new DataInputStream(fstream);
 				BufferedReader br = new BufferedReader(
 						new InputStreamReader(in));
+						
+
+				
 				CSVReader reader = new CSVReader(br, fileFormat.getSeparator().toCharArray()[0],
 						CSVParser.DEFAULT_QUOTE_CHARACTER, (fileFormat.getHaveheader() ? 1 : 0));
 
 				// On parcours le fichier ligne par ligne
+				logger.debug("On parcours le fichier ligne par ligne");
 				String[] nextLine;
 				int ligne = (fileFormat.getHaveheader() ? 2 : 1);
 				while ((nextLine = reader.readNext()) != null) {
 
 					// On mets à jour la stat concernant le nombre de lignes traitées
+					logger.debug("On mets à jour la stat concernant le nombre de lignes traitées");
 					this.stats.update("lignes_traitées");
 					
 					// On récupére la liste des colonnes à traiter
+					logger.debug("On récupére la liste des colonnes à traiter");
 					Set<String> set = this.getIn().getFormat().keySet();
 					Iterator<String> itr = set.iterator();
 
 					// On vérifie si la ligne contient bien toute les colonnes
 					// même vide sinon on rejete la ligne du chargement et on
 					// loggue tout ça
+					logger.debug("On vérifie si la ligne contient bien toute les colonnes");
 					if (nextLine.length != set.size()) {
 						logger.error("ligne rejetée (nombre de colonnes incorrect) : [attendue=" + set.size()
 								+ "; reçue=" + nextLine.length

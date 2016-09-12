@@ -60,6 +60,7 @@ public class DataFileFormat {
 				if (key.contains(type + "." + DataFileName)) {
 					// On récupére le charactére de complément, de fin
 					// d'enregistrement et le séparateur
+					
 					if (key.contains("separator")) {
 						this.separator = value;
 					} else if (key.contains("replacechar")) {

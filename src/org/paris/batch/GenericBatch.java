@@ -295,10 +295,18 @@ public abstract class GenericBatch {
 		}
 		
 		if (DEBUG) System.out.println("Test de présence de la propriété nomail");
-		if(this.props.getProperty(ConfigurationParameters.NOMAIL_KEY).equals("true")){
-		    noMailMode = true;
+		try
+		{
+			// on fournit une valeur par défaut si la propriété n'est pas trouvée
+			if(this.props.getProperty(ConfigurationParameters.NOMAIL_KEY, "true").equals("true")){
+			    noMailMode = true;
+			}
+		} catch(Exception e)
+		{
+			String msg = "Erreur inattendue lors du test de présence de la propriété nomail.\nException :" + e.getMessage();
+			throw new ConfigurationBatchException(msg);
 		}
-
+			
 		// --------------------------- Fin de l'initialisation ---------------------------------
 		this.logger.info("Initialisation terminée.");
 		if (DEBUG) System.out.println("Instanciation de GenericBatch::Fin de l'instanciation, prêt à taffer");
