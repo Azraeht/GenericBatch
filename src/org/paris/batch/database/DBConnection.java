@@ -122,6 +122,16 @@ public class DBConnection {
 			        + sqle.getMessage();
 			System.err.println(msg);
 			throw new ConfigurationBatchException(msg);
+		} catch (Exception e) {
+			String msg = "Exception non prévue lors de la tentative d'obtention de connexion :\n"
+					+ "URL = " + url + "\n"
+			        + "User = " + p.getProperty(ConfigurationParameters.DB_USER_KEY) + "\n"
+                    + "Password = " + p.getProperty(ConfigurationParameters.DB_PASS_KEY) + "\n"
+                    + "Autocommit " + (Boolean.parseBoolean(p.getProperty(ConfigurationParameters.DB_AUTOCOMMIT_KEY, "false")) ? "on" : "off") + "\n"
+                    + e.getMessage();
+
+			System.err.println(msg);
+			throw new ConfigurationBatchException(msg);
 		}
 
 		return connect;

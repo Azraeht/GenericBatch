@@ -47,6 +47,7 @@ import org.paris.batch.datafile.DataFile;
  * @author Guillaume Weber
  * @author Brice Santus
  * @author Emmanuel GALLOIS
+ * @author Christophe RIVIERE
  * 
  * Exemple : 
 

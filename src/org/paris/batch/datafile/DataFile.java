@@ -1,6 +1,6 @@
 /**
  *
- * @author santusbr
+ * @author santusbr, rivierech
  *
  */
 package org.paris.batch.datafile;
@@ -57,6 +57,150 @@ public class DataFile {
 	/** fourniture de quelques statistiques sur les différents traitements de cette classe */
 	private StatAnalyzer stats = null;
 
+	
+	/**
+	 * Constructeur implémentant les éléments obligatoires et invariables pour un objet DataFile.
+	 * 
+	 * @param typeFile
+	 *            Type de fichier CSV ou Colonné (DataFileType)
+	 * @param logger
+	 *            Logger fourni par la classe appelante (implémentant
+	 *            GenericBatch)
+	 * @param stats
+	 *            StatAnalyzer fourni par la classe appelante (implémentant
+	 *            GenericBatch)
+	 * @throws DataFileException
+	 */
+	private DataFile(String typeFile, Logger logger, StatAnalyzer stats) 
+						throws DataFileException {
+		// contrôle de cohérence des données de construction
+		String errMsg = "";
+
+		if (stats == null)
+			errMsg += "Le composant StatAnalyzer n'est pas valide";
+		
+		if (logger == null)
+			errMsg += "Le composant Logger n'est pas valide";
+		
+		if (typeFile == null)
+			errMsg += "Le composant (String)typeFile n'est pas valide";
+
+		// TODO : compléter les tests de cohérence des paramètres en entrée avec
+		// typeFile
+		if (!errMsg.equals(""))
+			throw new DataFileException(errMsg);
+
+		try {
+			// définition du logger
+			this.logger = logger;
+
+			// on créer une DataStructure pour enrigistrer les données à traiter
+			this.datas = new DataStructure();
+			
+			// définition du StatAnalyzer
+			this.stats = stats;
+
+			// Définition du type de fichier CSV / Colonné
+			this.setTypeFile(typeFile);
+		}
+		catch (Exception e) {
+			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
+					+ this.getName() + "\nException : " + e.getMessage();
+			System.err.println(msg);
+			throw new DataFileException(msg);
+		}
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Constructeur implémentant un objet DataFile destiné à la production d'un fichier sans partir d'un fichier source.
+	 * 
+	 * @param destinationPath
+	 *            chemin de la destination
+	 * @param outputFilename
+	 *            nom du fichier de données en sortie si vous ne souhaitez pas garder le nom du fichier d'origine
+	 * @param typeFile
+	 *            Type de fichier CSV ou Colonné (DataFileType)
+	 * @param formats
+	 *            Properties contenant les formats de DataFile
+	 * @param nameDataFileFormatOut
+	 *            [optionnel] : Nom du DataFileFormat en sortie si différent du nom du
+	 *            fichier
+	 * @param logger
+	 *            Logger fourni par la classe appelante (implémentant
+	 *            GenericBatch)
+	 * @param stats
+	 *            StatAnalyzer fourni par la classe appelante (implémentant
+	 *            GenericBatch)
+	 * @throws DataFileException
+	 */
+	public DataFile(String destinationPath, String outputFilename,
+			String typeFile, Properties formats,  String nameDataFileFormatOut,
+			Logger logger, StatAnalyzer stats) throws DataFileException {
+		
+		this(typeFile, logger, stats);
+		
+		// contrôle de cohérence des données de construction
+		String errMsg = "";
+
+		// vérifier que le chemin destination n'est pas vide
+		if (destinationPath.equals("") || destinationPath == null) {
+			errMsg += "Le chemin d'accès au fichier de destination est vide\n";
+		} else {
+			// vérifier que le chemin destination existe;
+			File destFileDir = new File(destinationPath);
+			if (!destFileDir.exists()) {
+				errMsg += "Le chemin d'accès au fichier de destination n'existe pas\n";
+			} else {
+				if (!destFileDir.isDirectory()) {
+					errMsg += "Le chemin d'accès au fichier de destination ne correspond pas à un répertoire\n";
+				} else {
+					if (!destFileDir.canWrite()) {
+						errMsg += "Le chemin d'accès au fichier de destination n'est pas un répertoire accessible en écriture\n";
+					}
+				}
+			}
+		}
+		
+
+		// TODO : compléter les tests de cohérence des paramètres en entrée avec
+		// formatIn
+		// formats
+		if (!errMsg.equals(""))
+			throw new DataFileException(errMsg);
+
+		// tout est en ordre ? Alors va pour la construction. Yeeeeepeeeee !
+		try {
+			// définition du nom de fichier
+			this.setName(outputFilename); 
+			//TODO, a 1ere vu l'attribut Name sert surtout lors de la constitution des messages d'erreurs, 
+			//il y aurait un travail de mise en conformité de ces derniers suite à l'intégration de cette nouvelle fonctionnalité
+			
+			// définition des formats du fichier de destination
+			this.setOut(formats, nameDataFileFormatOut);
+
+			// / Définition du fichier de destination
+			this.setFichierDestination(new File(destinationPath
+					+ File.separator + outputFilename));
+			
+		} catch (DataFileException dfe) {
+			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
+					+ this.getName() + "\nDataFileException : " + dfe.getMessage();
+			System.err.println(msg);
+			throw new DataFileException(msg);
+		}
+		catch (Exception e) {
+			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
+					+ this.getName() + "\nException : " + e.getMessage();
+			System.err.println(msg);
+			throw new DataFileException(msg);
+		}
+	}
+	
+	
 	/**
 	 * Constructeur implémentant un objet DataFile.
 	 * 
@@ -89,6 +233,9 @@ public class DataFile {
 	public DataFile(String inputFilename, String sourcePath, String destinationPath, String outputFilename,
 			String typeFile, Properties formats, String nameDataFileFormatIn, String nameDataFileFormatOut,
 			Logger logger, StatAnalyzer stats) throws DataFileException {
+		
+		this(typeFile, logger, stats);
+		
 		// contrôle de cohérence des données de construction
 		String errMsg = "";
 
@@ -138,15 +285,8 @@ public class DataFile {
 			}
 		}
 		
-		if (stats == null)
-			errMsg += "Le composant StatAnalyzer n'est pas valide";
-		
-		if (logger == null)
-			errMsg += "Le composant Logger n'est pas valide";
-
 		// TODO : compléter les tests de cohérence des paramètres en entrée avec
 		// formatIn
-		// typeFile
 		// formats
 		if (!errMsg.equals(""))
 			throw new DataFileException(errMsg);
@@ -164,15 +304,6 @@ public class DataFile {
 			this.setFichierSource(new File(sourcePath + File.separator
 					+ inputFilename));
 
-			// définition du logger
-			this.logger = logger;
-
-			// on créer une DataStructure pour enrigistrer les données à traiter
-			this.datas = new DataStructure();
-			
-			// définition du StatAnalyzer
-			this.stats = stats;
-
 			// Si le nom de fichier destination n'est pas renseigné, le nom de fichier sera celui de l'origine
 			if (outputFilename != null && outputFilename != "") {
 				this.setFichierDestination(new File(destinationPath
@@ -182,8 +313,6 @@ public class DataFile {
 						+ File.separator + inputFilename));
 			}
 			
-			// Définition du type de fichier CSV / Colonné
-			this.setTypeFile(typeFile);
 		} catch (DataFileException dfe) {
 			String msg = "Erreur lors de l'accés au fichier - Fichier concerné: "
 					+ this.getName() + "\nDataFileException : " + dfe.getMessage();
@@ -198,6 +327,33 @@ public class DataFile {
 		}
 	}
 
+	/**
+	 * Méthode de chargement des données du fichier en mémoire //TODO
+	 * 
+	 * @param FileOrigine
+	 *            : Nom du fichier à charger
+	 * @throws DataFileException
+	 * @throws IOException
+	 */
+	public void setData(DataStructure datas) 
+			throws DataFileException {
+		
+		// contrôle de cohérence des données de construction
+		String errMsg = "";
+				
+		if ((datas == null) || !(datas.getDatas().size()>0))
+			errMsg += "Le composant DataStructure n'est pas valide";
+		
+		this.datas = datas;
+		
+		if (!errMsg.equals(""))
+			throw new DataFileException("Erreur lors du chargement des données: " + errMsg);
+		
+	}
+	
+
+	
+	
 	/**
 	 * Méthode de chargement des données du fichier en mémoire
 	 * 
@@ -719,17 +875,20 @@ public class DataFile {
 	 */
 	private void writeCSVDataFile(String fileName, DataFileFormat fileFormat, FileWriter fileWriter) throws DataFileException, StatAnalyzerException {
 		CSVWriter writer = null;
-		
+		String etapeExecution = "";
 		try {
 			// On configure les paramètres du fichier de sortie
+			etapeExecution = "[configuration params fichier sortie]";
 			writer = new CSVWriter(fileWriter,fileFormat.getSeparator().toCharArray()[0], CSVWriter.NO_QUOTE_CHARACTER);
 
 			// On écrit l'entête si le paramètre HaveHeader est vrai
+			etapeExecution = "[écriture du header]";
 			if (fileFormat.getHaveheader()){
 				writer.writeNext(fileFormat.getFormat().keySet().toArray(new String[fileFormat.getFormat().keySet().size()]));
 			}
 			
 			// Pour chaque donnée
+			etapeExecution = "[parcour des données]";
 			for (HashMap<String, Object> hm : this.datas.getDatas()) {
 
 				// On récupére la liste des colonnes à écrire dans le fichier
@@ -758,9 +917,16 @@ public class DataFile {
 				this.stats.update("lignes_écrites");
 			}
 			// Après traitement, on peut fermer le module écriture
+			etapeExecution = "[fermeture module d'écriture]";
 			writer.close();
-		} catch (IOException e) {
+		} catch (IOException ioe) {
 			String msg = "Erreur lors d'écriture des données en mémoire dans le fichier csv - Fichier concerné: "
+					+ fileName + "\nIOException : " + ioe.getMessage();
+			System.err.println(msg);
+			logger.error(msg);
+			throw new DataFileException(msg);
+		} catch (Exception e) {
+			String msg = "Erreur lors d'écriture des données en mémoire dans le fichier csv - Etape: " + etapeExecution + " - Fichier concerné: "
 					+ fileName + "\nException : " + e.getMessage();
 			System.err.println(msg);
 			logger.error(msg);

@@ -71,7 +71,20 @@ public class SQLExecutor {
         
         // Création de la connexion en fonction des propriétés transmises en paramètre
         this.logger.debug("Ouverture de la connexion en cours...");
-        this.connection = DBConnection.getConnection(filteredProps);
+        try
+        {
+        	this.connection = DBConnection.getConnection(filteredProps);
+        }
+        catch (DatabaseDriverNotFoundException ddnfe)
+        {
+        	logger.error("Pilote de base de données introuvable... y'a pas bon !\n" + ddnfe.getMessage());
+        	throw ddnfe;
+        }
+        catch (Exception e)
+        {
+        	logger.error("Exception non prévue lors de la création de la connexion... ça fouetasse dans la purée !\n" + e.getMessage());
+        	throw new ConfigurationBatchException(e.getMessage());
+        }
         this.logger.debug("Connexion ouverte.");
         
         // Préparation du runner
@@ -133,13 +146,21 @@ public class SQLExecutor {
 
         
         // Mode no-commit
-        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true"))
+        if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY) == null)
+        {
+        	String errMsg = "Une anomalie est survenue lors de l'instanciation du SQLExecutor :\n" 
+        					+ "La property config.db.no-commit-mode(.ID) doit être renseignée dans le fichier de paramètrage";
+
+            throw new ConfigurationBatchException(errMsg);
+        }
+        else if(properties.getProperty(ConfigurationParameters.DB_NOCOMMIT_KEY).equals("true"))
         {
             this.logger.info("Mode no-commit détecté");
             this.nocommit = true;
         }
         else
         {
+        	this.logger.info("Mode commit détecté");
             this.nocommit = false;
         }
         
@@ -464,6 +485,52 @@ public class SQLExecutor {
         }
         return result;
     }
+    
+      
+
+    /**
+     * @param query
+     *            la Requète SQL
+     * @param params
+     *            The query replacement parameters.
+     *            Each row in this array is one set of batch replacement values.
+     * @return une liste contenant les résultats
+     * @throws SQLExecutorException
+     */
+    public int[] callBatch(String query, Object[][] params)
+           throws SQLExecutorException {
+    	// TODO
+    	int res[] = null;
+        try {
+        	
+        	if(nocommit == false)
+        		connection.setAutoCommit(true);
+        	
+            logger.debug("Requète SQL : " + query);
+        	//Execute a batch of SQL INSERT, UPDATE, or DELETE queries. 
+        	//The Connection is retrieved from the DataSource set in the constructor. 
+        	//This Connection must be in auto-commit mode or the update will not be saved.
+            res = runner.batch(connection,query,params);
+            logger.debug("Batch exécuté. Nombre de déclarations traitées : "
+                    + res.length);
+            
+            if(nocommit == false)
+        		connection.setAutoCommit(false);
+            
+        } catch (SQLException sqle) {
+            String msg = "Erreur lors de l'éxécution de la requête en mode \"batch\" `" + query + "`\n"
+                    + sqle.getMessage();
+            logger.error(msg);
+
+            throw new SQLExecutorException(msg);
+        }
+
+    	return res;
+    }
+    
+    
+    
+    
 
     public HashMap<String, Object> adjustQueryForMultipleParams(String query, Object...params)
     {

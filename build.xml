@@ -1,5 +1,5 @@
 <project name="GenericBatch" basedir="." default="jar">
-	<property name="version" value="1.7" />
+	<property name="version" value="1.7.1" />
 	<property name="main-class" value="No Main Class Name Here" />
 	<property name="java-version-target" value="1.6"/>
 	<!-- ==========END CHANGE VERSION ======= -->
